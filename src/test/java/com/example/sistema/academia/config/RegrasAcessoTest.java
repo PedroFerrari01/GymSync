@@ -1,38 +1,36 @@
 package com.example.sistema.academia.config;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.mock.web.MockHttpSession;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
 
 /**
- * Regras de acesso por perfil do AutenticacaoInterceptor.
+ * Regras de acesso por perfil (RegrasAcesso), usadas pelo Spring Security.
  * Cada linha diz: perfil logado, caminho pedido e se o acesso deve ser liberado.
  */
-class AutenticacaoInterceptorTest {
+class RegrasAcessoTest {
 
-    private final AutenticacaoInterceptor interceptor = new AutenticacaoInterceptor();
-
-    private boolean acessar(String perfil, String caminho, MockHttpServletResponse resposta) throws Exception {
-        MockHttpServletRequest requisicao = new MockHttpServletRequest("POST", caminho);
-        if (perfil != null) {
-            MockHttpSession sessao = new MockHttpSession();
-            sessao.setAttribute("perfil", perfil);
-            requisicao.setSession(sessao);
-        }
-        return interceptor.preHandle(requisicao, resposta, new Object());
+    @Test
+    void semLoginSoAcessaRotasPublicas() {
+        assertTrue(RegrasAcesso.permitido(null, "/"));
+        assertTrue(RegrasAcesso.permitido(null, "/login"));
+        assertTrue(RegrasAcesso.permitido(null, "/recuperar-senha"));
+        assertTrue(RegrasAcesso.permitido(null, "/css/gymsync-tema.css"));
+        assertFalse(RegrasAcesso.permitido(null, "/alunos/salvar"));
+        assertFalse(RegrasAcesso.permitido(null, "/aluno/ficha/email"));
+        assertFalse(RegrasAcesso.permitido(null, "/mensagens"));
+        assertFalse(RegrasAcesso.permitido(null, "/rota-inventada/salvar"));
     }
 
     @Test
-    void semLoginVoltaParaATelaInicial() throws Exception {
-        MockHttpServletResponse resposta = new MockHttpServletResponse();
-        assertFalse(acessar(null, "/alunos/salvar", resposta));
-        assertEquals("/", resposta.getRedirectedUrl());
+    void rotaDesconhecidaEDoAdministrador() {
+        assertTrue(RegrasAcesso.permitido("ADMIN", "/rota-inventada/salvar"));
+        assertFalse(RegrasAcesso.permitido("PROFESSOR", "/rota-inventada/salvar"));
+        assertFalse(RegrasAcesso.permitido("ALUNO", "/rota-inventada/salvar"));
     }
 
     @ParameterizedTest(name = "{0} em {1} -> {2}")
@@ -87,11 +85,7 @@ class AutenticacaoInterceptorTest {
             "VISITANTE, /alunos/salvar, false",
             "VISITANTE, /aluno/ficha/email, false"
     })
-    void respeitaAsPermissoesDeCadaPerfil(String perfil, String caminho, boolean esperado) throws Exception {
-        MockHttpServletResponse resposta = new MockHttpServletResponse();
-        assertEquals(esperado, acessar(perfil, caminho, resposta));
-        if (!esperado) {
-            assertEquals("/", resposta.getRedirectedUrl());
-        }
+    void respeitaAsPermissoesDeCadaPerfil(String perfil, String caminho, boolean esperado) {
+        assertEquals(esperado, RegrasAcesso.permitido(perfil, caminho));
     }
 }

@@ -22,7 +22,7 @@
     <div class="d-flex align-items-center gap-2">
         <a href="/" class="btn-theme"><i class="bi bi-arrow-left"></i> Voltar</a>
         <button type="button" class="btn-theme" id="btnTema"><i class="bi bi-sun-fill" id="iconeTema"></i> <span id="textoTema">Modo Claro</span></button>
-        <a href="/logout" class="btn-theme text-danger"><i class="bi bi-box-arrow-right"></i> Sair</a>
+        <form th:action="@{/logout}" method="post" class="d-inline"><button type="submit" class="btn-theme text-danger"><i class="bi bi-box-arrow-right"></i> Sair</button></form>
     </div>
 </header>
 
@@ -62,7 +62,7 @@
                         <small th:text="${#temporals.format(m.dataHora, 'dd/MM HH:mm')}"></small>
                     </div>
                 </div>
-                <form action="/mensagens/enviar" method="post" class="d-flex gap-2">
+                <form th:action="@{/mensagens/enviar}" method="post" class="d-flex gap-2">
                     <input type="hidden" name="destinoId" th:value="${selecionado.id}">
                     <input type="text" name="texto" class="form-control" maxlength="1000" placeholder="Escreva sua mensagem..." autocomplete="off" required>
                     <button type="submit" class="btn-brand"><i class="bi bi-send-fill"></i></button>

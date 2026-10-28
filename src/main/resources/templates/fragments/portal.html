@@ -22,7 +22,7 @@
                     <div class="d-flex flex-wrap gap-2 ocultar-impressao">
                         <button type="button" class="btn-theme" onclick="window.print()"><i class="bi bi-printer"></i> Imprimir</button>
                         <a th:if="${linkWhatsappFicha != null}" th:href="${linkWhatsappFicha}" target="_blank" rel="noopener" class="btn-theme"><i class="bi bi-whatsapp"></i> WhatsApp</a>
-                        <form action="/aluno/ficha/email" method="post" class="d-inline">
+                        <form th:action="@{/aluno/ficha/email}" method="post" class="d-inline">
                             <button type="submit" class="btn-theme"><i class="bi bi-envelope"></i> E-mail</button>
                         </form>
                     </div>

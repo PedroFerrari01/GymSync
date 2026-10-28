@@ -4,12 +4,14 @@ import com.example.sistema.academia.model.Aluno;
 import com.example.sistema.academia.model.Professor;
 import com.example.sistema.academia.repository.AlunoRepository;
 import com.example.sistema.academia.repository.ProfessorRepository;
+import com.example.sistema.academia.config.SessaoService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -22,6 +24,7 @@ public class AuthController {
     @Autowired private AlunoRepository alunoRepository;
     @Autowired private ProfessorRepository professorRepository;
     @Autowired private PasswordEncoder encoder;
+    @Autowired private SessaoService sessaoService;
 
     @Value("${gymsync.admin.usuario:admin}") private String adminUsuario;
     @Value("${gymsync.admin.senha:123}") private String adminSenha;
@@ -41,12 +44,12 @@ public class AuthController {
                                 @RequestParam(required = false) String usuario,
                                 @RequestParam(required = false) String identificador,
                                 @RequestParam String senha,
-                                HttpSession session,
+                                HttpServletRequest request,
+                                HttpServletResponse response,
                                 RedirectAttributes redirect) {
         if ("ADMIN".equals(tipo)) {
             if (adminUsuario.equalsIgnoreCase(usuario) && adminSenha.equals(senha)) {
-                session.setAttribute("perfil", "ADMIN");
-                session.setAttribute("nomeUsuario", "Administrador");
+                sessaoService.iniciar(request, response, "ADMIN", "Administrador", null);
                 return "redirect:/";
             }
             redirect.addFlashAttribute("erroLogin", "Usuário ou senha de administrador incorretos.");
@@ -62,9 +65,7 @@ public class AuthController {
                     prof.setSenha(encoder.encode(senha));
                     professorRepository.save(prof);
                 }
-                session.setAttribute("perfil", "PROFESSOR");
-                session.setAttribute("nomeUsuario", prof.getNome());
-                session.setAttribute("usuarioId", prof.getId());
+                sessaoService.iniciar(request, response, "PROFESSOR", prof.getNome(), prof.getId());
                 return "redirect:/";
             }
             redirect.addFlashAttribute("erroLogin", "CPF/E-mail ou senha de professor incorretos.");
@@ -78,9 +79,7 @@ public class AuthController {
                     aluno.setSenha(encoder.encode(senha));
                     alunoRepository.save(aluno);
                 }
-                session.setAttribute("perfil", "ALUNO");
-                session.setAttribute("nomeUsuario", aluno.getNome());
-                session.setAttribute("usuarioId", aluno.getId());
+                sessaoService.iniciar(request, response, "ALUNO", aluno.getNome(), aluno.getId());
                 return "redirect:/";
             }
             redirect.addFlashAttribute("erroLogin", "CPF/E-mail ou senha de aluno incorretos.");
@@ -145,12 +144,6 @@ public class AuthController {
                 redirect.addFlashAttribute("sucesso", "Sua senha foi atualizada com sucesso!");
             }
         }
-        return "redirect:/";
-    }
-
-    @GetMapping("/logout")
-    public String logout(HttpSession session) {
-        session.invalidate();
         return "redirect:/";
     }
 }

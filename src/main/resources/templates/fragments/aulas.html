@@ -5,7 +5,7 @@
             <div class="panel-card">
                 <div class="d-flex justify-content-between align-items-center mb-3"><span class="tag-pill">Agenda</span><i class="bi bi-calendar-week fs-5"></i></div>
                 <h5 class="panel-title mb-3">Nova Aula Coletiva</h5>
-                <form action="/aulas/salvar" method="post">
+                <form th:action="@{/aulas/salvar}" method="post">
                     <label class="form-label">Nome da aula</label>
                     <input type="text" name="nome" class="form-control mb-2" maxlength="50" placeholder="Spinning, Funcional, Dança..." required>
                     <div th:if="${perfil == 'ADMIN'}">
