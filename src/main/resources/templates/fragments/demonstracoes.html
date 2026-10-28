@@ -1,0 +1,96 @@
+<!-- Demonstrações do "Quem somos": réplicas das telas do sistema com dados de exemplo.
+     Usam as mesmas classes das telas reais (mudam com o tema) e funcionam só no navegador
+     (js/demonstracoes.js): nada é enviado ao servidor. -->
+
+<div th:fragment="catraca" class="panel-card demo demo-catraca">
+    <div class="d-flex justify-content-between align-items-center mb-3"><span class="tag-pill">Biometria</span><i class="bi bi-fingerprint fs-4 text-success demo-digital"></i></div>
+    <h5 class="panel-title mb-3">Controle de Catraca</h5>
+    <label class="form-label">Identificar Aluno</label>
+    <select class="form-select mb-3 demo-aluno" aria-label="Aluno">
+        <option value="ok">Ana Souza (ATIVO)</option>
+        <option value="atraso">Bruno Lima (ATIVO)</option>
+        <option value="inativo">Carla Dias (INATIVO)</option>
+    </select>
+    <button type="button" class="btn-biometria w-100 demo-liberar"><i class="bi bi-unlock-fill me-2"></i>Liberar Catraca</button>
+    <p class="demo-resultado" aria-live="polite"></p>
+    <div class="demo-rodape">Acessos hoje: <strong class="demo-acessos">127</strong></div>
+</div>
+
+<div th:fragment="ficha" class="panel-card demo demo-ficha">
+    <div class="d-flex justify-content-between align-items-center mb-1">
+        <h5 class="panel-title mb-0">Minha Ficha de Treino</h5>
+        <span class="small demo-progresso" aria-live="polite">0 de 3 feitos hoje</span>
+    </div>
+    <p class="small mb-2 demo-sub">Treino A, montado pelo Prof. Marcos</p>
+    <table class="table table-custom mb-0">
+        <thead><tr><th>Exercício</th><th>Séries x Reps</th><th>Última vez</th><th></th></tr></thead>
+        <tbody>
+            <tr><td class="fw-semibold">Supino reto</td><td><span class="status-ok">4 x 10</span></td><td class="small demo-ultima">Seg, 40 kg</td>
+                <td class="text-end"><button type="button" class="action-btn action-toggle demo-feito" title="Registrar que fiz" aria-label="Registrar supino reto"><i class="bi bi-check2-circle"></i></button></td></tr>
+            <tr><td class="fw-semibold">Agachamento</td><td><span class="status-ok">4 x 12</span></td><td class="small demo-ultima">Seg, 60 kg</td>
+                <td class="text-end"><button type="button" class="action-btn action-toggle demo-feito" title="Registrar que fiz" aria-label="Registrar agachamento"><i class="bi bi-check2-circle"></i></button></td></tr>
+            <tr><td class="fw-semibold">Remada curvada</td><td><span class="status-ok">3 x 12</span></td><td class="small demo-ultima">-</td>
+                <td class="text-end"><button type="button" class="action-btn action-toggle demo-feito" title="Registrar que fiz" aria-label="Registrar remada curvada"><i class="bi bi-check2-circle"></i></button></td></tr>
+        </tbody>
+    </table>
+</div>
+
+<div th:fragment="mensalidades" class="panel-card demo demo-mensalidades">
+    <h5 class="panel-title mb-3">Minhas Mensalidades</h5>
+    <div class="demo-lista">
+        <table class="table table-custom mb-0">
+            <thead><tr><th>Vencimento</th><th>Valor</th><th>Situação</th><th></th></tr></thead>
+            <tbody>
+                <tr><td>10/09</td><td>R$ 99,90</td><td><span class="status-ok">PAGA</span></td><td></td></tr>
+                <tr><td>10/10</td><td>R$ 99,90</td><td><span class="status-ok">PAGA</span></td><td></td></tr>
+                <tr><td>10/11</td><td>R$ 99,90</td><td><span class="status-wait demo-situacao">PENDENTE</span></td>
+                    <td class="text-end"><button type="button" class="btn btn-sm btn-success fw-semibold demo-pagar">Pagar</button></td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="demo-pix" hidden>
+        <p class="small demo-sub mb-2">Mensalidade de 10/11, R$ 99,90. Pix simulado: nada é cobrado.</p>
+        <label class="form-label">Código Pix (copia e cola)</label>
+        <div class="input-group mb-3">
+            <input type="text" class="form-control pix-codigo" value="GYMSYNC-PIX-SIMULADO-1011" readonly aria-label="Código Pix">
+            <button type="button" class="btn-theme demo-copiar">Copiar</button>
+        </div>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn-theme demo-voltar">Cancelar</button>
+            <button type="button" class="btn-brand demo-paguei">Já paguei</button>
+        </div>
+    </div>
+    <p class="demo-resultado" aria-live="polite"></p>
+    <button type="button" class="btn-theme demo-confirmar" hidden><i class="bi bi-shield-check me-1"></i>Confirmar como administrador</button>
+    <button type="button" class="btn-theme demo-reiniciar" hidden><i class="bi bi-arrow-counterclockwise me-1"></i>Ver de novo</button>
+</div>
+
+<div th:fragment="aulas" class="panel-card demo demo-aulas">
+    <h5 class="panel-title mb-1">Aulas Coletivas</h5>
+    <p class="small mb-2 demo-sub">A reserva vale para a próxima aula.</p>
+    <table class="table table-custom mb-0">
+        <thead><tr><th>Aula</th><th>Dia / Horário</th><th>Vagas livres</th><th></th></tr></thead>
+        <tbody>
+            <tr data-vagas="3" data-total="12"><td class="fw-semibold">Spinning</td><td>Seg 18:00</td><td><span class="demo-vagas"></span></td><td class="text-end demo-acao"></td></tr>
+            <tr data-vagas="1" data-total="10"><td class="fw-semibold">Funcional</td><td>Qua 07:00</td><td><span class="demo-vagas"></span></td><td class="text-end demo-acao"></td></tr>
+            <tr data-vagas="0" data-total="15"><td class="fw-semibold">Yoga</td><td>Sex 19:00</td><td><span class="demo-vagas"></span></td><td class="text-end demo-acao"></td></tr>
+        </tbody>
+    </table>
+</div>
+
+<div th:fragment="relatorio" class="panel-card demo demo-relatorio">
+    <div class="d-flex justify-content-between align-items-center mb-1 gap-2">
+        <h5 class="panel-title mb-0">Horários de maior movimento</h5>
+        <div class="demo-periodo" role="group" aria-label="Período do relatório">
+            <button type="button" class="demo-periodo-btn ativo" data-periodo="7" aria-pressed="true">7 dias</button>
+            <button type="button" class="demo-periodo-btn" data-periodo="30" aria-pressed="false">30 dias</button>
+        </div>
+    </div>
+    <p class="small mb-2 demo-sub demo-pico" aria-live="polite"></p>
+    <div class="vchart demo-grafico"></div>
+</div>
+
+<div th:fragment="indicador" class="kpi-card">
+    <div><div class="kpi-val">127</div><div class="kpi-lbl">Acessos hoje</div></div>
+    <div class="kpi-ico"><i class="ph ph-fingerprint"></i></div>
+</div>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GymSync — Mensagens</title>
+    <link rel="stylesheet" th:href="@{/vendor/bootstrap/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/vendor/bootstrap-icons/bootstrap-icons.min.css}">
+    <link rel="stylesheet" th:href="@{/vendor/phosphor/regular/style.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/gymsync.css}">
+    <link rel="stylesheet" th:href="@{/css/gymsync-tema.css}">
+    <link rel="icon" type="image/png" th:href="@{/img/favicon.png}">
+</head>
+<body>
+
+<header class="topbar">
+    <a href="/" class="brand-box border-0 m-0 p-0">
+        <span class="brand-logo"><img th:src="@{/img/logo-simbolo-fundo-escuro.png}" class="logo-fundo-escuro" alt="GymSync" height="48"><img th:src="@{/img/logo-simbolo-fundo-claro.png}" class="logo-fundo-claro" alt="GymSync" height="48"></span>
+        <div><span class="brand-title">GymSync</span><span class="brand-sub">Mensagens</span></div>
+    </a>
+    <div class="d-flex align-items-center gap-2">
+        <a href="/" class="btn-theme"><i class="bi bi-arrow-left"></i> Voltar</a>
+        <button type="button" class="btn-theme" id="btnTema"><i class="bi bi-sun-fill" id="iconeTema"></i> <span id="textoTema">Modo Claro</span></button>
+        <a href="/logout" class="btn-theme text-danger"><i class="bi bi-box-arrow-right"></i> Sair</a>
+    </div>
+</header>
+
+<main class="content-body">
+
+    <div th:if="${erro}" class="alert alert-danger alert-dismissible fade show rounded-3 border-0 mb-4" role="alert">
+        <i class="bi bi-exclamation-octagon-fill me-2"></i><span th:text="${erro}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="chat-layout">
+        <div class="panel-card">
+            <h5 class="panel-title mb-3" th:text="${souAluno ? 'Professores' : 'Alunos'}">Contatos</h5>
+            <a th:each="c : ${contatos}" th:href="@{/mensagens(com=${c.id})}" class="contato-item mb-1"
+               th:classappend="${selecionado != null and selecionado.id == c.id ? 'ativo' : ''}">
+                <span>
+                    <span class="d-block fw-semibold" th:text="${c.nome}"></span>
+                    <span class="d-block small" style="color:var(--text-secondary);" th:text="${c.detalhe}"></span>
+                </span>
+                <span th:if="${c.naoLidas > 0}" class="nav-badge" th:text="${c.naoLidas}"></span>
+            </a>
+            <div th:if="${#lists.isEmpty(contatos)}" class="vazio">Nenhum contato disponível.</div>
+        </div>
+
+        <div class="panel-card">
+            <div th:if="${selecionado == null}" class="vazio">Escolha uma pessoa na lista para ver a conversa.</div>
+            <div th:if="${selecionado != null}">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                    <h5 class="panel-title" th:text="|Conversa com ${selecionado.nome}|"></h5>
+                    <a th:if="${selecionado.whatsapp != null}" th:href="${selecionado.whatsapp}" target="_blank" rel="noopener" class="btn-theme"><i class="bi bi-whatsapp"></i> Chamar no WhatsApp</a>
+                </div>
+                <div class="chat-box mb-3" id="chatBox">
+                    <div th:if="${#lists.isEmpty(mensagens)}" class="vazio">Ainda não há mensagens. Escreva a primeira.</div>
+                    <div th:each="m : ${mensagens}" class="msg"
+                         th:classappend="${(souAluno and m.remetente == 'ALUNO') or (!souAluno and m.remetente == 'PROFESSOR') ? 'msg-eu' : 'msg-outro'}">
+                        <span th:text="${m.texto}"></span>
+                        <small th:text="${#temporals.format(m.dataHora, 'dd/MM HH:mm')}"></small>
+                    </div>
+                </div>
+                <form action="/mensagens/enviar" method="post" class="d-flex gap-2">
+                    <input type="hidden" name="destinoId" th:value="${selecionado.id}">
+                    <input type="text" name="texto" class="form-control" maxlength="1000" placeholder="Escreva sua mensagem..." autocomplete="off" required>
+                    <button type="submit" class="btn-brand"><i class="bi bi-send-fill"></i></button>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script th:src="@{/vendor/bootstrap/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/js/gymsync.js}"></script>
+</body>
+</html>

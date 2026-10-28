@@ -1,0 +1,86 @@
+<div th:fragment="aba" class="tab-pane fade" id="aba-relatorios" role="tabpanel">
+
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3"><div class="mini-kpi"><div class="valor" th:text="${relEntradasHoje}">0</div><div class="rotulo">Entradas hoje</div></div></div>
+        <div class="col-6 col-lg-3"><div class="mini-kpi"><div class="valor" th:text="${relEntradasMes}">0</div><div class="rotulo">Entradas no mês</div></div></div>
+        <div class="col-6 col-lg-3"><div class="mini-kpi"><div class="valor" th:text="${relAlunosAtivos}">0</div><div class="rotulo">Alunos ativos</div></div></div>
+        <div class="col-6 col-lg-3"><div class="mini-kpi"><div class="valor text-danger" th:text="${relInadimplentes}">0</div><div class="rotulo">Alunos inadimplentes</div></div></div>
+        <div class="col-6 col-lg-4"><div class="mini-kpi"><div class="valor" style="color:#10b981;" th:text="${relReceitaMes}">R$ 0,00</div><div class="rotulo">Recebido no mês</div></div></div>
+        <div class="col-6 col-lg-4"><div class="mini-kpi"><div class="valor" th:text="${relAReceber}">R$ 0,00</div><div class="rotulo">A receber (pendente)</div></div></div>
+        <div class="col-12 col-lg-4"><div class="mini-kpi"><div class="valor text-danger" th:text="${relAtrasado}">R$ 0,00</div><div class="rotulo">Em atraso</div></div></div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-lg-8">
+            <div class="panel-card">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h5 class="panel-title">Horários de maior movimento</h5>
+                    <span class="tag-pill">Últimos 30 dias</span>
+                </div>
+                <p class="small mb-2" style="color:var(--text-secondary);">
+                    <span th:if="${relHoraPico != null}" th:text="|Pico: ${relHoraPico}|"></span>
+                    <span th:if="${relHoraPico == null}">Ainda não há entradas registradas neste período.</span>
+                </p>
+                <div class="vchart">
+                    <div class="vcol" th:each="b : ${relHoras}">
+                        <span class="vval" th:text="${b.texto}"></span>
+                        <div class="vtrack"><div class="vbar" th:style="|height:${b.percentual}%|" th:title="|${b.rotulo}: ${b.texto} entrada(s)|"></div></div>
+                        <span class="vlbl" th:text="${b.rotulo}"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="panel-card">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h5 class="panel-title">Dias da semana</h5>
+                    <span class="tag-pill">30 dias</span>
+                </div>
+                <p class="small mb-2" style="color:var(--text-secondary);">
+                    <span th:if="${relDiaPico != null}" th:text="|Mais movimentado: ${relDiaPico}|"></span>
+                    <span th:if="${relDiaPico == null}">Sem entradas no período.</span>
+                </p>
+                <div class="vchart">
+                    <div class="vcol" th:each="b : ${relDias}">
+                        <span class="vval" th:text="${b.texto}"></span>
+                        <div class="vtrack"><div class="vbar" th:style="|height:${b.percentual}%|"></div></div>
+                        <span class="vlbl" th:text="${b.rotulo}"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="panel-card">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="panel-title">Alunos mais frequentes</h5>
+                    <span class="tag-pill">Últimos 30 dias</span>
+                </div>
+                <div th:if="${#lists.isEmpty(relTopAlunos)}" class="vazio">Ainda não há entradas registradas.</div>
+                <div class="hbar-row" th:each="b : ${relTopAlunos}">
+                    <span class="text-truncate" th:text="${b.rotulo}"></span>
+                    <div class="hbar-track"><div class="hbar-fill" th:style="|width:${b.percentual}%|"></div></div>
+                    <span class="small text-end" th:text="${b.texto}"></span>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="panel-card">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h5 class="panel-title">Faturamento</h5>
+                    <span class="tag-pill">Últimos 6 meses</span>
+                </div>
+                <p class="small mb-2" style="color:var(--text-secondary);">Soma das mensalidades pagas em cada mês.</p>
+                <div class="vchart">
+                    <div class="vcol" th:each="b : ${relReceita}">
+                        <span class="vval" th:text="${b.texto}"></span>
+                        <div class="vtrack"><div class="vbar" th:style="|height:${b.percentual}%|"></div></div>
+                        <span class="vlbl" th:text="${b.rotulo}"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

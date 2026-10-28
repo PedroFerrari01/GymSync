@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GymSync — Sistema de Gestão Fitness</title>
+    <link rel="stylesheet" th:href="@{/vendor/bootstrap/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/vendor/bootstrap-icons/bootstrap-icons.min.css}">
+    <link rel="stylesheet" th:href="@{/vendor/phosphor/regular/style.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/gymsync.css}">
+    <link rel="stylesheet" th:href="@{/css/gymsync-tema.css}">
+    <link rel="icon" type="image/png" th:href="@{/img/favicon.png}">
+    <script th:src="@{/vendor/gsap/gsap.min.js}" defer></script>
+    <script th:src="@{/vendor/gsap/ScrollTrigger.min.js}" defer></script>
+</head>
+<body>
+
+<div th:if="${!logado}" class="login-wrapper">
+    <div class="tema-login">
+        <button type="button" class="btn-theme" id="btnTemaLogin">
+            <i class="bi bi-sun-fill" id="iconeTemaLogin"></i> <span id="textoTemaLogin">Modo Claro</span>
+        </button>
+    </div>
+
+    <div class="login-hero">
+        <span class="tag-pill">Gestão de academias</span>
+        <h1>Alunos, treinos e mensalidades em <span class="destaque-titulo">um só lugar.</span></h1>
+        <p class="hero-sub">Chega de planilha e ficha de papel: o sistema controla matrículas, frequência e pagamentos.</p>
+        <ul class="hero-lista">
+            <li><i class="ph ph-receipt"></i> Mensalidades geradas automaticamente, com aviso de atraso</li>
+            <li><i class="ph ph-fingerprint"></i> Entrada registrada na catraca, sem lançamento manual</li>
+            <li><i class="ph ph-barbell"></i> Ficha de treino do aluno no computador e no celular</li>
+        </ul>
+    </div>
+
+    <div class="login-card">
+        <div class="login-logo"><img th:src="@{/img/logo-completo-fundo-escuro.png}" class="logo-fundo-escuro" alt="GymSync - Sistema de Gestão" height="150"><img th:src="@{/img/logo-completo-fundo-claro.png}" class="logo-fundo-claro" alt="GymSync - Sistema de Gestão" height="150"></div>
+
+        <div th:if="${erroLogin}" class="alert alert-danger py-2 small rounded-3 border-0 mb-3">
+            <i class="bi bi-exclamation-circle-fill me-1"></i><span th:text="${erroLogin}"></span>
+        </div>
+        <div th:if="${sucessoLogin}" class="alert alert-success py-2 small rounded-3 border-0 mb-3">
+            <i class="bi bi-check-circle-fill me-1"></i><span th:text="${sucessoLogin}"></span>
+        </div>
+
+        <div class="role-selector">
+            <button type="button" class="role-btn active" data-role="ALUNO">Aluno</button>
+            <button type="button" class="role-btn" data-role="PROFESSOR">Professor</button>
+            <button type="button" class="role-btn" data-role="ADMIN">Admin</button>
+        </div>
+
+        <form action="/login" method="post">
+            <input type="hidden" name="tipo" id="inputTipoLogin" value="ALUNO">
+
+            <div id="blocoCpfLogin">
+                <label class="form-label" id="labelCpfLogin">CPF ou E-mail do Aluno</label>
+                <input type="text" name="identificador" id="inputIdentificadorLogin" class="form-control mb-3 campo-cpf-ou-email" required>
+            </div>
+
+            <div id="blocoAdminLogin" style="display:none;">
+                <label class="form-label">Usuário</label>
+                <input type="text" name="usuario" id="inputUserAdmin" class="form-control mb-3">
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center">
+                <label class="form-label">Senha de Acesso</label>
+                <a id="linkRecuperarSenha" class="link-acao mb-1" data-bs-toggle="modal" data-bs-target="#modalRecuperarSenha">Esqueceu a senha / 1º Acesso?</a>
+            </div>
+            <div class="pass-group mb-4">
+                <input type="password" name="senha" id="inputSenhaLogin" class="form-control pe-5" required>
+                <button type="button" class="pass-toggle" onclick="alternarSenha('inputSenhaLogin', this)"><i class="bi bi-eye"></i></button>
+            </div>
+
+            <button type="submit" class="btn-brand w-100"><i class="bi bi-box-arrow-in-right me-2"></i>Entrar no Sistema</button>
+        </form>
+
+        <div class="text-center mt-4 pt-3 border-top" style="border-color:var(--border-color)!important;">
+            <span class="small" style="color:var(--text-secondary);">Precisa de ajuda? <a href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=suportegymsync@gmail.com&amp;su=Suporte%20GymSync" target="_blank" rel="noopener" class="link-acao">suportegymsync@gmail.com</a></span>
+        </div>
+    </div>
+
+    <a href="#sobre" class="sobre-convite">Conheça o GymSync <i class="ph ph-arrow-down"></i></a>
+</div>
+
+<!-- Quem somos: apresentação do sistema abaixo do login (animações em gymsync.js) -->
+<div th:if="${!logado}" class="sobre" id="sobre">
+
+    <section class="abertura" aria-labelledby="tituloAbertura">
+        <div class="abertura-cartoes" aria-hidden="true" inert>
+            <div class="cartao-flutuante c1" data-profundidade="0.7"><th:block th:replace="~{fragments/demonstracoes :: ficha}"></th:block></div>
+            <div class="cartao-flutuante c2" data-profundidade="0.9"><th:block th:replace="~{fragments/demonstracoes :: mensalidades}"></th:block></div>
+            <div class="cartao-flutuante c3" data-profundidade="0.5"><th:block th:replace="~{fragments/demonstracoes :: catraca}"></th:block></div>
+            <div class="cartao-flutuante c4" data-profundidade="1"><th:block th:replace="~{fragments/demonstracoes :: indicador}"></th:block></div>
+            <!--/* Fotos de academia (Unsplash/Pexels): salve como foto-1.jpg a foto-4.jpg em static/img/sobre e tire este comentário.
+            <figure class="cartao-flutuante cartao-foto c5" data-profundidade="0.35"><img th:src="@{/img/sobre/foto-1.jpg}" alt=""></figure>
+            <figure class="cartao-flutuante cartao-foto c6" data-profundidade="0.6"><img th:src="@{/img/sobre/foto-2.jpg}" alt=""></figure>
+            <figure class="cartao-flutuante cartao-foto c7" data-profundidade="0.45"><img th:src="@{/img/sobre/foto-3.jpg}" alt=""></figure>
+            <figure class="cartao-flutuante cartao-foto c8" data-profundidade="0.8"><img th:src="@{/img/sobre/foto-4.jpg}" alt=""></figure>
+            */-->
+
+        </div>
+        <div class="abertura-texto">
+            <h2 id="tituloAbertura" class="abertura-titulo"><span>A academia</span><span>inteira em</span><span class="acento">um sistema só.</span></h2>
+            <p class="abertura-sub">Cadastro, plano, mensalidade, catraca e treino conversam entre si, e ninguém precisa conferir planilha para saber quem pode entrar.</p>
+        </div>
+        <div class="halter-sombra" aria-hidden="true"></div>
+        <canvas class="halter-canvas" aria-hidden="true"></canvas>
+    </section>
+
+    <section class="jornada" aria-labelledby="tituloJornada">
+        <div class="jornada-fixa">
+            <div class="jornada-texto">
+                <h2 id="tituloJornada" class="sobre-titulo">Da matrícula ao treino</h2>
+                <ol class="jornada-passos">
+                    <li class="passo">
+                        <span class="passo-num">1</span>
+                        <div><h3>Matrícula</h3><p>O administrador cadastra o aluno e escolhe o plano. As mensalidades do plano são geradas na hora.</p></div>
+                    </li>
+                    <li class="passo">
+                        <span class="passo-num">2</span>
+                        <div><h3>Mensalidade</h3><p>O status muda sozinho quando o vencimento passa. O aluno acompanha tudo na área dele.</p></div>
+                    </li>
+                    <li class="passo">
+                        <span class="passo-num">3</span>
+                        <div><h3>Pagamento</h3><p>O aluno paga por Pix, simulado nesta versão, e informa o pagamento. O administrador confirma.</p></div>
+                    </li>
+                    <li class="passo">
+                        <span class="passo-num">4</span>
+                        <div><h3>Catraca</h3><p>A entrada só é liberada com aluno ativo, matrícula ativa e nada em atraso. Se faltar algo, a catraca mostra o motivo.</p></div>
+                    </li>
+                    <li class="passo">
+                        <span class="passo-num">5</span>
+                        <div><h3>Treino</h3><p>O professor monta a ficha. O aluno marca o que fez e recebe a ficha por WhatsApp ou e-mail.</p></div>
+                    </li>
+                </ol>
+            </div>
+
+            <div class="jornada-visual" aria-hidden="true">
+                <div class="jornada-barra"><span></span></div>
+                <!-- Cada cena se monta quando o passo fica ativo (classes cena-* em gymsync-tema.css) -->
+                <div class="visual-item">
+                    <span class="cena-numero">01</span>
+                    <div class="cena">
+                        <div class="cena-cabeca cena-anima"><i class="ph ph-identification-card"></i> Nova matrícula</div>
+                        <div class="cena-campo cena-anima"><span>Aluno</span><strong>Ana Souza</strong></div>
+                        <div class="cena-campo cena-anima"><span>Plano</span><strong>Anual, R$ 99,90 por mês</strong></div>
+                        <p class="cena-nota cena-anima">12 mensalidades geradas na hora</p>
+                        <div class="cena-meses">
+                            <span class="cena-anima">jan</span><span class="cena-anima">fev</span><span class="cena-anima">mar</span><span class="cena-anima">abr</span><span class="cena-anima">mai</span><span class="cena-anima">jun</span>
+                            <span class="cena-anima">jul</span><span class="cena-anima">ago</span><span class="cena-anima">set</span><span class="cena-anima">out</span><span class="cena-anima">nov</span><span class="cena-anima">dez</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="visual-item">
+                    <span class="cena-numero">02</span>
+                    <div class="cena">
+                        <div class="cena-cabeca cena-anima"><i class="ph ph-receipt"></i> Mensalidade de 10/11</div>
+                        <div class="cena-trilho cena-anima">
+                            <span class="cena-trilho-vence">vence 10/11</span>
+                            <span class="cena-marcador">hoje</span>
+                        </div>
+                        <div class="cena-campo cena-anima"><span>Situação</span>
+                            <span class="cena-troca"><span class="status-wait cena-antes">PENDENTE</span><span class="status-err cena-depois">ATRASADA</span></span>
+                        </div>
+                        <p class="cena-nota cena-anima">O sistema muda sozinho e avisa o aluno na área dele.</p>
+                    </div>
+                </div>
+                <div class="visual-item">
+                    <span class="cena-numero">03</span>
+                    <div class="cena">
+                        <div class="cena-cabeca cena-anima"><i class="ph ph-qr-code"></i> Pix (simulado)</div>
+                        <div class="cena-pix cena-anima"><div class="cena-qr"></div><code>GYMSYNC-PIX-SIMULADO-1011</code></div>
+                        <div class="cena-campo cena-anima"><span>Situação</span>
+                            <span class="cena-troca"><span class="status-info cena-antes">EM ANÁLISE</span><span class="status-ok cena-depois">PAGA</span></span>
+                        </div>
+                        <p class="cena-nota cena-anima">O aluno informa, o administrador confirma.</p>
+                    </div>
+                </div>
+                <div class="visual-item">
+                    <span class="cena-numero">04</span>
+                    <div class="cena">
+                        <div class="cena-cabeca cena-anima"><i class="ph ph-fingerprint"></i> Catraca <span class="cena-scan"></span></div>
+                        <div class="cena-acesso cena-ok cena-anima"><i class="ph ph-check-circle"></i><div><strong>Ana Souza</strong><span>Entrada liberada</span></div></div>
+                        <div class="cena-acesso cena-erro cena-anima"><i class="ph ph-x-circle"></i><div><strong>Bruno Lima</strong><span>Bloqueada: mensalidade em atraso</span></div></div>
+                    </div>
+                </div>
+                <div class="visual-item">
+                    <span class="cena-numero">05</span>
+                    <div class="cena">
+                        <div class="cena-cabeca cena-anima"><i class="ph ph-barbell"></i> Treino A de hoje</div>
+                        <div class="cena-exercicio cena-anima"><span>Supino reto, 4 x 10</span><i class="ph ph-check-circle"></i></div>
+                        <div class="cena-exercicio cena-anima"><span>Agachamento, 4 x 12</span><i class="ph ph-check-circle"></i></div>
+                        <div class="cena-exercicio cena-anima"><span>Remada curvada, 3 x 12</span><i class="ph ph-check-circle"></i></div>
+                        <div class="cena-progresso cena-anima"><span></span></div>
+                        <p class="cena-nota cena-depois">Treino completo! A ficha também vai por WhatsApp ou e-mail.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="galeria" aria-labelledby="tituloGaleria">
+        <div class="galeria-palco">
+            <h2 id="tituloGaleria" class="sobre-titulo galeria-titulo">Por dentro do sistema</h2>
+            <p class="galeria-sub">Experimente: os cartões funcionam como no sistema, com dados de exemplo. Nada é salvo.</p>
+            <div class="galeria-anel">
+                <div class="galeria-item"><th:block th:replace="~{fragments/demonstracoes :: catraca}"></th:block></div>
+                <div class="galeria-item"><th:block th:replace="~{fragments/demonstracoes :: ficha}"></th:block></div>
+                <div class="galeria-item"><th:block th:replace="~{fragments/demonstracoes :: mensalidades}"></th:block></div>
+                <div class="galeria-item"><th:block th:replace="~{fragments/demonstracoes :: aulas}"></th:block></div>
+                <div class="galeria-item"><th:block th:replace="~{fragments/demonstracoes :: relatorio}"></th:block></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="sobre-bloco" aria-labelledby="tituloPerfis">
+        <h2 id="tituloPerfis" class="sobre-titulo">Cada um vê o que precisa</h2>
+        <p class="perfis-sub">O menu muda conforme quem entra. Escolha um perfil e veja o que aparece para ele.</p>
+        <div class="role-selector perfis-seletor" role="group" aria-label="Perfil">
+            <button type="button" class="perfil-btn active" data-perfil="ALUNO" aria-pressed="true">Aluno</button>
+            <button type="button" class="perfil-btn" data-perfil="PROFESSOR" aria-pressed="false">Professor</button>
+            <button type="button" class="perfil-btn" data-perfil="ADMIN" aria-pressed="false">Administrador</button>
+        </div>
+        <div class="perfis-palco">
+            <!-- Réplica do menu lateral real: data-perfis diz quem vê cada item (mesmas regras do index logado) -->
+            <div class="menu-demo" aria-hidden="true">
+                <div class="brand-box menu-demo-marca">
+                    <span class="brand-logo"><img th:src="@{/img/logo-simbolo-fundo-escuro.png}" class="logo-fundo-escuro" alt="" height="40"><img th:src="@{/img/logo-simbolo-fundo-claro.png}" class="logo-fundo-claro" alt="" height="40"></span>
+                    <div><span class="brand-title">GymSync</span><span class="brand-sub">Gestão Fitness</span></div>
+                </div>
+                <div class="nav nav-menu">
+                    <div class="sidebar-section" data-perfis="ADMIN">Gestão</div>
+                    <span class="nav-link" data-perfis="ADMIN"><i class="ph ph-squares-four"></i> Painel &amp; Catraca</span>
+                    <span class="nav-link" data-perfis="ADMIN"><i class="ph ph-users"></i> Alunos &amp; Matrículas</span>
+                    <span class="nav-link" data-perfis="ADMIN"><i class="ph ph-wallet"></i> Planos &amp; Financeiro</span>
+                    <span class="nav-link" data-perfis="ADMIN"><i class="ph ph-chart-bar"></i> Relatórios</span>
+                    <div class="sidebar-section" data-perfis="ALUNO">Minha conta</div>
+                    <span class="nav-link" data-perfis="ALUNO"><i class="ph ph-identification-badge"></i> Minha Área</span>
+                    <div class="sidebar-section" data-perfis="ADMIN PROFESSOR">Treino</div>
+                    <span class="nav-link" data-perfis="ADMIN PROFESSOR"><i class="ph ph-barbell"></i> Treinos &amp; Equipe</span>
+                    <div class="sidebar-section" data-perfis="ALUNO">Academia</div>
+                    <span class="nav-link" data-perfis="ADMIN PROFESSOR ALUNO"><i class="ph ph-ruler"></i> Avaliações Físicas</span>
+                    <span class="nav-link" data-perfis="ADMIN PROFESSOR ALUNO"><i class="ph ph-calendar-check"></i> Aulas Coletivas</span>
+                    <span class="nav-link" data-perfis="ADMIN"><i class="ph ph-gear"></i> Equipamentos</span>
+                    <span class="nav-link" data-perfis="PROFESSOR ALUNO"><i class="ph ph-chat-circle-dots"></i> Mensagens</span>
+                </div>
+            </div>
+
+            <div class="perfis-texto" aria-live="polite">
+                <div class="perfil-info ativo" data-perfil="ALUNO">
+                    <h3><i class="ph ph-student"></i> Aluno</h3>
+                    <p>Entra com CPF ou e-mail e só enxerga os próprios dados.</p>
+                    <ul>
+                        <li>Vê a ficha de treino e marca o que fez</li>
+                        <li>Acompanha as mensalidades e informa o pagamento</li>
+                        <li>Reserva vaga nas aulas coletivas</li>
+                        <li>Conversa com o professor</li>
+                    </ul>
+                    <p class="perfil-bloqueio"><i class="ph ph-lock-simple"></i> Não aparece para ele: cadastros, financeiro da academia, relatórios e equipamentos.</p>
+                </div>
+                <div class="perfil-info" data-perfil="PROFESSOR">
+                    <h3><i class="ph ph-chalkboard-teacher"></i> Professor</h3>
+                    <p>Entra com CPF ou e-mail e cuida da parte de treino.</p>
+                    <ul>
+                        <li>Monta e ajusta as fichas de treino</li>
+                        <li>Registra as avaliações físicas</li>
+                        <li>Cria as aulas coletivas</li>
+                        <li>Responde as mensagens dos alunos</li>
+                    </ul>
+                    <p class="perfil-bloqueio"><i class="ph ph-lock-simple"></i> Não aparece para ele: mensalidades, planos, catraca e relatórios.</p>
+                </div>
+                <div class="perfil-info" data-perfil="ADMIN">
+                    <h3><i class="ph ph-shield-check"></i> Administrador</h3>
+                    <p>Entra com o usuário da academia e cuida da operação inteira.</p>
+                    <ul>
+                        <li>Cadastra alunos, professores e planos</li>
+                        <li>Confirma os pagamentos</li>
+                        <li>Controla a catraca e os acessos</li>
+                        <li>Acompanha relatórios e equipamentos</li>
+                    </ul>
+                    <p class="perfil-bloqueio"><i class="ph ph-lock-simple"></i> A área pessoal do aluno e as mensagens ficam só entre aluno e professor.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="sobre-bloco sobre-fim">
+        <h2 class="sobre-titulo">Feito em sala de aula</h2>
+        <p>O GymSync é um trabalho acadêmico desenvolvido por um grupo de quatro estudantes, pensando na rotina real de uma academia.</p>
+        <div class="sobre-acoes">
+            <a href="#" class="btn-brand sobre-voltar"><i class="ph ph-sign-in"></i> Entrar no sistema</a>
+            <a href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=suportegymsync@gmail.com&amp;su=Suporte%20GymSync" target="_blank" rel="noopener" class="btn-theme"><i class="ph ph-envelope-simple"></i> Falar com o suporte</a>
+        </div>
+    </section>
+    <script type="module" th:src="@{/js/halter.js}"></script>
+    <script th:src="@{/js/demonstracoes.js}" defer></script>
+</div>
+
+<div th:if="${!logado}" class="modal fade" id="modalRecuperarSenha" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content p-2">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold"><i class="bi bi-key-fill me-2" style="color:var(--accent);"></i>Criar ou Redefinir Senha</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <form action="/recuperar-senha" method="post">
+                <div class="modal-body">
+                    <p class="small mb-3" style="color:var(--text-secondary);">Confirme seu CPF e E-mail cadastrados para definir sua nova senha pessoal.</p>
+                    <label class="form-label">Seu Perfil</label>
+                    <select name="tipo" class="form-select mb-3" required>
+                        <option value="ALUNO">Aluno</option>
+                        <option value="PROFESSOR">Professor</option>
+                    </select>
+                    <label class="form-label">CPF Cadastrado</label>
+                    <input type="text" name="cpf" class="form-control mb-3 mascara-cpf" minlength="14" maxlength="14" required>
+                    <label class="form-label">E-mail Cadastrado</label>
+                    <input type="email" name="email" class="form-control mb-3" required>
+                    <label class="form-label">Nova Senha (mínimo 4 caracteres)</label>
+                    <div class="pass-group">
+                        <input type="password" name="novaSenha" id="senhaRecuperacao" class="form-control pe-5" minlength="4" required>
+                        <button type="button" class="pass-toggle" onclick="alternarSenha('senhaRecuperacao', this)"><i class="bi bi-eye"></i></button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-theme" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn-brand">Salvar Nova Senha</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div th:if="${logado}" class="layout-wrapper">
+
+    <aside class="sidebar" role="navigation">
+        <a href="/" class="brand-box">
+            <span class="brand-logo"><img th:src="@{/img/logo-simbolo-fundo-escuro.png}" class="logo-fundo-escuro" alt="GymSync" height="48"><img th:src="@{/img/logo-simbolo-fundo-claro.png}" class="logo-fundo-claro" alt="GymSync" height="48"></span>
+            <div><span class="brand-title">GymSync</span><span class="brand-sub">Gestão Fitness</span></div>
+        </a>
+
+        <div class="nav nav-menu" id="menuAbas" role="tablist">
+            <div th:if="${perfil == 'ADMIN'}" class="sidebar-section">Gestão</div>
+            <button th:if="${perfil == 'ADMIN'}" class="nav-link active" id="btn-aba-painel" data-bs-toggle="pill" data-bs-target="#aba-painel" type="button" role="tab"><i class="ph ph-squares-four"></i> Painel &amp; Catraca</button>
+            <button th:if="${perfil == 'ADMIN'}" class="nav-link" id="btn-aba-alunos" data-bs-toggle="pill" data-bs-target="#aba-alunos" type="button" role="tab"><i class="ph ph-users"></i> Alunos &amp; Matrículas</button>
+            <button th:if="${perfil == 'ADMIN'}" class="nav-link" id="btn-aba-financeiro" data-bs-toggle="pill" data-bs-target="#aba-financeiro" type="button" role="tab"><i class="ph ph-wallet"></i> Planos &amp; Financeiro</button>
+            <button th:if="${perfil == 'ADMIN'}" class="nav-link" id="btn-aba-relatorios" data-bs-toggle="pill" data-bs-target="#aba-relatorios" type="button" role="tab"><i class="ph ph-chart-bar"></i> Relatórios</button>
+
+            <div th:if="${perfil == 'ALUNO'}" class="sidebar-section">Minha conta</div>
+            <button th:if="${perfil == 'ALUNO'}" class="nav-link active" id="btn-aba-portal" data-bs-toggle="pill" data-bs-target="#aba-portal" type="button" role="tab"><i class="ph ph-identification-badge"></i> Minha Área</button>
+
+            <div th:if="${perfil == 'ADMIN' or perfil == 'PROFESSOR'}" class="sidebar-section">Treino</div>
+            <button th:if="${perfil == 'ADMIN' or perfil == 'PROFESSOR'}" class="nav-link" th:classappend="${perfil == 'PROFESSOR' ? 'active' : ''}" id="btn-aba-treinos" data-bs-toggle="pill" data-bs-target="#aba-treinos" type="button" role="tab"><i class="ph ph-barbell"></i> Treinos &amp; Equipe</button>
+
+            <div th:if="${perfil == 'ALUNO'}" class="sidebar-section">Academia</div>
+            <button class="nav-link" id="btn-aba-avaliacoes" data-bs-toggle="pill" data-bs-target="#aba-avaliacoes" type="button" role="tab"><i class="ph ph-ruler"></i> Avaliações Físicas</button>
+            <button class="nav-link" id="btn-aba-aulas" data-bs-toggle="pill" data-bs-target="#aba-aulas" type="button" role="tab"><i class="ph ph-calendar-check"></i> Aulas Coletivas</button>
+            <button th:if="${perfil == 'ADMIN'}" class="nav-link" id="btn-aba-equipamentos" data-bs-toggle="pill" data-bs-target="#aba-equipamentos" type="button" role="tab"><i class="ph ph-gear"></i> Equipamentos</button>
+            <a th:if="${perfil == 'ALUNO' or perfil == 'PROFESSOR'}" href="/mensagens" class="nav-link"><i class="ph ph-chat-circle-dots"></i> Mensagens <span th:if="${naoLidas != null and naoLidas > 0}" class="nav-badge" th:text="${naoLidas}"></span></a>
+        </div>
+
+        <div class="perfil-box">
+            <div class="small fw-bold mb-1" th:text="${nomeUsuario}"></div>
+            <div class="small mb-2" style="color:var(--text-secondary);"><i class="bi bi-shield-lock text-success me-1"></i>Perfil: <span th:text="${perfil}"></span></div>
+            <div class="small" style="color:var(--text-secondary);"><i class="bi bi-envelope me-1"></i><a href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=suportegymsync@gmail.com&amp;su=Suporte%20GymSync" target="_blank" rel="noopener" class="link-acao">suportegymsync@gmail.com</a></div>
+        </div>
+    </aside>
+
+    <div class="main-area">
+        <header class="topbar">
+            <div class="d-flex align-items-center gap-2 flex-grow-1">
+                <button type="button" class="btn-theme d-lg-none" id="btnMenu" aria-label="Abrir menu"><i class="bi bi-list"></i></button>
+                <div class="search-wrapper">
+                    <i class="bi bi-search"></i>
+                    <input type="text" id="inputBuscaGlobal" class="form-control search-input" placeholder="Pesquisar registros...">
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <button th:if="${perfil == 'ALUNO' or perfil == 'PROFESSOR'}" type="button" class="btn-theme" data-bs-toggle="modal" data-bs-target="#modalMinhaSenha"><i class="bi bi-key"></i> Minha Senha</button>
+                <button type="button" class="btn-theme" id="btnTema"><i class="bi bi-sun-fill" id="iconeTema"></i> <span id="textoTema">Modo Claro</span></button>
+                <a href="/logout" class="btn-theme text-danger"><i class="bi bi-box-arrow-right"></i> Sair</a>
+            </div>
+        </header>
+
+        <main class="content-body">
+
+            <div th:if="${erro}" class="alert alert-danger alert-dismissible fade show rounded-3 border-0 shadow-sm mb-4 ocultar-impressao" role="alert">
+                <i class="bi bi-exclamation-octagon-fill me-2"></i><span th:text="${erro}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <div th:if="${sucesso}" class="alert alert-success alert-dismissible fade show rounded-3 border-0 shadow-sm mb-4 ocultar-impressao" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i><span th:text="${sucesso}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <div th:if="${perfil == 'ALUNO' or perfil == 'PROFESSOR'}" class="boas-vindas mb-4">
+                <div>
+                    <div class="boas-saudacao" id="boasSaudacao">Olá</div>
+                    <h2 class="boas-nome" th:text="${nomeUsuario}">Bem-vindo</h2>
+                </div>
+                <div class="boas-data" id="boasData"></div>
+            </div>
+
+            <div th:if="${perfil == 'ADMIN' or perfil == 'PROFESSOR'}" class="row g-3 mb-4 kpi-row">
+                <div class="col-6 col-xl-3"><div class="kpi-card"><div><div class="kpi-val" th:text="${#lists.size(alunos)}">0</div><div class="kpi-lbl">Alunos</div></div><div class="kpi-ico"><i class="ph ph-users"></i></div></div></div>
+                <div class="col-6 col-xl-3"><div class="kpi-card"><div><div class="kpi-val" th:text="${#lists.size(professores)}">0</div><div class="kpi-lbl">Professores</div></div><div class="kpi-ico"><i class="ph ph-identification-badge"></i></div></div></div>
+                <div class="col-6 col-xl-3"><div class="kpi-card"><div><div class="kpi-val" th:text="${#lists.size(planos)}">0</div><div class="kpi-lbl">Planos</div></div><div class="kpi-ico"><i class="ph ph-medal"></i></div></div></div>
+                <div class="col-6 col-xl-3"><div class="kpi-card"><div><div class="kpi-val" th:text="${#lists.size(entradas)}">0</div><div class="kpi-lbl">Acessos Catraca</div></div><div class="kpi-ico"><i class="ph ph-fingerprint"></i></div></div></div>
+            </div>
+
+            <div class="tab-content">
+
+                <div th:if="${perfil == 'ADMIN'}" class="tab-pane fade show active" id="aba-painel" role="tabpanel">
+
+                    <th:block th:replace="~{fragments/avisos :: lista}"></th:block>
+
+                    <div class="row g-4 mb-4">
+                        <div class="col-lg-4">
+                            <div class="panel-card">
+                                <div class="d-flex justify-content-between align-items-center mb-3"><span class="tag-pill">Biometria</span><i class="bi bi-fingerprint fs-4 text-success"></i></div>
+                                <h5 class="panel-title mb-3">Controle de Catraca</h5>
+                                <form action="/entradas/registrar" method="post">
+                                    <label class="form-label">Identificar Aluno</label>
+                                    <select name="alunoId" class="form-select mb-3" required>
+                                        <option value="">Selecionar aluno...</option>
+                                        <option th:each="a : ${alunos}" th:value="${a.id}" th:text="|${a.nome} (${a.situacao})|"></option>
+                                    </select>
+                                    <button type="submit" class="btn-biometria w-100"><i class="bi bi-unlock-fill me-2"></i>Liberar Catraca</button>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="panel-card">
+                                <div class="d-flex justify-content-between align-items-center mb-3"><span class="tag-pill">Matrícula</span><i class="bi bi-file-earmark-check fs-4" style="color:var(--accent);"></i></div>
+                                <h5 class="panel-title mb-3">Vincular Aluno a Plano</h5>
+                                <form action="/matriculas/salvar" method="post">
+                                    <label class="form-label">Aluno</label>
+                                    <select name="alunoId" class="form-select mb-2" required>
+                                        <option value="">Selecionar aluno...</option>
+                                        <option th:each="a : ${alunos}" th:value="${a.id}" th:text="${a.nome}"></option>
+                                    </select>
+                                    <label class="form-label">Plano</label>
+                                    <select name="planoId" class="form-select mb-3" required>
+                                        <option value="">Selecionar plano...</option>
+                                        <option th:each="p : ${planos}" th:value="${p.id}" th:text="|${p.nome} — R$ ${@fmt.dinheiro(p.valor)} em ${p.duracaoMeses}x (≈ R$ ${@fmt.dinheiro(p.valor / p.duracaoMeses)}/mês)|"></option>
+                                    </select>
+                                    <button type="submit" class="btn-brand w-100">Confirmar Matrícula</button>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="panel-card">
+                                <div class="d-flex justify-content-between align-items-center mb-3"><span class="tag-pill">Frequência</span><i class="bi bi-clock-history fs-5"></i></div>
+                                <h5 class="panel-title mb-3">Registros da Catraca</h5>
+                                <div class="table-responsive tabela-scroll">
+                                    <table class="table table-custom tabela-filtravel">
+                                        <thead><tr><th>ID</th><th>Aluno</th><th>Data / Hora</th><th class="text-end"></th></tr></thead>
+                                        <tbody>
+                                            <tr th:each="e : ${entradasRecentes}">
+                                                <td th:text="|#${e.id}|"></td>
+                                                <td class="fw-semibold" th:text="${e.aluno.nome}"></td>
+                                                <td class="small" th:text="${e.dataHoraEntrada != null ? #temporals.format(e.dataHoraEntrada, 'dd/MM/yyyy HH:mm') : ''}"></td>
+                                                <td class="text-end">
+                                                    <form th:action="@{/entradas/excluir/{id}(id=${e.id})}" method="post" class="d-inline" data-confirm="Excluir este registro de acesso?">
+                                                        <button type="submit" class="action-btn" title="Excluir"><i class="bi bi-trash"></i></button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div th:if="${#lists.isEmpty(entradasRecentes)}" class="vazio">Nenhum acesso registrado.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-lg-5">
+                            <div class="panel-card">
+                                <h5 class="panel-title mb-3">Alunos Ativos e Inativos</h5>
+                                <div class="table-responsive tabela-scroll">
+                                    <table class="table table-custom tabela-filtravel">
+                                        <thead><tr><th>Nome</th><th>CPF</th><th>Situação</th><th class="text-end">Ações</th></tr></thead>
+                                        <tbody>
+                                            <tr th:each="a : ${alunos}">
+                                                <td class="fw-semibold" th:text="${a.nome}"></td>
+                                                <td th:text="${a.cpf}"></td>
+                                                <td><span th:text="${a.situacao}" th:classappend="${a.situacao == 'ATIVO' ? 'status-ok' : 'status-off'}"></span></td>
+                                                <td class="text-end text-nowrap">
+                                                    <form th:action="@{/alunos/status/{id}(id=${a.id})}" method="post" class="d-inline">
+                                                        <button type="submit" class="action-btn action-toggle" title="Ativar / Inativar"><i class="bi bi-arrow-repeat"></i></button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-7">
+                            <div class="panel-card">
+                                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                                    <h5 class="panel-title">Controle de Mensalidades</h5>
+                                    <select id="filtroStatusMensalidade" class="form-select form-select-sm w-auto">
+                                        <option value="">Todas</option>
+                                        <option value="PENDENTE">Pendentes</option>
+                                        <option value="ATRASADA">Atrasadas</option>
+                                        <option value="EM_ANALISE">Em análise</option>
+                                        <option value="PAGA">Pagas</option>
+                                        <option value="CANCELADA">Canceladas</option>
+                                    </select>
+                                </div>
+                                <div class="table-responsive tabela-scroll">
+                                    <table class="table table-custom tabela-filtravel">
+                                        <thead><tr><th>Aluno</th><th>Plano</th><th>Valor</th><th>Vencimento</th><th>Status</th><th class="text-end">Ações</th></tr></thead>
+                                        <tbody>
+                                            <tr th:each="m : ${mensalidades}" th:attr="data-status=${m.situacao}">
+                                                <td class="fw-semibold" th:text="${m.matricula.aluno.nome}"></td>
+                                                <td th:text="${m.matricula.plano.nome}"></td>
+                                                <td th:text="|R$ ${@fmt.dinheiro(m.valor)}|"></td>
+                                                <td th:text="${@fmt.data(m.vencimento)}"></td>
+                                                <td><span th:text="${@fmt.statusTexto(m.situacao)}" th:class="${@fmt.statusClasse(m.situacao)}"></span></td>
+                                                <td class="text-end text-nowrap">
+                                                    <form th:if="${m.situacao == 'PENDENTE' or m.situacao == 'ATRASADA'}" th:action="@{/mensalidades/pagar/{id}(id=${m.id})}" method="post" class="d-inline" data-confirm="Confirmar o recebimento desta mensalidade?">
+                                                        <button type="submit" class="btn btn-sm btn-success fw-semibold px-2 me-1">Receber</button>
+                                                    </form>
+                                                    <th:block th:if="${m.situacao == 'EM_ANALISE'}">
+                                                        <form th:action="@{/mensalidades/pagar/{id}(id=${m.id})}" method="post" class="d-inline" data-confirm="Confirmar que o pagamento foi recebido?">
+                                                            <button type="submit" class="btn btn-sm btn-success fw-semibold px-2 me-1">Confirmar</button>
+                                                        </form>
+                                                        <form th:action="@{/mensalidades/recusar/{id}(id=${m.id})}" method="post" class="d-inline" data-confirm="Recusar este pagamento? A mensalidade volta para pendente.">
+                                                            <button type="submit" class="btn btn-sm btn-outline-danger fw-semibold px-2 me-1">Recusar</button>
+                                                        </form>
+                                                    </th:block>
+                                                    <form th:action="@{/mensalidades/excluir/{id}(id=${m.id})}" method="post" class="d-inline" data-confirm="Excluir esta mensalidade?">
+                                                        <button type="submit" class="action-btn" title="Excluir"><i class="bi bi-trash"></i></button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div th:if="${#lists.isEmpty(mensalidades)}" class="vazio">Nenhuma mensalidade gerada ainda.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div th:if="${perfil == 'ADMIN'}" class="tab-pane fade" id="aba-alunos" role="tabpanel">
+                    <div class="row g-4 mb-4">
+                        <div class="col-lg-4">
+                            <div class="panel-card">
+                                <div class="d-flex justify-content-between align-items-center mb-3"><span class="tag-pill">Recepção</span><i class="bi bi-person-plus-fill fs-5"></i></div>
+                                <h5 class="panel-title mb-3">Cadastrar Novo Aluno</h5>
+                                <form action="/alunos/salvar" method="post">
+                                    <label class="form-label">Nome Completo</label>
+                                    <input type="text" name="nome" class="form-control mb-2 campo-apenas-letras" minlength="3" maxlength="80" required>
+                                    <label class="form-label">CPF</label>
+                                    <input type="text" name="cpf" class="form-control mb-2 mascara-cpf" minlength="14" maxlength="14" required>
+                                    <label class="form-label">E-mail</label>
+                                    <input type="email" name="email" class="form-control mb-2" required>
+                                    <label class="form-label">Data de Nascimento</label>
+                                    <input type="date" name="dataNascimento" class="form-control mb-2 campo-data-4digitos" min="1900-01-01" required>
+                                    <label class="form-label">Telefone</label>
+                                    <input type="text" name="contato" class="form-control mb-2 mascara-telefone" minlength="14" maxlength="15" required>
+                                    <label class="form-label">Senha Inicial</label>
+                                    <div class="pass-group mb-3">
+                                        <input type="password" name="senha" id="senhaCadAluno" class="form-control pe-5" value="123" required>
+                                        <button type="button" class="pass-toggle" onclick="alternarSenha('senhaCadAluno', this)"><i class="bi bi-eye"></i></button>
+                                    </div>
+                                    <button type="submit" class="btn-brand w-100">Salvar Cadastro</button>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="col-lg-8">
+                            <div class="panel-card">
+                                <h5 class="panel-title mb-3">Lista Geral de Alunos</h5>
+                                <div class="table-responsive tabela-scroll">
+                                    <table class="table table-custom tabela-filtravel">
+                                        <thead><tr><th>Nome</th><th>CPF</th><th>E-mail</th><th>Nascimento</th><th>Telefone</th><th>Status</th><th class="text-end">Ações</th></tr></thead>
+                                        <tbody>
+                                            <tr th:each="a : ${alunos}">
+                                                <td class="fw-semibold" th:text="${a.nome}"></td>
+                                                <td th:text="${a.cpf}"></td>
+                                                <td class="small" th:text="${a.email != null ? a.email : '-'}"></td>
+                                                <td th:text="${a.dataNascimento != null ? #temporals.format(a.dataNascimento, 'dd/MM/yyyy') : '-'}"></td>
+                                                <td th:text="${a.contato}"></td>
+                                                <td><span th:text="${a.situacao}" th:classappend="${a.situacao == 'ATIVO' ? 'status-ok' : 'status-off'}"></span></td>
+                                                <td class="text-end text-nowrap">
+                                                    <button type="button" class="action-btn action-toggle me-1 btn-fill" title="Editar dados"
+                                                            data-bs-toggle="modal" data-bs-target="#modalEditarAluno" data-form="formEditarAluno"
+                                                            th:attr="data-campo-id=${a.id},data-campo-nome=${a.nome},data-campo-email=${a.email},data-campo-contato=${a.contato},data-campo-data-nascimento=${a.dataNascimento}"><i class="bi bi-pencil"></i></button>
+                                                    <form th:action="@{/alunos/redefinir-senha/{id}(id=${a.id})}" method="post" class="d-inline" data-confirm="Redefinir a senha deste aluno para 123?">
+                                                        <button type="submit" class="action-btn action-toggle me-1" title="Redefinir senha"><i class="bi bi-key"></i></button>
+                                                    </form>
+                                                    <form th:action="@{/alunos/status/{id}(id=${a.id})}" method="post" class="d-inline">
+                                                        <button type="submit" class="action-btn action-toggle me-1" title="Ativar / Inativar"><i class="bi bi-arrow-repeat"></i></button>
+                                                    </form>
+                                                    <form th:action="@{/alunos/excluir/{id}(id=${a.id})}" method="post" class="d-inline" data-confirm="Excluir este aluno? Isso apaga também matrículas, mensalidades, treinos e acessos dele. Para só bloquear o acesso, use o botão de inativar.">
+                                                        <button type="submit" class="action-btn" title="Excluir"><i class="bi bi-trash"></i></button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-12">
+                            <div class="panel-card">
+                                <h5 class="panel-title mb-3">Matrículas</h5>
+                                <div class="table-responsive tabela-scroll">
+                                    <table class="table table-custom tabela-filtravel">
+                                        <thead><tr><th>Aluno</th><th>Plano</th><th>Início</th><th>Fim</th><th>Situação</th><th class="text-end">Ação</th></tr></thead>
+                                        <tbody>
+                                            <tr th:each="mat : ${matriculas}">
+                                                <td class="fw-semibold" th:text="${mat.aluno.nome}"></td>
+                                                <td th:text="${mat.plano.nome}"></td>
+                                                <td th:text="${@fmt.data(mat.dataInicio)}"></td>
+                                                <td th:text="${@fmt.data(mat.dataFim)}"></td>
+                                                <td><span th:text="${mat.situacao}" th:class="${mat.situacao == 'ATIVA' ? 'status-ok' : (mat.situacao == 'VENCIDA' ? 'status-wait' : 'status-off')}"></span></td>
+                                                <td class="text-end">
+                                                    <form th:if="${mat.situacao == 'ATIVA'}" th:action="@{/matriculas/cancelar/{id}(id=${mat.id})}" method="post" class="d-inline" data-confirm="Cancelar esta matrícula? As mensalidades em aberto também serão canceladas.">
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger fw-semibold">Cancelar</button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div th:if="${#lists.isEmpty(matriculas)}" class="vazio">Nenhuma matrícula realizada ainda.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div th:if="${perfil == 'ADMIN' or perfil == 'PROFESSOR'}" class="tab-pane fade" th:classappend="${perfil == 'PROFESSOR' ? 'show active' : ''}" id="aba-treinos" role="tabpanel">
+                    <div class="row g-4 mb-4">
+
+                        <div th:if="${perfil == 'ADMIN'}" class="col-lg-4">
+                            <div class="panel-card">
+                                <div class="d-flex justify-content-between align-items-center mb-3"><span class="tag-pill">Corpo Técnico</span><i class="bi bi-person-workspace fs-5"></i></div>
+                                <h5 class="panel-title mb-3">Cadastrar Professor</h5>
+                                <form action="/professores/salvar" method="post">
+                                    <label class="form-label">Nome Completo</label>
+                                    <input type="text" name="nome" class="form-control mb-2 campo-apenas-letras" minlength="3" maxlength="80" required>
+                                    <label class="form-label">CPF</label>
+                                    <input type="text" name="cpf" class="form-control mb-2 mascara-cpf" minlength="14" maxlength="14" required>
+                                    <label class="form-label">E-mail</label>
+                                    <input type="email" name="email" class="form-control mb-2" required>
+                                    <label class="form-label">Telefone</label>
+                                    <input type="text" name="contato" class="form-control mb-2 mascara-telefone" minlength="14" maxlength="15" required>
+                                    <label class="form-label">Especialidade</label>
+                                    <input type="text" name="especialidade" class="form-control mb-2 campo-apenas-letras" maxlength="50" required>
+                                    <label class="form-label">Senha Inicial</label>
+                                    <div class="pass-group mb-3">
+                                        <input type="password" name="senha" id="senhaCadProf" class="form-control pe-5" value="123" required>
+                                        <button type="button" class="pass-toggle" onclick="alternarSenha('senhaCadProf', this)"><i class="bi bi-eye"></i></button>
+                                    </div>
+                                    <button type="submit" class="btn-brand w-100">Salvar Professor</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div th:class="${perfil == 'ADMIN' ? 'col-lg-4' : 'col-lg-6'}">
+                            <div class="panel-card">
+                                <div class="d-flex justify-content-between align-items-center mb-3"><span class="tag-pill">Prescrição</span><i class="bi bi-clipboard2-pulse fs-5"></i></div>
+                                <h5 class="panel-title mb-3">Nova Ficha de Treino</h5>
+                                <form action="/treinos/salvar" method="post">
+                                    <label class="form-label">Aluno</label>
+                                    <select name="alunoId" class="form-select mb-2" required>
+                                        <option value="">Selecionar aluno...</option>
+                                        <option th:each="a : ${alunos}" th:value="${a.id}" th:text="${a.nome}"></option>
+                                    </select>
+                                    <div th:if="${perfil == 'ADMIN'}">
+                                        <label class="form-label">Professor</label>
+                                        <select name="professorId" class="form-select mb-2" required>
+                                            <option value="">Selecionar professor...</option>
+                                            <option th:each="prof : ${professores}" th:value="${prof.id}" th:text="${prof.nome}"></option>
+                                        </select>
+                                    </div>
+                                    <label class="form-label">Divisão / Nome do Treino</label>
+                                    <input type="text" name="descricao" class="form-control mb-3" maxlength="60" required>
+                                    <button type="submit" class="btn-brand w-100">Criar Ficha</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div th:class="${perfil == 'ADMIN' ? 'col-lg-4' : 'col-lg-6'}">
+                            <div class="panel-card">
+                                <div class="d-flex justify-content-between align-items-center mb-3"><span class="tag-pill">Série</span><i class="bi bi-activity fs-5"></i></div>
+                                <h5 class="panel-title mb-3">Adicionar Exercício</h5>
+                                <form action="/exercicios/salvar" method="post">
+                                    <label class="form-label">Ficha de Treino</label>
+                                    <select name="treinoId" class="form-select mb-2" required>
+                                        <option value="">Selecionar ficha...</option>
+                                        <option th:each="t : ${meusTreinos}" th:value="${t.id}" th:text="|${t.aluno.nome} — ${t.descricao}|"></option>
+                                    </select>
+                                    <label class="form-label">Exercício</label>
+                                    <input type="text" name="exercicio" class="form-control mb-2" maxlength="50" required>
+                                    <div class="row g-2 mb-3">
+                                        <div class="col"><label class="form-label">Séries</label><input type="number" name="series" min="1" max="20" class="form-control" required></div>
+                                        <div class="col"><label class="form-label">Repetições</label><input type="number" name="repeticoes" min="1" max="100" class="form-control" required></div>
+                                    </div>
+                                    <button type="submit" class="btn-brand w-100">Incluir Exercício</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-4 mb-4">
+                        <div class="col-12">
+                            <div class="panel-card">
+                                <h5 class="panel-title mb-3">Fichas de Treino</h5>
+                                <div class="table-responsive tabela-scroll">
+                                    <table class="table table-custom tabela-filtravel">
+                                        <thead><tr><th>Aluno</th><th>Ficha</th><th>Professor</th><th>Criada em</th><th class="text-end">Ações</th></tr></thead>
+                                        <tbody>
+                                            <tr th:each="t : ${treinos}">
+                                                <td class="fw-semibold" th:text="${t.aluno.nome}"></td>
+                                                <td th:text="${t.descricao}"></td>
+                                                <td th:text="${t.professor.nome}"></td>
+                                                <td th:text="${@fmt.data(t.dataCriacao)}"></td>
+                                                <td class="text-end text-nowrap">
+                                                    <a th:if="${linksWhatsapp[t.id] != null}" th:href="${linksWhatsapp[t.id]}" target="_blank" rel="noopener" class="action-btn action-toggle me-1" title="Enviar por WhatsApp"><i class="bi bi-whatsapp"></i></a>
+                                                    <form th:action="@{/treinos/enviar-email/{id}(id=${t.id})}" method="post" class="d-inline" data-confirm="Enviar esta ficha por e-mail para o aluno?">
+                                                        <button type="submit" class="action-btn action-toggle me-1" title="Enviar por e-mail"><i class="bi bi-envelope"></i></button>
+                                                    </form>
+                                                    <th:block th:if="${perfil == 'ADMIN' or t.professor.id == professorId}">
+                                                        <button type="button" class="action-btn action-toggle me-1 btn-fill" title="Editar"
+                                                                data-bs-toggle="modal" data-bs-target="#modalEditarFicha" data-form="formEditarFicha"
+                                                                th:attr="data-campo-id=${t.id},data-campo-descricao=${t.descricao}"><i class="bi bi-pencil"></i></button>
+                                                        <form th:action="@{/treinos/excluir/{id}(id=${t.id})}" method="post" class="d-inline" data-confirm="Excluir esta ficha e todos os exercícios dela?">
+                                                            <button type="submit" class="action-btn" title="Excluir"><i class="bi bi-trash"></i></button>
+                                                        </form>
+                                                    </th:block>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div th:if="${#lists.isEmpty(treinos)}" class="vazio">Nenhuma ficha criada ainda.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-4">
+                        <div th:if="${perfil == 'ADMIN'}" class="col-lg-6">
+                            <div class="panel-card">
+                                <h5 class="panel-title mb-3">Professores Cadastrados</h5>
+                                <div class="table-responsive tabela-scroll">
+                                    <table class="table table-custom tabela-filtravel">
+                                        <thead><tr><th>Nome</th><th>CPF</th><th>E-mail</th><th>Especialidade</th><th>Contato</th><th class="text-end">Ações</th></tr></thead>
+                                        <tbody>
+                                            <tr th:each="prof : ${professores}">
+                                                <td class="fw-semibold" th:text="${prof.nome}"></td>
+                                                <td th:text="${prof.cpf}"></td>
+                                                <td class="small" th:text="${prof.email != null ? prof.email : '-'}"></td>
+                                                <td><span class="status-off" th:text="${prof.especialidade}"></span></td>
+                                                <td class="small" th:text="${prof.contato}"></td>
+                                                <td class="text-end text-nowrap">
+                                                    <button type="button" class="action-btn action-toggle me-1 btn-fill" title="Editar dados"
+                                                            data-bs-toggle="modal" data-bs-target="#modalEditarProfessor" data-form="formEditarProfessor"
+                                                            th:attr="data-campo-id=${prof.id},data-campo-nome=${prof.nome},data-campo-email=${prof.email},data-campo-contato=${prof.contato},data-campo-especialidade=${prof.especialidade}"><i class="bi bi-pencil"></i></button>
+                                                    <form th:action="@{/professores/redefinir-senha/{id}(id=${prof.id})}" method="post" class="d-inline" data-confirm="Redefinir a senha deste professor para 123?">
+                                                        <button type="submit" class="action-btn action-toggle me-1" title="Redefinir senha"><i class="bi bi-key"></i></button>
+                                                    </form>
+                                                    <form th:action="@{/professores/excluir/{id}(id=${prof.id})}" method="post" class="d-inline" data-confirm="Excluir este professor? As fichas e aulas dele também serão apagadas.">
+                                                        <button type="submit" class="action-btn" title="Excluir"><i class="bi bi-trash"></i></button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div th:class="${perfil == 'ADMIN' ? 'col-lg-6' : 'col-lg-12'}">
+                            <div class="panel-card">
+                                <h5 class="panel-title mb-3">Exercícios por Ficha de Treino</h5>
+                                <div class="table-responsive tabela-scroll">
+                                    <table class="table table-custom tabela-filtravel">
+                                        <thead><tr><th>Aluno</th><th>Ficha / Professor</th><th>Exercício</th><th>Séries x Reps</th><th>Última carga</th><th class="text-end"></th></tr></thead>
+                                        <tbody>
+                                            <tr th:each="ex : ${exercicios}">
+                                                <td class="fw-semibold" th:text="${ex.treino.aluno.nome}"></td>
+                                                <td class="small" th:text="|${ex.treino.descricao} (${ex.treino.professor.nome})|"></td>
+                                                <td th:text="${ex.exercicio}"></td>
+                                                <td><span class="status-ok" th:text="|${ex.series} x ${ex.repeticoes}|"></span></td>
+                                                <td class="small" th:text="${@fmt.execucao(ultimosRegistros[ex.id])}"></td>
+                                                <td class="text-end text-nowrap">
+                                                    <th:block th:if="${perfil == 'ADMIN' or ex.treino.professor.id == professorId}">
+                                                        <button type="button" class="action-btn action-toggle me-1 btn-fill" title="Editar"
+                                                                data-bs-toggle="modal" data-bs-target="#modalEditarExercicio" data-form="formEditarExercicio"
+                                                                th:attr="data-campo-id=${ex.id},data-campo-exercicio=${ex.exercicio},data-campo-series=${ex.series},data-campo-repeticoes=${ex.repeticoes}"><i class="bi bi-pencil"></i></button>
+                                                        <form th:action="@{/exercicios/excluir/{id}(id=${ex.id})}" method="post" class="d-inline" data-confirm="Excluir este exercício?">
+                                                            <button type="submit" class="action-btn" title="Excluir"><i class="bi bi-trash"></i></button>
+                                                        </form>
+                                                    </th:block>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div th:if="${#lists.isEmpty(exercicios)}" class="vazio">Nenhum exercício cadastrado ainda.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div th:if="${perfil == 'ADMIN'}" class="tab-pane fade" id="aba-financeiro" role="tabpanel">
+                    <div class="row g-4">
+                        <div class="col-lg-4">
+                            <div class="panel-card">
+                                <div class="d-flex justify-content-between align-items-center mb-3"><span class="tag-pill">Planos</span><i class="bi bi-tags-fill fs-5"></i></div>
+                                <h5 class="panel-title mb-3">Criar Novo Plano</h5>
+                                <form action="/planos/salvar" method="post">
+                                    <label class="form-label">Nome do Plano</label>
+                                    <input type="text" name="nome" class="form-control mb-3 campo-apenas-letras" maxlength="40" required>
+                                    <label class="form-label">Duração (Meses)</label>
+                                    <input type="number" name="duracaoMeses" min="1" max="60" class="form-control mb-3" required>
+                                    <label class="form-label">Valor total do plano (R$)</label>
+                                    <input type="number" step="0.01" min="1" max="99999.99" name="valor" class="form-control mb-1" required>
+                                    <div class="small mb-4" style="color:var(--text-secondary);">A mensalidade será o valor total dividido pelos meses de duração.</div>
+                                    <button type="submit" class="btn-brand w-100">Salvar Plano</button>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="col-lg-8">
+                            <div class="panel-card">
+                                <h5 class="panel-title mb-3">Planos Disponíveis</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-custom tabela-filtravel">
+                                        <thead><tr><th>Plano</th><th>Duração</th><th>Valor total</th><th>Mensalidade</th><th class="text-end">Ações</th></tr></thead>
+                                        <tbody>
+                                            <tr th:each="p : ${planos}">
+                                                <td class="fw-semibold" th:text="${p.nome}"></td>
+                                                <td th:text="|${p.duracaoMeses} ${p.duracaoMeses == 1 ? 'mês' : 'meses'}|"></td>
+                                                <td class="fw-bold" style="color:var(--accent);" th:text="|R$ ${@fmt.dinheiro(p.valor)}|"></td>
+                                                <td th:text="|≈ R$ ${@fmt.dinheiro(p.valor / p.duracaoMeses)}|"></td>
+                                                <td class="text-end text-nowrap">
+                                                    <button type="button" class="action-btn action-toggle me-1 btn-fill" title="Editar plano"
+                                                            data-bs-toggle="modal" data-bs-target="#modalEditarPlano" data-form="formEditarPlano"
+                                                            th:attr="data-campo-id=${p.id},data-campo-nome=${p.nome},data-campo-duracao-meses=${p.duracaoMeses},data-campo-valor=${p.valor}"><i class="bi bi-pencil"></i></button>
+                                                    <form th:action="@{/planos/excluir/{id}(id=${p.id})}" method="post" class="d-inline" data-confirm="Excluir este plano? As matrículas e mensalidades ligadas a ele também serão apagadas.">
+                                                        <button type="submit" class="action-btn" title="Excluir"><i class="bi bi-trash"></i></button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div th:if="${#lists.isEmpty(planos)}" class="vazio">Nenhum plano cadastrado ainda.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <th:block th:if="${perfil == 'ADMIN'}">
+                    <div th:replace="~{fragments/relatorios :: aba}"></div>
+                    <div th:replace="~{fragments/equipamentos :: aba}"></div>
+                </th:block>
+
+                <th:block th:if="${perfil == 'ALUNO'}">
+                    <div th:replace="~{fragments/portal :: aba}"></div>
+                </th:block>
+
+                <div th:replace="~{fragments/avaliacoes :: aba}"></div>
+                <div th:replace="~{fragments/aulas :: aba}"></div>
+
+            </div>
+        </main>
+    </div>
+</div>
+
+<div th:if="${logado and (perfil == 'ALUNO' or perfil == 'PROFESSOR')}" class="modal fade" id="modalMinhaSenha" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content p-2">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold"><i class="bi bi-shield-lock-fill me-2" style="color:var(--accent);"></i>Alterar Minha Senha</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <form action="/alterar-senha" method="post">
+                <div class="modal-body">
+                    <label class="form-label">Digite sua Nova Senha (mínimo 4 caracteres)</label>
+                    <div class="pass-group">
+                        <input type="password" name="novaSenha" id="inputMinhaNovaSenha" class="form-control pe-5" minlength="4" required>
+                        <button type="button" class="pass-toggle" onclick="alternarSenha('inputMinhaNovaSenha', this)"><i class="bi bi-eye"></i></button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-theme" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn-brand">Atualizar Senha</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div th:if="${logado and (perfil == 'ADMIN' or perfil == 'PROFESSOR')}" class="modal fade" id="modalEditarFicha" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content p-2">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square me-2" style="color:var(--accent);"></i>Editar Ficha de Treino</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <form id="formEditarFicha" action="/treinos/editar" method="post">
+                <div class="modal-body">
+                    <input type="hidden" name="id">
+                    <label class="form-label">Divisão / Nome do Treino</label>
+                    <input type="text" name="descricao" class="form-control" maxlength="60" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-theme" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn-brand">Salvar Alteração</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div th:if="${logado and (perfil == 'ADMIN' or perfil == 'PROFESSOR')}" class="modal fade" id="modalEditarExercicio" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content p-2">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square me-2" style="color:var(--accent);"></i>Editar Exercício</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <form id="formEditarExercicio" action="/exercicios/editar" method="post">
+                <div class="modal-body">
+                    <input type="hidden" name="id">
+                    <label class="form-label">Exercício</label>
+                    <input type="text" name="exercicio" class="form-control mb-2" maxlength="50" required>
+                    <div class="row g-2">
+                        <div class="col"><label class="form-label">Séries</label><input type="number" name="series" min="1" max="20" class="form-control" required></div>
+                        <div class="col"><label class="form-label">Repetições</label><input type="number" name="repeticoes" min="1" max="100" class="form-control" required></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-theme" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn-brand">Salvar Alteração</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<th:block th:if="${logado and perfil == 'ADMIN'}">
+
+    <div class="modal fade" id="modalEditarAluno" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content p-2">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square me-2" style="color:var(--accent);"></i>Editar Aluno</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <form id="formEditarAluno" action="/alunos/editar" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" name="id">
+                        <label class="form-label">Nome Completo</label>
+                        <input type="text" name="nome" class="form-control mb-2 campo-apenas-letras" minlength="3" maxlength="80" required>
+                        <label class="form-label">E-mail</label>
+                        <input type="email" name="email" class="form-control mb-2" required>
+                        <label class="form-label">Data de Nascimento</label>
+                        <input type="date" name="dataNascimento" class="form-control mb-2 campo-data-4digitos" min="1900-01-01" required>
+                        <label class="form-label">Telefone</label>
+                        <input type="text" name="contato" class="form-control mb-1 mascara-telefone" minlength="14" maxlength="15" required>
+                        <div class="small" style="color:var(--text-secondary);">O CPF não pode ser alterado.</div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-theme" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn-brand">Salvar Alterações</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalEditarProfessor" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content p-2">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square me-2" style="color:var(--accent);"></i>Editar Professor</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <form id="formEditarProfessor" action="/professores/editar" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" name="id">
+                        <label class="form-label">Nome Completo</label>
+                        <input type="text" name="nome" class="form-control mb-2 campo-apenas-letras" minlength="3" maxlength="80" required>
+                        <label class="form-label">E-mail</label>
+                        <input type="email" name="email" class="form-control mb-2" required>
+                        <label class="form-label">Telefone</label>
+                        <input type="text" name="contato" class="form-control mb-2 mascara-telefone" minlength="14" maxlength="15" required>
+                        <label class="form-label">Especialidade</label>
+                        <input type="text" name="especialidade" class="form-control mb-1 campo-apenas-letras" maxlength="50" required>
+                        <div class="small" style="color:var(--text-secondary);">O CPF não pode ser alterado.</div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-theme" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn-brand">Salvar Alterações</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalEditarPlano" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content p-2">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square me-2" style="color:var(--accent);"></i>Editar Plano</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <form id="formEditarPlano" action="/planos/editar" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" name="id">
+                        <label class="form-label">Nome do Plano</label>
+                        <input type="text" name="nome" class="form-control mb-2" maxlength="40" required>
+                        <label class="form-label">Duração (Meses)</label>
+                        <input type="number" name="duracaoMeses" min="1" max="60" class="form-control mb-2" required>
+                        <label class="form-label">Valor total do plano (R$)</label>
+                        <input type="number" step="0.01" min="1" max="99999.99" name="valor" class="form-control mb-1" required>
+                        <div class="small" style="color:var(--text-secondary);">Mensalidades que já foram geradas não mudam.</div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-theme" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn-brand">Salvar Alterações</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalManutencao" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content p-2">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-wrench-adjustable me-2" style="color:var(--accent);"></i>Registrar Manutenção</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <form id="formManutencao" action="/equipamentos/manutencao" method="post">
+                    <div class="modal-body">
+                        <label class="form-label">Equipamento</label>
+                        <select name="equipamentoId" class="form-select mb-2" required>
+                            <option value="">Selecionar...</option>
+                            <option th:each="equip : ${equipamentos}" th:value="${equip.id}" th:text="${equip.nome}"></option>
+                        </select>
+                        <div class="row g-2 mb-2">
+                            <div class="col"><label class="form-label">Data</label><input type="date" name="dataManutencao" class="form-control campo-hoje" required></div>
+                            <div class="col">
+                                <label class="form-label">Tipo</label>
+                                <select name="tipo" class="form-select" required>
+                                    <option value="PREVENTIVA">Preventiva</option>
+                                    <option value="CORRETIVA">Corretiva</option>
+                                </select>
+                            </div>
+                        </div>
+                        <label class="form-label">O que foi feito</label>
+                        <textarea name="descricao" class="form-control mb-2" rows="2" maxlength="300" required></textarea>
+                        <div class="row g-2 mb-2">
+                            <div class="col"><label class="form-label">Responsável</label><input type="text" name="responsavel" class="form-control" maxlength="60"></div>
+                            <div class="col"><label class="form-label">Custo (R$)</label><input type="number" step="0.01" min="0" name="custo" class="form-control"></div>
+                        </div>
+                        <label class="form-label">Próxima manutenção prevista</label>
+                        <input type="date" name="proximaManutencao" class="form-control mb-2">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="continuaEmManutencao" value="sim" id="chkContinua">
+                            <label class="form-check-label small" for="chkContinua">O equipamento continua em manutenção</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-theme" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn-brand">Salvar Manutenção</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</th:block>
+
+<th:block th:if="${logado and perfil == 'ALUNO'}">
+
+    <div class="modal fade" id="modalPagarPix" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content p-2">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-qr-code me-2" style="color:var(--accent);"></i>Pagar mensalidade</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <form id="formPagarPix" method="post">
+                    <div class="modal-body">
+                        <div class="alert alert-info py-2 small border-0 rounded-3">Demonstração: nenhum valor é cobrado de verdade. Depois de informar, o pagamento fica EM ANÁLISE até a recepção confirmar.</div>
+                        <div class="row g-2 mb-2">
+                            <div class="col"><label class="form-label">Valor</label><input type="text" name="valor" class="form-control" readonly></div>
+                            <div class="col"><label class="form-label">Vencimento</label><input type="text" name="vencimento" class="form-control" readonly></div>
+                        </div>
+                        <label class="form-label">Código Pix (copia e cola)</label>
+                        <div class="input-group">
+                            <input type="text" name="codigo" id="pixCodigo" class="form-control pix-codigo" readonly>
+                            <button type="button" class="btn-theme" id="btnCopiarPix">Copiar</button>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-theme" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn-brand">Já paguei</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalRegistrarExercicio" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content p-2">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-check2-circle me-2" style="color:var(--accent);"></i>Registrar exercício</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <form id="formRegistrarExercicio" action="/aluno/exercicios/registrar" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" name="exercicioId">
+                        <label class="form-label">Exercício</label>
+                        <input type="text" name="nomeExercicio" class="form-control mb-2" readonly>
+                        <label class="form-label">Carga usada (kg)</label>
+                        <input type="number" step="0.5" min="0" max="1000" name="carga" class="form-control mb-2">
+                        <label class="form-label">Observação (opcional)</label>
+                        <input type="text" name="observacao" class="form-control" maxlength="200" placeholder="Ex: senti o ombro, subir a carga...">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-theme" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn-brand">Registrar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</th:block>
+
+<script th:src="@{/vendor/bootstrap/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/js/gymsync.js}"></script>
+</body>
+</html>

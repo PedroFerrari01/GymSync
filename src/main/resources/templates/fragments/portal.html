@@ -1,0 +1,106 @@
+<div th:fragment="aba" class="tab-pane fade show active" id="aba-portal" role="tabpanel">
+
+    <th:block th:replace="~{fragments/avisos :: lista}"></th:block>
+
+    <div class="cabecalho-impressao">
+        <h3 class="fw-bold mb-1">GymSync - FICHA DE TREINO</h3>
+        <p class="mb-0" th:text="|Aluno(a): ${nomeUsuario}|"></p>
+        <p class="mb-0" th:text="|Impressa em ${#temporals.format(#temporals.createNow(), 'dd/MM/yyyy HH:mm')}|"></p>
+    </div>
+
+    <div class="row g-3 mb-4 ocultar-impressao">
+        <div class="col-4"><div class="mini-kpi"><div class="valor" th:text="${#lists.size(exercicios)}">0</div><div class="rotulo">Exercícios na ficha</div></div></div>
+        <div class="col-4"><div class="mini-kpi"><div class="valor" th:text="${visitasSemana}">0</div><div class="rotulo">Visitas esta semana</div></div></div>
+        <div class="col-4"><div class="mini-kpi"><div class="valor" th:text="${visitas30}">0</div><div class="rotulo">Últimos 30 dias</div></div></div>
+    </div>
+
+    <div class="row g-4 align-items-start">
+        <div class="col-lg-7 col-impressao-full">
+            <div class="panel-card">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                    <h5 class="panel-title">Minha Ficha de Treino</h5>
+                    <div class="d-flex flex-wrap gap-2 ocultar-impressao">
+                        <button type="button" class="btn-theme" onclick="window.print()"><i class="bi bi-printer"></i> Imprimir</button>
+                        <a th:if="${linkWhatsappFicha != null}" th:href="${linkWhatsappFicha}" target="_blank" rel="noopener" class="btn-theme"><i class="bi bi-whatsapp"></i> WhatsApp</a>
+                        <form action="/aluno/ficha/email" method="post" class="d-inline">
+                            <button type="submit" class="btn-theme"><i class="bi bi-envelope"></i> E-mail</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-custom tabela-filtravel">
+                        <thead>
+                            <tr>
+                                <th>Treino / Professor</th><th>Exercício</th><th>Séries x Reps</th>
+                                <th class="ocultar-impressao">Última vez</th>
+                                <th class="so-impressao">Carga / Anotações</th>
+                                <th class="text-end ocultar-impressao"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="ex : ${exercicios}">
+                                <td th:text="|${ex.treino.descricao} (${ex.treino.professor.nome})|"></td>
+                                <td class="fw-semibold cel-exercicio" th:text="${ex.exercicio}"></td>
+                                <td><span class="status-ok" th:text="|${ex.series} x ${ex.repeticoes}|"></span></td>
+                                <td class="small ocultar-impressao" th:text="${@fmt.execucao(ultimosRegistros[ex.id])}"></td>
+                                <td class="so-impressao" style="min-width:120px;"></td>
+                                <td class="text-end ocultar-impressao">
+                                    <button type="button" class="action-btn action-toggle btn-registrar" title="Registrar que fiz"
+                                            data-bs-toggle="modal" data-bs-target="#modalRegistrarExercicio"
+                                            th:data-id="${ex.id}"><i class="bi bi-check2-circle"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div th:if="${#lists.isEmpty(exercicios)}" class="vazio">Seu professor ainda não montou a sua ficha.</div>
+                <div class="assinatura-impressao">Professor responsável</div>
+            </div>
+        </div>
+
+        <div class="col-lg-5 ocultar-impressao">
+            <div class="panel-card mb-4">
+                <h5 class="panel-title mb-3">Minhas Mensalidades</h5>
+                <div class="table-responsive tabela-scroll">
+                    <table class="table table-custom">
+                        <thead><tr><th>Plano</th><th>Valor</th><th>Vencimento</th><th>Situação</th><th class="text-end"></th></tr></thead>
+                        <tbody>
+                            <tr th:each="m : ${mensalidades}">
+                                <td th:text="${m.matricula.plano.nome}"></td>
+                                <td class="cel-valor" th:text="|R$ ${@fmt.dinheiro(m.valor)}|"></td>
+                                <td class="cel-venc" th:text="${m.vencimento != null ? #temporals.format(m.vencimento, 'dd/MM/yyyy') : ''}"></td>
+                                <td><span th:text="${@fmt.statusTexto(m.situacao)}" th:class="${@fmt.statusClasse(m.situacao)}"></span></td>
+                                <td class="text-end">
+                                    <button th:if="${m.situacao == 'PENDENTE' or m.situacao == 'ATRASADA'}" type="button" class="btn btn-sm btn-success fw-semibold btn-pagar"
+                                            data-bs-toggle="modal" data-bs-target="#modalPagarPix"
+                                            th:data-id="${m.id}">Pagar</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div th:if="${#lists.isEmpty(mensalidades)}" class="vazio">Você ainda não tem mensalidades.</div>
+            </div>
+
+            <div class="panel-card">
+                <h5 class="panel-title mb-3">Minha Frequência</h5>
+                <div class="row g-2 mb-3">
+                    <div class="col-6"><div class="mini-kpi"><div class="valor" th:text="${visitasSemana}">0</div><div class="rotulo">Esta semana</div></div></div>
+                    <div class="col-6"><div class="mini-kpi"><div class="valor" th:text="${visitas30}">0</div><div class="rotulo">Últimos 30 dias</div></div></div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-custom">
+                        <thead><tr><th>Registro</th><th>Data e Hora da Entrada</th></tr></thead>
+                        <tbody>
+                            <tr th:each="e, st : ${entradas}" th:if="${st.index < 10}">
+                                <td th:text="|#${e.id}|"></td>
+                                <td th:text="${e.dataHoraEntrada != null ? #temporals.format(e.dataHoraEntrada, 'dd/MM/yyyy HH:mm') : ''}"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div th:if="${#lists.isEmpty(entradas)}" class="vazio">Nenhum acesso registrado ainda.</div>
+            </div>
+        </div>
+    </div>
+</div>

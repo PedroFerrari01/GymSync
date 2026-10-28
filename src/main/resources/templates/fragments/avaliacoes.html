@@ -1,0 +1,113 @@
+<div th:fragment="aba" class="tab-pane fade" id="aba-avaliacoes" role="tabpanel">
+
+    <div th:if="${perfil == 'ADMIN' or perfil == 'PROFESSOR'}" class="row g-4">
+        <div class="col-lg-4">
+            <div class="panel-card">
+                <div class="d-flex justify-content-between align-items-center mb-3"><span class="tag-pill">Evolução</span><i class="bi bi-rulers fs-5"></i></div>
+                <h5 class="panel-title mb-3">Nova Avaliação Física</h5>
+                <form action="/avaliacoes/salvar" method="post">
+                    <label class="form-label">Aluno</label>
+                    <select name="alunoId" class="form-select mb-2" required>
+                        <option value="">Selecionar aluno...</option>
+                        <option th:each="a : ${alunos}" th:value="${a.id}" th:text="${a.nome}"></option>
+                    </select>
+                    <label class="form-label">Data da avaliação</label>
+                    <input type="date" name="dataAvaliacao" class="form-control mb-2 campo-hoje" required>
+                    <div class="row g-2 mb-2">
+                        <div class="col"><label class="form-label">Peso (kg)</label><input type="number" step="0.1" min="1" max="500" name="peso" class="form-control" required></div>
+                        <div class="col"><label class="form-label">Altura (m)</label><input type="number" step="0.01" min="0.5" max="3" name="altura" class="form-control"></div>
+                    </div>
+                    <label class="form-label">Gordura corporal (%)</label>
+                    <input type="number" step="0.1" min="1" max="80" name="percentualGordura" class="form-control mb-2">
+                    <div class="row g-2 mb-2">
+                        <div class="col"><label class="form-label">Cintura (cm)</label><input type="number" step="0.1" min="1" max="300" name="cintura" class="form-control"></div>
+                        <div class="col"><label class="form-label">Quadril (cm)</label><input type="number" step="0.1" min="1" max="300" name="quadril" class="form-control"></div>
+                    </div>
+                    <div class="row g-2 mb-2">
+                        <div class="col"><label class="form-label">Peito (cm)</label><input type="number" step="0.1" min="1" max="300" name="peito" class="form-control"></div>
+                        <div class="col"><label class="form-label">Braço (cm)</label><input type="number" step="0.1" min="1" max="150" name="braco" class="form-control"></div>
+                        <div class="col"><label class="form-label">Coxa (cm)</label><input type="number" step="0.1" min="1" max="200" name="coxa" class="form-control"></div>
+                    </div>
+                    <label class="form-label">Observações</label>
+                    <textarea name="observacao" class="form-control mb-3" rows="2" maxlength="300"></textarea>
+                    <button type="submit" class="btn-brand w-100">Salvar Avaliação</button>
+                </form>
+            </div>
+        </div>
+        <div class="col-lg-8">
+            <div class="panel-card">
+                <h5 class="panel-title mb-3">Avaliações registradas</h5>
+                <div class="table-responsive tabela-scroll">
+                    <table class="table table-custom tabela-filtravel">
+                        <thead><tr><th>Aluno</th><th>Data</th><th>Peso</th><th>IMC</th><th>% Gord.</th><th>Cint.</th><th>Quad.</th><th>Registrou</th><th class="text-end"></th></tr></thead>
+                        <tbody>
+                            <tr th:each="av : ${avaliacoes}">
+                                <td class="fw-semibold" th:text="${av.aluno.nome}"></td>
+                                <td th:text="${av.dataAvaliacao != null ? #temporals.format(av.dataAvaliacao, 'dd/MM/yyyy') : '-'}"></td>
+                                <td th:text="|${@fmt.numero(av.peso, 1)} kg|"></td>
+                                <td th:text="${@fmt.numero(av.imc, 1)}"></td>
+                                <td th:text="${av.percentualGordura != null ? @fmt.numero(av.percentualGordura, 1) + '%' : '-'}"></td>
+                                <td th:text="${@fmt.numero(av.cintura, 1)}"></td>
+                                <td th:text="${@fmt.numero(av.quadril, 1)}"></td>
+                                <td class="small" th:text="${av.registradoPor}"></td>
+                                <td class="text-end">
+                                    <form th:if="${perfil == 'ADMIN' or av.professorId == professorId}" th:action="@{/avaliacoes/excluir/{id}(id=${av.id})}" method="post" class="d-inline" data-confirm="Excluir esta avaliação?">
+                                        <button type="submit" class="action-btn" title="Excluir"><i class="bi bi-trash"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div th:if="${#lists.isEmpty(avaliacoes)}" class="vazio">Nenhuma avaliação registrada ainda.</div>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${perfil == 'ALUNO'}" class="row g-4">
+        <div class="col-lg-5">
+            <div class="panel-card">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h5 class="panel-title">Evolução do peso</h5>
+                    <span class="tag-pill">kg</span>
+                </div>
+                <p class="small mb-2" style="color:var(--text-secondary);">
+                    <span th:if="${resumoPeso != null}" th:text="${resumoPeso}"></span>
+                    <span th:if="${resumoPeso == null}">Com duas ou mais avaliações você acompanha a sua evolução aqui.</span>
+                </p>
+                <div th:if="${#lists.isEmpty(barrasPeso)}" class="vazio">Você ainda não tem avaliações.</div>
+                <div class="vchart">
+                    <div class="vcol" th:each="b : ${barrasPeso}">
+                        <span class="vval" th:text="${b.texto}"></span>
+                        <div class="vtrack"><div class="vbar" th:style="|height:${b.percentual}%|"></div></div>
+                        <span class="vlbl" th:text="${b.rotulo}"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-7">
+            <div class="panel-card">
+                <h5 class="panel-title mb-3">Minhas avaliações</h5>
+                <div class="table-responsive">
+                    <table class="table table-custom">
+                        <thead><tr><th>Data</th><th>Peso</th><th>IMC</th><th>% Gord.</th><th>Cintura</th><th>Quadril</th><th>Peito</th><th>Braço</th><th>Coxa</th></tr></thead>
+                        <tbody>
+                            <tr th:each="av : ${avaliacoes}">
+                                <td th:text="${av.dataAvaliacao != null ? #temporals.format(av.dataAvaliacao, 'dd/MM/yyyy') : '-'}"></td>
+                                <td th:text="|${@fmt.numero(av.peso, 1)} kg|"></td>
+                                <td th:text="${@fmt.numero(av.imc, 1)}"></td>
+                                <td th:text="${av.percentualGordura != null ? @fmt.numero(av.percentualGordura, 1) + '%' : '-'}"></td>
+                                <td th:text="${@fmt.numero(av.cintura, 1)}"></td>
+                                <td th:text="${@fmt.numero(av.quadril, 1)}"></td>
+                                <td th:text="${@fmt.numero(av.peito, 1)}"></td>
+                                <td th:text="${@fmt.numero(av.braco, 1)}"></td>
+                                <td th:text="${@fmt.numero(av.coxa, 1)}"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="small mt-2 mb-0" style="color:var(--text-secondary);">Medidas em centímetros. As avaliações são feitas pelo professor na academia.</p>
+            </div>
+        </div>
+    </div>
+</div>

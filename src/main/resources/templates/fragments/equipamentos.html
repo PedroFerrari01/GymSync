@@ -1,0 +1,82 @@
+<div th:fragment="aba" class="tab-pane fade" id="aba-equipamentos" role="tabpanel">
+
+    <div class="row g-4 mb-4">
+        <div class="col-lg-4">
+            <div class="panel-card">
+                <div class="d-flex justify-content-between align-items-center mb-3"><span class="tag-pill">Patrimônio</span><i class="bi bi-gear-wide-connected fs-5"></i></div>
+                <h5 class="panel-title mb-3">Cadastrar Equipamento</h5>
+                <form action="/equipamentos/salvar" method="post">
+                    <label class="form-label">Nome</label>
+                    <input type="text" name="nome" class="form-control mb-2" maxlength="60" placeholder="Esteira, Leg press..." required>
+                    <label class="form-label">Tipo</label>
+                    <input type="text" name="tipo" class="form-control mb-2" maxlength="40" placeholder="Cardio, Musculação...">
+                    <label class="form-label">Código / Patrimônio</label>
+                    <input type="text" name="codigo" class="form-control mb-2" maxlength="30">
+                    <label class="form-label">Data de aquisição</label>
+                    <input type="date" name="dataAquisicao" class="form-control mb-3">
+                    <button type="submit" class="btn-brand w-100">Salvar Equipamento</button>
+                </form>
+            </div>
+        </div>
+        <div class="col-lg-8">
+            <div class="panel-card">
+                <h5 class="panel-title mb-3">Equipamentos</h5>
+                <div class="table-responsive">
+                    <table class="table table-custom tabela-filtravel">
+                        <thead><tr><th>Nome</th><th>Tipo</th><th>Código</th><th>Situação</th><th>Próxima manutenção</th><th class="text-end">Ações</th></tr></thead>
+                        <tbody>
+                            <tr th:each="equip : ${equipamentos}">
+                                <td class="fw-semibold" th:text="${equip.nome}"></td>
+                                <td th:text="${equip.tipo != null and equip.tipo != '' ? equip.tipo : '-'}"></td>
+                                <td th:text="${equip.codigo != null and equip.codigo != '' ? equip.codigo : '-'}"></td>
+                                <td><span th:text="${equip.situacao == 'OPERANDO' ? 'OPERANDO' : 'EM MANUTENÇÃO'}" th:class="${equip.situacao == 'OPERANDO' ? 'status-ok' : 'status-wait'}"></span></td>
+                                <td th:text="${equip.proximaManutencao != null ? #temporals.format(equip.proximaManutencao, 'dd/MM/yyyy') : '-'}"></td>
+                                <td class="text-end text-nowrap">
+                                    <button type="button" class="action-btn action-toggle me-1 btn-fill" title="Registrar manutenção"
+                                            data-bs-toggle="modal" data-bs-target="#modalManutencao" data-form="formManutencao"
+                                            th:attr="data-campo-equipamento-id=${equip.id}"><i class="bi bi-wrench"></i></button>
+                                    <form th:action="@{/equipamentos/status/{id}(id=${equip.id})}" method="post" class="d-inline">
+                                        <button type="submit" class="action-btn action-toggle me-1" title="Alternar situação"><i class="bi bi-arrow-repeat"></i></button>
+                                    </form>
+                                    <form th:action="@{/equipamentos/excluir/{id}(id=${equip.id})}" method="post" class="d-inline" data-confirm="Excluir este equipamento e o histórico de manutenções dele?">
+                                        <button type="submit" class="action-btn" title="Excluir"><i class="bi bi-trash"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div th:if="${#lists.isEmpty(equipamentos)}" class="vazio">Nenhum equipamento cadastrado.</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="panel-card">
+                <h5 class="panel-title mb-3">Histórico de manutenções</h5>
+                <div class="table-responsive tabela-scroll">
+                    <table class="table table-custom tabela-filtravel">
+                        <thead><tr><th>Data</th><th>Equipamento</th><th>Tipo</th><th>Descrição</th><th>Responsável</th><th>Custo</th><th class="text-end"></th></tr></thead>
+                        <tbody>
+                            <tr th:each="man : ${manutencoes}">
+                                <td th:text="${man.dataManutencao != null ? #temporals.format(man.dataManutencao, 'dd/MM/yyyy') : '-'}"></td>
+                                <td class="fw-semibold" th:text="${man.equipamento.nome}"></td>
+                                <td><span class="status-off" th:text="${man.tipo}"></span></td>
+                                <td class="small" th:text="${man.descricao}"></td>
+                                <td class="small" th:text="${man.responsavel != null and man.responsavel != '' ? man.responsavel : '-'}"></td>
+                                <td th:text="${man.custo != null ? 'R$ ' + @fmt.dinheiro(man.custo) : '-'}"></td>
+                                <td class="text-end">
+                                    <form th:action="@{/equipamentos/manutencao/excluir/{id}(id=${man.id})}" method="post" class="d-inline" data-confirm="Excluir este registro de manutenção?">
+                                        <button type="submit" class="action-btn" title="Excluir"><i class="bi bi-trash"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div th:if="${#lists.isEmpty(manutencoes)}" class="vazio">Nenhuma manutenção registrada.</div>
+            </div>
+        </div>
+    </div>
+</div>

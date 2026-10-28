@@ -2,7 +2,7 @@
 
 Sistema web de gestão de academias feito em **Java com Spring Boot**: cadastros, planos, matrículas, mensalidades com Pix simulado, catraca, fichas de treino, avaliações físicas, aulas coletivas, equipamentos, mensagens e relatórios. Cada pessoa entra com o próprio perfil (administrador, professor ou aluno) e só vê o que é dela.
 
-Projeto acadêmico do curso de Análise e Desenvolvimento de Sistemas, feito em grupo de 4 pessoas.
+Desenvolvi este sistema para um trabalho acadêmico do curso de Análise e Desenvolvimento de Sistemas: modelagem, regras de negócio, back-end, telas e testes.
 
 ![Java](https://img.shields.io/badge/Java_25-ED8B00?style=flat-square&logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot_4-6DB33F?style=flat-square&logo=springboot&logoColor=white)
@@ -123,7 +123,10 @@ cd GymSync
 - [ ] Leitor biométrico e catraca de verdade
 - [ ] Publicação na nuvem e aplicativo para o aluno
 
-## Equipe
+## Autoria
 
-<!-- Adicione aqui o nome e o link do GitHub de cada integrante do grupo antes de publicar. -->
-- Pedro Ferrari — [GitHub](https://github.com/PedroFerrari01) · [LinkedIn](https://www.linkedin.com/in/pedrohpferrari/)
+Desenvolvido por **Pedro Ferrari** ([GitHub](https://github.com/PedroFerrari01) · [LinkedIn](https://www.linkedin.com/in/pedrohpferrari/)): modelagem, regras de negócio, back-end, telas e testes.
+
+O trabalho acadêmico foi feito em grupo: os colegas contribuíram com ideias, a proposta, o canvas e os slides da apresentação.
+
+A página de apresentação "Quem somos" (halter 3D, animações e demonstrações) foi feita com apoio de IA.

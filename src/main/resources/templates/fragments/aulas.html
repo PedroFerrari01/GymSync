@@ -1,0 +1,85 @@
+<div th:fragment="aba" class="tab-pane fade" id="aba-aulas" role="tabpanel">
+
+    <div class="row g-4">
+        <div th:if="${perfil == 'ADMIN' or perfil == 'PROFESSOR'}" class="col-lg-4">
+            <div class="panel-card">
+                <div class="d-flex justify-content-between align-items-center mb-3"><span class="tag-pill">Agenda</span><i class="bi bi-calendar-week fs-5"></i></div>
+                <h5 class="panel-title mb-3">Nova Aula Coletiva</h5>
+                <form action="/aulas/salvar" method="post">
+                    <label class="form-label">Nome da aula</label>
+                    <input type="text" name="nome" class="form-control mb-2" maxlength="50" placeholder="Spinning, Funcional, Dança..." required>
+                    <div th:if="${perfil == 'ADMIN'}">
+                        <label class="form-label">Professor</label>
+                        <select name="professorId" class="form-select mb-2" required>
+                            <option value="">Selecionar professor...</option>
+                            <option th:each="prof : ${professores}" th:value="${prof.id}" th:text="${prof.nome}"></option>
+                        </select>
+                    </div>
+                    <label class="form-label">Dia da semana</label>
+                    <select name="diaSemana" class="form-select mb-2" required>
+                        <option value="MONDAY">Segunda</option>
+                        <option value="TUESDAY">Terça</option>
+                        <option value="WEDNESDAY">Quarta</option>
+                        <option value="THURSDAY">Quinta</option>
+                        <option value="FRIDAY">Sexta</option>
+                        <option value="SATURDAY">Sábado</option>
+                        <option value="SUNDAY">Domingo</option>
+                    </select>
+                    <div class="row g-2 mb-3">
+                        <div class="col"><label class="form-label">Horário</label><input type="time" name="horario" class="form-control" required></div>
+                        <div class="col"><label class="form-label">Vagas</label><input type="number" name="vagas" min="1" max="200" class="form-control" required></div>
+                    </div>
+                    <button type="submit" class="btn-brand w-100">Cadastrar Aula</button>
+                </form>
+            </div>
+        </div>
+
+        <div th:class="${perfil == 'ALUNO' ? 'col-12' : 'col-lg-8'}">
+            <div class="panel-card">
+                <h5 class="panel-title mb-1">Aulas coletivas</h5>
+                <p class="small mb-3" style="color:var(--text-secondary);">As aulas se repetem toda semana. A reserva vale para a próxima aula.</p>
+                <div class="table-responsive">
+                    <table class="table table-custom tabela-filtravel">
+                        <thead>
+                            <tr>
+                                <th>Aula</th><th>Professor</th><th>Dia / Horário</th><th>Próxima</th><th>Vagas livres</th>
+                                <th th:if="${perfil != 'ALUNO'}">Inscritos</th>
+                                <th class="text-end">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="aula : ${aulas}">
+                                <td class="fw-semibold" th:text="${aula.nome}"></td>
+                                <td th:text="${aula.professor.nome}"></td>
+                                <td th:text="|${aula.diaSemanaPt} ${#temporals.format(aula.horario, 'HH:mm')}|"></td>
+                                <td th:text="${#temporals.format(proximasDatas[aula.id], 'dd/MM')}"></td>
+                                <td>
+                                    <span th:text="|${vagasRestantes[aula.id]} de ${aula.vagas}|"
+                                          th:class="${vagasRestantes[aula.id] > 0 ? 'status-ok' : 'status-err'}"></span>
+                                </td>
+                                <td th:if="${perfil != 'ALUNO'}" class="small" th:text="${nomesReservas[aula.id] != '' ? nomesReservas[aula.id] : '-'}"></td>
+                                <td class="text-end text-nowrap">
+                                    <th:block th:if="${perfil == 'ALUNO'}">
+                                        <form th:if="${aulasReservadas.contains(aula.id)}" th:action="@{/aulas/cancelar-reserva/{id}(id=${aula.id})}" method="post" class="d-inline" data-confirm="Cancelar a sua reserva?">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger fw-semibold">Cancelar reserva</button>
+                                        </form>
+                                        <form th:if="${!aulasReservadas.contains(aula.id) and vagasRestantes[aula.id] > 0}" th:action="@{/aulas/reservar/{id}(id=${aula.id})}" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-success fw-semibold">Reservar</button>
+                                        </form>
+                                        <span th:if="${!aulasReservadas.contains(aula.id) and vagasRestantes[aula.id] <= 0}" class="small" style="color:var(--text-secondary);">Lotada</span>
+                                    </th:block>
+                                    <th:block th:if="${perfil != 'ALUNO'}">
+                                        <form th:if="${perfil == 'ADMIN' or aula.professor.id == professorId}" th:action="@{/aulas/excluir/{id}(id=${aula.id})}" method="post" class="d-inline" data-confirm="Excluir esta aula e todas as reservas dela?">
+                                            <button type="submit" class="action-btn" title="Excluir"><i class="bi bi-trash"></i></button>
+                                        </form>
+                                    </th:block>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div th:if="${#lists.isEmpty(aulas)}" class="vazio">Nenhuma aula cadastrada ainda.</div>
+            </div>
+        </div>
+    </div>
+</div>
