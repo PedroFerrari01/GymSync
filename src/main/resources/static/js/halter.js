@@ -106,6 +106,7 @@ function iniciar() {
 
     const largaEAnimada = () => window.matchMedia('(min-width: 992px) and (prefers-reduced-motion: no-preference)').matches;
     let alturaVisivel = 1;
+    let deslocamentoX = 0; // na abertura animada o halter fica à direita, longe do texto
     let animado = false;
     // y em frações da altura visível; rotações em radianos
     const inicio = { y: 0.8, rx: 2.6, ry: 0.9, rz: -1.1 };
@@ -115,6 +116,7 @@ function iniciar() {
 
     const desenhar = () => {
         halter.position.y = (animado ? estado.y : 0) * alturaVisivel;
+        halter.position.x = deslocamentoX;
         halter.rotation.set(estado.rx, estado.ry + giroLivre, estado.rz);
         renderer.render(cena, camera);
     };
@@ -127,8 +129,9 @@ function iniciar() {
         camera.updateProjectionMatrix();
         alturaVisivel = 2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.position.z;
         const larguraVisivel = alturaVisivel * camera.aspect;
+        deslocamentoX = animado ? larguraVisivel * 0.28 : 0;
         // O halter mede 3,2 de ponta a ponta: 40% da largura na abertura animada, 75% no celular, sem passar da altura
-        const fracao = animado ? 0.4 : 0.75;
+        const fracao = animado ? 0.34 : 0.75;
         halter.scale.setScalar(Math.min((larguraVisivel * fracao) / 3.2, (alturaVisivel * 0.55) / 2));
         desenhar();
     };

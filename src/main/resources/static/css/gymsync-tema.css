@@ -404,6 +404,8 @@ html:has(.sobre) { scroll-behavior: smooth; }
 .cartao-foto { border: 1px solid var(--border-color); }
 .cartao-foto img { aspect-ratio: 3 / 4; object-fit: cover; }
 /* Os mais "fundos" ficam menores e mais apagados, para dar profundidade */
+/* Com o título à esquerda e o halter à direita, só o cartão c3 fica; os outros entrariam por cima do texto ou do halter */
+.c1, .c2, .c4 { display: none; }
 .c1 { width: 330px; left: 2%; top: 5%; rotate: -4deg; }
 .c2 { width: 340px; right: 2%; top: 55%; rotate: 3deg; }
 .c3 { width: 240px; right: 2%; top: 4%; rotate: 5deg; opacity: 0.85; }
