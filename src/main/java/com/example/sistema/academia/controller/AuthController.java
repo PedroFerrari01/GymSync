@@ -4,6 +4,7 @@ import com.example.sistema.academia.model.Aluno;
 import com.example.sistema.academia.model.Professor;
 import com.example.sistema.academia.repository.AlunoRepository;
 import com.example.sistema.academia.repository.ProfessorRepository;
+import com.example.sistema.academia.service.LimiteTentativasService;
 import com.example.sistema.academia.config.SessaoService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -25,9 +26,12 @@ public class AuthController {
     @Autowired private ProfessorRepository professorRepository;
     @Autowired private PasswordEncoder encoder;
     @Autowired private SessaoService sessaoService;
+    @Autowired private LimiteTentativasService limite;
 
     @Value("${gymsync.admin.usuario:admin}") private String adminUsuario;
     @Value("${gymsync.admin.senha:123}") private String adminSenha;
+    @Value("${gymsync.login.max-falhas:5}") private int maxFalhasConta;
+    @Value("${gymsync.login.max-falhas-ip:30}") private int maxFalhasIp;
 
     private boolean senhaConfere(String salva, String digitada) {
         if (salva == null || salva.isBlank()) return "123".equals(digitada);
@@ -39,6 +43,11 @@ public class AuthController {
         return salva == null || salva.isBlank() || !salva.startsWith("$2");
     }
 
+    private void registrarFalha(String conta, String ip) {
+        limite.registrarFalha(conta, maxFalhasConta);
+        limite.registrarFalha(ip, maxFalhasIp); // mais folgado: vários alunos podem dividir o mesmo Wi-Fi
+    }
+
     @PostMapping("/login")
     public String realizarLogin(@RequestParam String tipo,
                                 @RequestParam(required = false) String usuario,
@@ -47,11 +56,22 @@ public class AuthController {
                                 HttpServletRequest request,
                                 HttpServletResponse response,
                                 RedirectAttributes redirect) {
+        String quem = "ADMIN".equals(tipo) ? usuario : identificador;
+        String conta = "conta:" + tipo + ":" + (quem == null ? "" : quem.trim().toLowerCase());
+        String ip = "ip:" + request.getRemoteAddr();
+        long espera = Math.max(limite.minutosRestantes(conta), limite.minutosRestantes(ip));
+        if (espera > 0) {
+            redirect.addFlashAttribute("erroLogin", "Muitas tentativas incorretas. Tente de novo em " + espera + " minuto(s).");
+            return "redirect:/";
+        }
+
         if ("ADMIN".equals(tipo)) {
             if (adminUsuario.equalsIgnoreCase(usuario) && adminSenha.equals(senha)) {
+                limite.registrarSucesso(conta);
                 sessaoService.iniciar(request, response, "ADMIN", "Administrador", null);
                 return "redirect:/";
             }
+            registrarFalha(conta, ip);
             redirect.addFlashAttribute("erroLogin", "Usuário ou senha de administrador incorretos.");
             return "redirect:/";
         }
@@ -65,9 +85,11 @@ public class AuthController {
                     prof.setSenha(encoder.encode(senha));
                     professorRepository.save(prof);
                 }
+                limite.registrarSucesso(conta);
                 sessaoService.iniciar(request, response, "PROFESSOR", prof.getNome(), prof.getId());
                 return "redirect:/";
             }
+            registrarFalha(conta, ip);
             redirect.addFlashAttribute("erroLogin", "CPF/E-mail ou senha de professor incorretos.");
             return "redirect:/";
         }
@@ -79,9 +101,11 @@ public class AuthController {
                     aluno.setSenha(encoder.encode(senha));
                     alunoRepository.save(aluno);
                 }
+                limite.registrarSucesso(conta);
                 sessaoService.iniciar(request, response, "ALUNO", aluno.getNome(), aluno.getId());
                 return "redirect:/";
             }
+            registrarFalha(conta, ip);
             redirect.addFlashAttribute("erroLogin", "CPF/E-mail ou senha de aluno incorretos.");
         }
         return "redirect:/";
