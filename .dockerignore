@@ -1,0 +1,12 @@
+# Nada de segredo ou arquivo local dentro da imagem
+src/main/resources/application.properties
+target/
+.git/
+.claude/
+_github/
+docs/
+Nova pasta/
+*.zip
+*.md
+.idea/
+.vscode/

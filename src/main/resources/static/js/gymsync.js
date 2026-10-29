@@ -446,3 +446,14 @@ document.addEventListener('DOMContentLoaded', () => {
         bootstrap.Modal.getOrCreateInstance(modal).show();
     }
 });
+
+// Sem onclick no HTML (a política de segurança CSP bloqueia scripts escritos dentro do HTML)
+document.addEventListener('click', (e) => {
+    const olho = e.target.closest('.pass-toggle');
+    if (olho) {
+        const campo = olho.closest('.pass-group')?.querySelector('input');
+        if (campo) alternarSenha(campo.id, olho);
+        return;
+    }
+    if (e.target.closest('[data-imprimir]')) window.print();
+});

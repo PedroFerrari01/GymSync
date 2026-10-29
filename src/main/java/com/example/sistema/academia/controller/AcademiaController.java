@@ -11,6 +11,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.math.BigDecimal;
@@ -48,6 +49,22 @@ public class AcademiaController {
 
     @Value("${gymsync.validar-cpf:true}") private boolean validarCpf;
     @Value("${gymsync.recuperacao-por-email:false}") private boolean recuperacaoPorEmail;
+
+    // Os cadastros recebem a entidade inteira: só estes campos podem vir do formulário (nada de id, situacao etc.)
+    @InitBinder("aluno")
+    void camposAluno(WebDataBinder binder) {
+        binder.setAllowedFields("nome", "cpf", "email", "dataNascimento", "contato", "senha");
+    }
+
+    @InitBinder("professor")
+    void camposProfessor(WebDataBinder binder) {
+        binder.setAllowedFields("nome", "cpf", "email", "contato", "especialidade", "senha");
+    }
+
+    @InitBinder("plano")
+    void camposPlano(WebDataBinder binder) {
+        binder.setAllowedFields("nome", "duracaoMeses", "valor");
+    }
 
     private Map<Long, RegistroExercicio> ultimosRegistros(List<RegistroExercicio> lista) {
         List<RegistroExercicio> ordenada = new ArrayList<>(lista);

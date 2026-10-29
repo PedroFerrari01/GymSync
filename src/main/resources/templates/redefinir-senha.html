@@ -35,7 +35,7 @@
             <label class="form-label">Nova senha (mínimo <span th:text="${tamanhoMinimoSenha}">8</span> caracteres)</label>
             <div class="pass-group mb-4">
                 <input type="password" name="novaSenha" id="inputNovaSenhaLink" class="form-control pe-5" th:minlength="${tamanhoMinimoSenha}" required autofocus>
-                <button type="button" class="pass-toggle" onclick="alternarSenha('inputNovaSenhaLink', this)"><i class="bi bi-eye"></i></button>
+                <button type="button" class="pass-toggle"><i class="bi bi-eye"></i></button>
             </div>
             <button type="submit" class="btn-brand w-100">Salvar nova senha</button>
         </form>

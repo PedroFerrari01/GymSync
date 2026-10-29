@@ -13,10 +13,26 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
+import org.springframework.security.web.header.writers.StaticHeadersWriter;
 
 @Configuration
 @EnableWebSecurity
 public class SegurancaConfig {
+
+    /**
+     * O navegador só roda scripts vindos do próprio site (nada de script escrito dentro do HTML nem de outro domínio).
+     * Por isso os templates não usam onclick: os cliques ficam no gymsync.js.
+     */
+    static final String CSP = "default-src 'self'; "
+            + "script-src 'self'; "
+            + "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+            + "font-src 'self' https://fonts.gstatic.com; "
+            + "img-src 'self' data: blob:; "
+            + "connect-src 'self'; "
+            + "object-src 'none'; "
+            + "base-uri 'self'; "
+            + "form-action 'self'; "
+            + "frame-ancestors 'none'";
 
     @Bean
     public SecurityFilterChain filtros(HttpSecurity http) throws Exception {
@@ -37,7 +53,9 @@ public class SegurancaConfig {
             .logout(l -> l.logoutUrl("/logout").logoutSuccessUrl("/").deleteCookies("JSESSIONID"))
             .headers(h -> h
                 .frameOptions(f -> f.deny())
-                .referrerPolicy(r -> r.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.SAME_ORIGIN)));
+                .referrerPolicy(r -> r.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.SAME_ORIGIN))
+                .contentSecurityPolicy(c -> c.policyDirectives(CSP))
+                .addHeaderWriter(new StaticHeadersWriter("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=()")));
         return http.build();
     }
 

@@ -12,6 +12,8 @@ import com.example.sistema.academia.config.SessaoService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,6 +26,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 public class AuthController {
+
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
     @Autowired private AlunoRepository alunoRepository;
     @Autowired private ProfessorRepository professorRepository;
@@ -58,6 +62,17 @@ public class AuthController {
         return salva == null || salva.isBlank() || !salva.startsWith("$2");
     }
 
+    /** Para o log: mostra só o começo do e-mail ou os 2 últimos dígitos do CPF (dado pessoal não vai inteiro para o log). */
+    static String mascarar(String quem) {
+        if (quem == null || quem.isBlank()) return "(vazio)";
+        String q = quem.trim();
+        int arroba = q.indexOf('@');
+        if (arroba > 0) return q.substring(0, Math.min(2, arroba)) + "***" + q.substring(arroba);
+        String digitos = q.replaceAll("\\D", "");
+        if (digitos.length() >= 2) return "CPF ***" + digitos.substring(digitos.length() - 2);
+        return "***";
+    }
+
     private void registrarFalha(String conta, String ip) {
         limite.registrarFalha(conta, maxFalhasConta);
         limite.registrarFalha(ip, maxFalhasIp); // mais folgado: vários alunos podem dividir o mesmo Wi-Fi
@@ -76,6 +91,7 @@ public class AuthController {
         String ip = "ip:" + request.getRemoteAddr();
         long espera = Math.max(limite.minutosRestantes(conta), limite.minutosRestantes(ip));
         if (espera > 0) {
+            log.warn("Login bloqueado por excesso de tentativas: perfil={} conta={} ip={}", tipo, mascarar(quem), request.getRemoteAddr());
             redirect.addFlashAttribute("erroLogin", "Muitas tentativas incorretas. Tente de novo em " + espera + " minuto(s).");
             return "redirect:/";
         }
@@ -83,10 +99,12 @@ public class AuthController {
         if ("ADMIN".equals(tipo)) {
             if (adminUsuario.equalsIgnoreCase(usuario) && senhaConfere(adminSenha, senha)) {
                 limite.registrarSucesso(conta);
+                log.info("Login: perfil={} conta={} ip={}", tipo, mascarar(quem), request.getRemoteAddr());
                 sessaoService.iniciar(request, response, "ADMIN", "Administrador", null);
                 return "redirect:/";
             }
             registrarFalha(conta, ip);
+            log.warn("Login recusado: perfil={} conta={} ip={}", tipo, mascarar(quem), request.getRemoteAddr());
             redirect.addFlashAttribute("erroLogin", "Usuário ou senha de administrador incorretos.");
             return "redirect:/";
         }
@@ -101,11 +119,13 @@ public class AuthController {
                     professorRepository.save(prof);
                 }
                 limite.registrarSucesso(conta);
+                log.info("Login: perfil={} conta={} ip={}", tipo, mascarar(quem), request.getRemoteAddr());
                 sessaoService.iniciar(request, response, "PROFESSOR", prof.getNome(), prof.getId());
                 if (prof.isTrocarSenha()) request.getSession().setAttribute("trocarSenha", true);
                 return "redirect:/";
             }
             registrarFalha(conta, ip);
+            log.warn("Login recusado: perfil={} conta={} ip={}", tipo, mascarar(quem), request.getRemoteAddr());
             redirect.addFlashAttribute("erroLogin", "CPF/E-mail ou senha de professor incorretos.");
             return "redirect:/";
         }
@@ -118,11 +138,13 @@ public class AuthController {
                     alunoRepository.save(aluno);
                 }
                 limite.registrarSucesso(conta);
+                log.info("Login: perfil={} conta={} ip={}", tipo, mascarar(quem), request.getRemoteAddr());
                 sessaoService.iniciar(request, response, "ALUNO", aluno.getNome(), aluno.getId());
                 if (aluno.isTrocarSenha()) request.getSession().setAttribute("trocarSenha", true);
                 return "redirect:/";
             }
             registrarFalha(conta, ip);
+            log.warn("Login recusado: perfil={} conta={} ip={}", tipo, mascarar(quem), request.getRemoteAddr());
             redirect.addFlashAttribute("erroLogin", "CPF/E-mail ou senha de aluno incorretos.");
         }
         return "redirect:/";

@@ -69,7 +69,7 @@
             </div>
             <div class="pass-group mb-4">
                 <input type="password" name="senha" id="inputSenhaLogin" class="form-control pe-5" required>
-                <button type="button" class="pass-toggle" onclick="alternarSenha('inputSenhaLogin', this)"><i class="bi bi-eye"></i></button>
+                <button type="button" class="pass-toggle"><i class="bi bi-eye"></i></button>
             </div>
 
             <button type="submit" class="btn-brand w-100"><i class="bi bi-box-arrow-in-right me-2"></i>Entrar no Sistema</button>
@@ -325,7 +325,7 @@
                         <label class="form-label">Nova Senha (mínimo <span th:text="${tamanhoMinimoSenha}">4</span> caracteres)</label>
                         <div class="pass-group">
                             <input type="password" name="novaSenha" id="senhaRecuperacao" class="form-control pe-5" th:minlength="${tamanhoMinimoSenha}" required>
-                            <button type="button" class="pass-toggle" onclick="alternarSenha('senhaRecuperacao', this)"><i class="bi bi-eye"></i></button>
+                            <button type="button" class="pass-toggle"><i class="bi bi-eye"></i></button>
                         </div>
                     </th:block>
                 </div>
@@ -574,7 +574,7 @@
                                     <label class="form-label">Senha Inicial</label>
                                     <div class="pass-group mb-3">
                                         <input type="password" name="senha" id="senhaCadAluno" class="form-control pe-5" th:value="${senhasFortes ? '' : '123'}" th:required="${!senhasFortes}" th:placeholder="${senhasFortes ? 'Em branco: o sistema gera uma provisória' : null}">
-                                        <button type="button" class="pass-toggle" onclick="alternarSenha('senhaCadAluno', this)"><i class="bi bi-eye"></i></button>
+                                        <button type="button" class="pass-toggle"><i class="bi bi-eye"></i></button>
                                     </div>
                                     <button type="submit" class="btn-brand w-100">Salvar Cadastro</button>
                                 </form>
@@ -666,7 +666,7 @@
                                     <label class="form-label">Senha Inicial</label>
                                     <div class="pass-group mb-3">
                                         <input type="password" name="senha" id="senhaCadProf" class="form-control pe-5" th:value="${senhasFortes ? '' : '123'}" th:required="${!senhasFortes}" th:placeholder="${senhasFortes ? 'Em branco: o sistema gera uma provisória' : null}">
-                                        <button type="button" class="pass-toggle" onclick="alternarSenha('senhaCadProf', this)"><i class="bi bi-eye"></i></button>
+                                        <button type="button" class="pass-toggle"><i class="bi bi-eye"></i></button>
                                     </div>
                                     <button type="submit" class="btn-brand w-100">Salvar Professor</button>
                                 </form>
@@ -898,7 +898,7 @@
                     <label class="form-label">Digite sua Nova Senha (mínimo <span th:text="${tamanhoMinimoSenha}">4</span> caracteres)</label>
                     <div class="pass-group">
                         <input type="password" name="novaSenha" id="inputMinhaNovaSenha" class="form-control pe-5" th:minlength="${tamanhoMinimoSenha}" required>
-                        <button type="button" class="pass-toggle" onclick="alternarSenha('inputMinhaNovaSenha', this)"><i class="bi bi-eye"></i></button>
+                        <button type="button" class="pass-toggle"><i class="bi bi-eye"></i></button>
                     </div>
                 </div>
                 <div class="modal-footer">
