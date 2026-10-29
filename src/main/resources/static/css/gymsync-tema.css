@@ -389,6 +389,12 @@ html:has(.sobre) { scroll-behavior: smooth; }
     z-index: 1;
 }
 :root[data-theme="light"] .halter-sombra { background: radial-gradient(closest-side, rgba(0, 0, 0, 0.28), transparent); }
+/* Na abertura animada o halter fica à direita (halter.js desloca 28% da largura): a sombra vai junto */
+.abertura-animada .halter-sombra {
+    left: 78%;
+    width: min(36vw, 560px);
+    margin-left: calc(min(36vw, 560px) / -2);
+}
 
 .abertura-cartoes { position: absolute; inset: 0; z-index: 1; }
 .cartao-flutuante {

@@ -86,7 +86,8 @@ function iniciar() {
         canvas.remove();
         return;
     }
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    // Desenha com pelo menos o dobro de pixels e reduz: bordas e reflexos nítidos mesmo em monitor comum
+    renderer.setPixelRatio(Math.min(Math.max(window.devicePixelRatio * 2, 2), 3));
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
 
     const cena = new THREE.Scene();

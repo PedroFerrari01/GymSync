@@ -389,13 +389,25 @@ document.addEventListener('DOMContentLoaded', () => {
         const galeria = sobre.querySelector('.galeria');
         const itens = [...galeria.querySelectorAll('.galeria-item')];
         const volta = Math.PI * 2;
-        const orbita = { angulo: 0 };
+        const passo = volta / itens.length;
+        // angulo vem da rolagem; extra é o giro automático e o dos pontos (sempre em passos inteiros quando para)
+        const orbita = { angulo: 0, extra: 0 };
+        let ultimaAcao = performance.now();
+        let mouseNoAnel = false;
+        let giro = null;
+        const girarExtra = (delta, duracao) => {
+            if (giro) giro.kill();
+            giro = gsap.to(orbita, {
+                extra: orbita.extra + delta, duration: duracao, ease: 'power2.inOut', onUpdate: posicionar,
+                onComplete: () => { orbita.extra %= volta; giro = null; }
+            });
+        };
         const legenda = galeria.querySelector('.galeria-legenda');
         const pontos = galeria.querySelector('.galeria-pontos');
         let frenteAtual = -1;
         galeria.classList.add('galeria-animada');
 
-        // Um ponto por cartão: clicar rola até a posição em que ele fica de frente
+        // Um ponto por cartão: clicar gira a órbita até ele ficar de frente (sem rolar a página)
         pontos.innerHTML = '';
         const botoes = itens.map((item, i) => {
             const b = document.createElement('button');
@@ -403,8 +415,12 @@ document.addEventListener('DOMContentLoaded', () => {
             b.className = 'galeria-ponto';
             b.setAttribute('aria-label', item.dataset.nome);
             b.addEventListener('click', () => {
-                const st = animacao.scrollTrigger;
-                window.scrollTo({ top: st.start + (st.end - st.start) * i / (itens.length - 1), behavior: 'smooth' });
+                // O cartão i fica de frente quando o ângulo total + i passos é múltiplo de uma volta; vai pelo caminho mais curto
+                let delta = (-(orbita.angulo + orbita.extra) - i * passo) % volta;
+                if (delta > volta / 2) delta -= volta;
+                if (delta < -volta / 2) delta += volta;
+                ultimaAcao = performance.now();
+                girarExtra(delta, 0.9);
             });
             pontos.appendChild(b);
             return b;
@@ -428,7 +444,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let maisNaFrente = 0;
             let melhor = -1;
             itens.forEach((item, i) => {
-                const a = orbita.angulo + (i / itens.length) * volta;
+                const a = orbita.angulo + orbita.extra + i * passo;
                 const frente = (Math.cos(a) + 1) / 2; // 1 = na frente, 0 = atrás
                 item.style.transform = `translate3d(${Math.sin(a) * largura}px, ${(1 - frente) * -120}px, ${(frente - 1) * 900}px) rotateY(${Math.sin(a) * -22}deg)`;
                 // Os de trás quase somem; os dos lados ficam meio apagados
@@ -451,9 +467,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 snap: { snapTo: 1 / (itens.length - 1), duration: { min: 0.2, max: 0.6 }, ease: 'power1.inOut' }
             }
         });
+        // Giro automático: parado na seção, a órbita passa para o próximo cartão a cada 4 s.
+        // Não gira enquanto a pessoa rola, nem com o mouse ou o foco nos cartões (ela pode estar testando uma tela).
+        const anel = galeria.querySelector('.galeria-anel');
+        const marcarAcao = () => { ultimaAcao = performance.now(); };
+        const entrou = () => { mouseNoAnel = true; };
+        const saiu = () => { mouseNoAnel = false; marcarAcao(); };
+        anel.addEventListener('pointerenter', entrou);
+        anel.addEventListener('pointerleave', saiu);
+        window.addEventListener('scroll', marcarAcao, { passive: true });
+        const automatico = gsap.delayedCall(4, function proximo() {
+            const parado = performance.now() - ultimaAcao > 2500;
+            const focoNosCartoes = anel.contains(document.activeElement);
+            if (animacao.scrollTrigger.isActive && parado && !mouseNoAnel && !focoNosCartoes && !document.hidden && !giro) {
+                girarExtra(-passo, 1.2);
+            }
+            automatico.restart(true);
+        });
         window.addEventListener('resize', posicionar);
         return () => {
             window.removeEventListener('resize', posicionar);
+            window.removeEventListener('scroll', marcarAcao);
+            anel.removeEventListener('pointerenter', entrou);
+            anel.removeEventListener('pointerleave', saiu);
+            automatico.kill();
+            if (giro) giro.kill();
             galeria.classList.remove('galeria-animada');
             pontos.innerHTML = '';
             itens.forEach(item => {
