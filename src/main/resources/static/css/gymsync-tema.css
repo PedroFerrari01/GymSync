@@ -521,8 +521,9 @@ html:has(.sobre) { scroll-behavior: smooth; }
 .cena-trilho-vence {
     position: absolute;
     left: 45%;
+    top: 0;
     bottom: -2px;
-    padding: 0 0 8px 8px;
+    padding: 0 0 0 8px; /* texto no topo da linha: o marcador "hoje" passa por baixo sem cobrir */
     border-left: 2px dashed var(--text-secondary);
     font-size: 0.8rem;
     color: var(--text-secondary);
@@ -830,3 +831,47 @@ html:has(.sobre) { scroll-behavior: smooth; }
 }
 .video-play:hover .video-play-icone { transform: scale(1.06); }
 .video-nota { margin-top: var(--s2); font-size: 0.85rem; color: var(--text-secondary); }
+
+/* Jornada no celular: a cena de cada passo aparece logo abaixo do texto, como um cartão */
+.visual-item.cena-no-passo {
+    position: static;
+    margin-top: var(--s3);
+    padding: var(--s4) var(--s3);
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    gap: var(--s3);
+    transform: translateY(24px);
+}
+.visual-item.cena-no-passo.ativo { transform: none; }
+.cena-no-passo .cena-numero { display: none; }
+.passo > div { min-width: 0; flex: 1; }
+
+/* Telas do "Por dentro do sistema" sem a órbita (celular): fileira que rola de lado,
+   com o próximo cartão aparecendo, o nome da tela em cima e a dica do que testar embaixo */
+.galeria-arraste { display: none; }
+.galeria:not(.galeria-animada) .galeria-arraste {
+    display: flex;
+    align-items: center;
+    gap: var(--s2);
+    margin: calc(-1 * var(--s2)) 0 var(--s3);
+    font-size: 0.9rem;
+    color: var(--accent);
+}
+.galeria:not(.galeria-animada) .galeria-item { display: flex; flex-direction: column; flex-basis: min(400px, 82vw); }
+.galeria:not(.galeria-animada) .galeria-item > .panel-card { flex: 1; height: auto; }
+.galeria:not(.galeria-animada) .galeria-item::before {
+    content: attr(data-nome);
+    margin-bottom: var(--s2);
+    font-weight: 700;
+    font-size: 1.05rem;
+}
+.galeria:not(.galeria-animada) .galeria-item::after {
+    content: attr(data-dica);
+    margin-top: var(--s2);
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+@media (max-width: 991px) {
+    .galeria-palco { padding-bottom: 64px; }
+}

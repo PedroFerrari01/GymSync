@@ -345,6 +345,36 @@ document.addEventListener('DOMContentLoaded', () => {
         }).join('');
     });
 
+    // Jornada no celular: cada cena vai para baixo do texto do seu passo e se monta ao chegar na tela.
+    // Em tela larga as cenas voltam para o quadro ao lado (que fica preso na tela, mais abaixo).
+    const jornada = sobre.querySelector('.jornada');
+    if (jornada) {
+        const passosJ = [...jornada.querySelectorAll('.passo')];
+        const cenas = [...jornada.querySelectorAll('.visual-item')];
+        const quadro = jornada.querySelector('.jornada-visual');
+        const celular = window.matchMedia('(max-width: 991px)');
+        const semMovimento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const observador = 'IntersectionObserver' in window ? new IntersectionObserver(entradas => {
+            entradas.forEach(e => { if (e.isIntersecting) { e.target.classList.add('ativo'); observador.unobserve(e.target); } });
+        }, { threshold: 0.45 }) : null;
+        const arrumar = () => {
+            cenas.forEach((cena, i) => {
+                if (celular.matches) {
+                    passosJ[i]?.querySelector(':scope > div')?.appendChild(cena);
+                    cena.classList.add('cena-no-passo');
+                    if (semMovimento || !observador) cena.classList.add('ativo');
+                    else observador.observe(cena);
+                } else if (cena.classList.contains('cena-no-passo')) {
+                    cena.classList.remove('cena-no-passo', 'ativo');
+                    observador?.unobserve(cena);
+                    quadro.appendChild(cena);
+                }
+            });
+        };
+        arrumar();
+        celular.addEventListener('change', arrumar);
+    }
+
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
     gsap.registerPlugin(ScrollTrigger);
 
