@@ -4,35 +4,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const galeria = document.querySelector('.galeria');
     if (!galeria) return;
 
-    // Abas da bancada: uma demonstração por vez. Setas, Home e End trocam de aba pelo teclado.
-    const abas = [...galeria.querySelectorAll('.bancada-aba')];
-    const paineis = abas.map(aba => document.getElementById(aba.getAttribute('aria-controls')));
-    const escolher = (indice, focar) => {
-        abas.forEach((aba, i) => {
-            const ativa = i === indice;
-            aba.setAttribute('aria-selected', ativa);
-            aba.tabIndex = ativa ? 0 : -1;
-            paineis[i].classList.toggle('ativo', ativa);
-            paineis[i].inert = !ativa;
-            paineis[i].classList.remove('entrando');
-        });
-        void paineis[indice].offsetWidth; // reinicia a animação de entrada
-        paineis[indice].classList.add('entrando');
-        if (focar) abas[indice].focus();
-        abas[indice].scrollIntoView({ block: 'nearest', inline: 'nearest' });
-    };
-    abas.forEach((aba, i) => {
-        if (i > 0) paineis[i].inert = true;
-        aba.addEventListener('click', () => escolher(i, false));
-        aba.addEventListener('keydown', e => {
-            const ultimo = abas.length - 1;
-            const destino = { ArrowRight: i === ultimo ? 0 : i + 1, ArrowLeft: i === 0 ? ultimo : i - 1, Home: 0, End: ultimo }[e.key];
-            if (destino === undefined) return;
-            e.preventDefault();
-            escolher(destino, true);
-        });
-    });
-
     const resultado = (cartao, texto, tipo) => {
         const p = cartao.querySelector('.demo-resultado');
         p.textContent = texto;

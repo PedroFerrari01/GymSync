@@ -382,6 +382,89 @@ document.addEventListener('DOMContentLoaded', () => {
             visuais.forEach(v => v.classList.remove('ativo'));
         };
     });
+
+    // Galeria: os prints dão a volta numa órbita enquanto a seção está presa na tela.
+    // Cada cartão continua virado para a frente (não fica espelhado); os de trás ficam menores e mais apagados.
+    mm.add('(min-width: 992px) and (prefers-reduced-motion: no-preference)', () => {
+        const galeria = sobre.querySelector('.galeria');
+        const itens = [...galeria.querySelectorAll('.galeria-item')];
+        const volta = Math.PI * 2;
+        const orbita = { angulo: 0 };
+        const legenda = galeria.querySelector('.galeria-legenda');
+        const pontos = galeria.querySelector('.galeria-pontos');
+        let frenteAtual = -1;
+        galeria.classList.add('galeria-animada');
+
+        // Um ponto por cartão: clicar rola até a posição em que ele fica de frente
+        pontos.innerHTML = '';
+        const botoes = itens.map((item, i) => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'galeria-ponto';
+            b.setAttribute('aria-label', item.dataset.nome);
+            b.addEventListener('click', () => {
+                const st = animacao.scrollTrigger;
+                window.scrollTo({ top: st.start + (st.end - st.start) * i / (itens.length - 1), behavior: 'smooth' });
+            });
+            pontos.appendChild(b);
+            return b;
+        });
+
+        const mostrarLegenda = indice => {
+            if (indice === frenteAtual) return;
+            frenteAtual = indice;
+            const item = itens[indice];
+            legenda.querySelector('.galeria-quem span').textContent = item.dataset.quem;
+            legenda.querySelector('.galeria-nome').textContent = item.dataset.nome;
+            legenda.querySelector('.galeria-dica').textContent = item.dataset.dica;
+            botoes.forEach((b, i) => b.setAttribute('aria-current', i === indice));
+            legenda.classList.remove('trocando');
+            void legenda.offsetWidth; // reinicia a animação da legenda
+            legenda.classList.add('trocando');
+        };
+
+        const posicionar = () => {
+            const largura = Math.min(window.innerWidth * 0.36, 600);
+            let maisNaFrente = 0;
+            let melhor = -1;
+            itens.forEach((item, i) => {
+                const a = orbita.angulo + (i / itens.length) * volta;
+                const frente = (Math.cos(a) + 1) / 2; // 1 = na frente, 0 = atrás
+                item.style.transform = `translate3d(${Math.sin(a) * largura}px, ${(1 - frente) * -120}px, ${(frente - 1) * 900}px) rotateY(${Math.sin(a) * -22}deg)`;
+                // Os de trás quase somem; os dos lados ficam meio apagados
+                item.style.setProperty('--apagado', Math.min(0.92, (1 - frente) * 1.4).toFixed(3));
+                item.style.setProperty('--destaque', Math.max(0, (frente - 0.85) / 0.15).toFixed(3));
+                item.style.zIndex = Math.round(frente * 100);
+                item.inert = frente < 0.9; // só o cartão da frente pode ser clicado
+                if (frente > melhor) { melhor = frente; maisNaFrente = i; }
+            });
+            mostrarLegenda(maisNaFrente);
+        };
+        posicionar();
+        const animacao = gsap.to(orbita, {
+            angulo: -volta * (itens.length - 1) / itens.length,
+            ease: 'none',
+            onUpdate: posicionar,
+            scrollTrigger: {
+                trigger: galeria, start: 'top top', end: '+=200%', pin: true, scrub: 0.6,
+                // Ao parar de rolar, a órbita encaixa com um cartão de frente, pronto para clicar
+                snap: { snapTo: 1 / (itens.length - 1), duration: { min: 0.2, max: 0.6 }, ease: 'power1.inOut' }
+            }
+        });
+        window.addEventListener('resize', posicionar);
+        return () => {
+            window.removeEventListener('resize', posicionar);
+            galeria.classList.remove('galeria-animada');
+            pontos.innerHTML = '';
+            itens.forEach(item => {
+                item.style.transform = '';
+                item.style.removeProperty('--apagado');
+                item.style.removeProperty('--destaque');
+                item.style.zIndex = '';
+                item.inert = false;
+            });
+        };
+    });
 });
 
 /* Botão de tema do login: aparece só com o login ou o final do "Quem somos" na tela, entrando com fade */

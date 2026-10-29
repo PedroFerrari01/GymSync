@@ -200,95 +200,24 @@
         </div>
     </section>
 
-    <!-- Bancada de teste: uma demonstração por vez (fragments/demonstracoes.html), escolhida pelas abas.
-         As abas e a troca ficam no js/demonstracoes.js; nada é enviado ao servidor. -->
-    <section class="galeria bancada" aria-labelledby="tituloGaleria">
-        <div class="bancada-cabeca">
-            <h2 id="tituloGaleria" class="sobre-titulo">Por dentro do sistema</h2>
-            <p class="galeria-sub">Teste as telas como elas funcionam no sistema, com dados de exemplo. Nada é salvo.</p>
-        </div>
-        <div class="bancada-abas" role="tablist" aria-label="Escolha uma tela para testar">
-                <button type="button" class="bancada-aba" role="tab" id="aba-demo-catraca" aria-controls="demo-catraca" aria-selected="true">
-                    <i class="ph ph-fingerprint" aria-hidden="true"></i><span>Catraca</span>
-                </button>
-                <button type="button" class="bancada-aba" role="tab" id="aba-demo-ficha" aria-controls="demo-ficha" aria-selected="false" tabindex="-1">
-                    <i class="ph ph-barbell" aria-hidden="true"></i><span>Ficha de treino</span>
-                </button>
-                <button type="button" class="bancada-aba" role="tab" id="aba-demo-mensalidades" aria-controls="demo-mensalidades" aria-selected="false" tabindex="-1">
-                    <i class="ph ph-receipt" aria-hidden="true"></i><span>Mensalidade e Pix</span>
-                </button>
-                <button type="button" class="bancada-aba" role="tab" id="aba-demo-aulas" aria-controls="demo-aulas" aria-selected="false" tabindex="-1">
-                    <i class="ph ph-calendar-check" aria-hidden="true"></i><span>Aulas coletivas</span>
-                </button>
-                <button type="button" class="bancada-aba" role="tab" id="aba-demo-relatorio" aria-controls="demo-relatorio" aria-selected="false" tabindex="-1">
-                    <i class="ph ph-chart-bar" aria-hidden="true"></i><span>Horário de pico</span>
-                </button>
-        </div>
-        <div class="bancada-palco">
-                <div class="bancada-painel ativo" role="tabpanel" id="demo-catraca" aria-labelledby="aba-demo-catraca">
-                    <div class="bancada-demo"><th:block th:replace="~{fragments/demonstracoes :: catraca}"></th:block></div>
-                    <aside class="bancada-guia">
-                        <p class="bancada-quem"><i class="ph ph-user" aria-hidden="true"></i>Recepção</p>
-                        <h3 class="bancada-titulo">Liberar a entrada</h3>
-                        <p class="bancada-texto">Antes de abrir, o sistema confere três coisas: aluno ativo, matrícula ativa e nenhuma mensalidade atrasada.</p>
-                        <p class="bancada-experimente">Experimente</p>
-                        <ul class="bancada-dicas">
-                            <li>Bruno Lima: tem mensalidade atrasada, a catraca bloqueia.</li>
-                            <li>Carla Dias: cadastro inativo, também bloqueia.</li>
-                        </ul>
-                    </aside>
-                </div>
-                <div class="bancada-painel" role="tabpanel" id="demo-ficha" aria-labelledby="aba-demo-ficha">
-                    <div class="bancada-demo"><th:block th:replace="~{fragments/demonstracoes :: ficha}"></th:block></div>
-                    <aside class="bancada-guia">
-                        <p class="bancada-quem"><i class="ph ph-user" aria-hidden="true"></i>Aluno</p>
-                        <h3 class="bancada-titulo">Marcar o treino do dia</h3>
-                        <p class="bancada-texto">O professor monta a ficha e o aluno marca cada exercício que fez. A coluna "Última vez" passa a mostrar "Hoje".</p>
-                        <p class="bancada-experimente">Experimente</p>
-                        <ul class="bancada-dicas">
-                            <li>Marque os três exercícios para completar o treino.</li>
-                            <li>Clique de novo para desmarcar.</li>
-                        </ul>
-                    </aside>
-                </div>
-                <div class="bancada-painel" role="tabpanel" id="demo-mensalidades" aria-labelledby="aba-demo-mensalidades">
-                    <div class="bancada-demo"><th:block th:replace="~{fragments/demonstracoes :: mensalidades}"></th:block></div>
-                    <aside class="bancada-guia">
-                        <p class="bancada-quem"><i class="ph ph-user" aria-hidden="true"></i>Aluno e administrador</p>
-                        <h3 class="bancada-titulo">Pagar com Pix</h3>
-                        <p class="bancada-texto">O aluno informa o pagamento e a mensalidade fica em análise até o administrador conferir. O Pix é simulado: nada é cobrado.</p>
-                        <p class="bancada-experimente">Experimente</p>
-                        <ul class="bancada-dicas">
-                            <li>Clique em Pagar, depois em Já paguei.</li>
-                            <li>Confirme como administrador para a mensalidade virar PAGA.</li>
-                        </ul>
-                    </aside>
-                </div>
-                <div class="bancada-painel" role="tabpanel" id="demo-aulas" aria-labelledby="aba-demo-aulas">
-                    <div class="bancada-demo"><th:block th:replace="~{fragments/demonstracoes :: aulas}"></th:block></div>
-                    <aside class="bancada-guia">
-                        <p class="bancada-quem"><i class="ph ph-user" aria-hidden="true"></i>Aluno</p>
-                        <h3 class="bancada-titulo">Reservar uma vaga</h3>
-                        <p class="bancada-texto">Cada aula tem um limite de vagas. Quando acabam, ela aparece como lotada.</p>
-                        <p class="bancada-experimente">Experimente</p>
-                        <ul class="bancada-dicas">
-                            <li>Reserve a última vaga do Funcional.</li>
-                            <li>Cancele para devolver a vaga.</li>
-                        </ul>
-                    </aside>
-                </div>
-                <div class="bancada-painel" role="tabpanel" id="demo-relatorio" aria-labelledby="aba-demo-relatorio">
-                    <div class="bancada-demo"><th:block th:replace="~{fragments/demonstracoes :: relatorio}"></th:block></div>
-                    <aside class="bancada-guia">
-                        <p class="bancada-quem"><i class="ph ph-user" aria-hidden="true"></i>Administrador</p>
-                        <h3 class="bancada-titulo">Ver quando a academia enche</h3>
-                        <p class="bancada-texto">O relatório conta as entradas da catraca por horário e mostra o pico.</p>
-                        <p class="bancada-experimente">Experimente</p>
-                        <ul class="bancada-dicas">
-                            <li>Troque entre 7 e 30 dias e veja as barras mudarem.</li>
-                        </ul>
-                    </aside>
-                </div>
+    <section class="galeria" aria-labelledby="tituloGaleria">
+        <div class="galeria-palco">
+            <h2 id="tituloGaleria" class="sobre-titulo galeria-titulo">Por dentro do sistema</h2>
+            <p class="galeria-sub">Experimente: os cartões funcionam como no sistema, com dados de exemplo. Nada é salvo.</p>
+            <div class="galeria-anel">
+                <div class="galeria-item" data-nome="Catraca" data-quem="Recepção" data-dica="Escolha o Bruno: ele tem mensalidade atrasada e a catraca bloqueia."><th:block th:replace="~{fragments/demonstracoes :: catraca}"></th:block></div>
+                <div class="galeria-item" data-nome="Ficha de treino" data-quem="Aluno" data-dica="Marque os três exercícios para completar o treino do dia."><th:block th:replace="~{fragments/demonstracoes :: ficha}"></th:block></div>
+                <div class="galeria-item" data-nome="Mensalidade e Pix" data-quem="Aluno e administrador" data-dica="Clique em Pagar, depois em Já paguei, e confirme como administrador."><th:block th:replace="~{fragments/demonstracoes :: mensalidades}"></th:block></div>
+                <div class="galeria-item" data-nome="Aulas coletivas" data-quem="Aluno" data-dica="Reserve a última vaga do Funcional e veja a aula lotar."><th:block th:replace="~{fragments/demonstracoes :: aulas}"></th:block></div>
+                <div class="galeria-item" data-nome="Horário de pico" data-quem="Administrador" data-dica="Troque entre 7 e 30 dias e veja as barras mudarem."><th:block th:replace="~{fragments/demonstracoes :: relatorio}"></th:block></div>
+            </div>
+            <!-- Legenda do cartão da frente e atalhos: preenchidos pelo gymsync.js enquanto a órbita gira -->
+            <div class="galeria-legenda" aria-live="polite">
+                <p class="galeria-quem"><i class="ph ph-user" aria-hidden="true"></i><span></span></p>
+                <h3 class="galeria-nome"></h3>
+                <p class="galeria-dica"></p>
+                <div class="galeria-pontos" role="group" aria-label="Ir direto para uma tela"></div>
+            </div>
         </div>
     </section>
 
