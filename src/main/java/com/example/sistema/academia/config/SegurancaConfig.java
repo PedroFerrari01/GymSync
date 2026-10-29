@@ -1,6 +1,7 @@
 package com.example.sistema.academia.config;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authorization.AuthorizationDecision;
@@ -24,6 +25,9 @@ public class SegurancaConfig {
             .authorizeHttpRequests(auth -> auth.anyRequest().access((autenticacao, contexto) -> {
                 HttpServletRequest req = contexto.getRequest();
                 String caminho = req.getRequestURI().substring(req.getContextPath().length());
+                HttpSession sessao = req.getSession(false);
+                boolean trocarSenha = sessao != null && Boolean.TRUE.equals(sessao.getAttribute("trocarSenha"));
+                if (trocarSenha && !RegrasAcesso.liberadaDuranteTrocaDeSenha(caminho)) return new AuthorizationDecision(false);
                 return new AuthorizationDecision(RegrasAcesso.permitido(perfil(autenticacao.get()), caminho));
             }))
             // Sem login ou sem permissão: volta para a tela inicial, como antes

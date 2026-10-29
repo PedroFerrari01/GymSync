@@ -438,3 +438,11 @@ document.addEventListener('DOMContentLoaded', () => {
     observador.observe(login);
     if (fim) observador.observe(fim);
 })();
+
+// Senha provisória (modo de senhas fortes): abre o modal de troca e não deixa fechar
+document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('modalMinhaSenha');
+    if (modal && modal.dataset.obrigatorio === 'true' && window.bootstrap) {
+        bootstrap.Modal.getOrCreateInstance(modal).show();
+    }
+});

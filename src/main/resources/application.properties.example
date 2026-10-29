@@ -17,6 +17,16 @@ spring.jpa.show-sql=false
 # gymsync.admin.usuario=admin
 # gymsync.admin.senha=123
 
+# Senhas fortes (ligar só na publicação): mínimo de 8 caracteres, senha provisória
+# aleatória com troca obrigatória no primeiro acesso. As senhas já salvas não mudam.
+# Ligado, o sistema não sobe se gymsync.admin.senha tiver menos de 8 caracteres.
+# gymsync.senhas-fortes=false
+
+# Bloqueio de login: erros seguidos por conta e por endereço de IP, e minutos de espera
+# gymsync.login.max-falhas=5
+# gymsync.login.max-falhas-ip=30
+# gymsync.login.bloqueio-minutos=15
+
 # Sessão só por cookie (não coloca ;jsessionid nos endereços)
 server.servlet.session.tracking-modes=cookie
 

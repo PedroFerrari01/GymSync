@@ -44,6 +44,7 @@ public class AcademiaController {
     @Autowired private AulaService aulaService;
     @Autowired private FichaService fichaService;
     @Autowired private PasswordEncoder encoder;
+    @Autowired private SenhaService senhaService;
 
     @Value("${gymsync.validar-cpf:true}") private boolean validarCpf;
 
@@ -69,6 +70,9 @@ public class AcademiaController {
 
         model.addAttribute("logado", true);
         model.addAttribute("perfil", perfil);
+        model.addAttribute("senhasFortes", senhaService.fortes());
+        model.addAttribute("tamanhoMinimoSenha", senhaService.tamanhoMinimo());
+        model.addAttribute("trocarSenha", Boolean.TRUE.equals(session.getAttribute("trocarSenha")));
         model.addAttribute("nomeUsuario", session.getAttribute("nomeUsuario"));
         Long usuarioId = (Long) session.getAttribute("usuarioId");
 
@@ -167,13 +171,19 @@ public class AcademiaController {
             return "redirect:/";
         }
 
-        String senha = (aluno.getSenha() == null || aluno.getSenha().isBlank()) ? "123" : aluno.getSenha();
+        boolean semSenha = aluno.getSenha() == null || aluno.getSenha().isBlank();
+        String senha = semSenha ? senhaService.provisoria() : aluno.getSenha();
+        if (!semSenha && senhaService.validarNova(senha) != null) {
+            redirect.addFlashAttribute("erro", senhaService.validarNova(senha));
+            return "redirect:/";
+        }
+        aluno.setTrocarSenha(senhaService.fortes());
         aluno.setNome(aluno.getNome().trim());
         aluno.setEmail(aluno.getEmail().trim());
         aluno.setSenha(encoder.encode(senha));
         try {
             alunoRepository.save(aluno);
-            redirect.addFlashAttribute("sucesso", "Aluno cadastrado com sucesso!");
+            redirect.addFlashAttribute("sucesso", "Aluno cadastrado com sucesso!" + avisoSenha(semSenha, senha));
         } catch (Exception e) {
             redirect.addFlashAttribute("erro", "Erro ao cadastrar: CPF já cadastrado ou dados inválidos.");
         }
@@ -210,13 +220,22 @@ public class AcademiaController {
         return "redirect:/";
     }
 
+    /** No modo de senhas fortes, mostra ao administrador a senha provisória gerada (só uma vez). */
+    private String avisoSenha(boolean gerada, String senha) {
+        if (!senhaService.fortes()) return "";
+        return gerada ? " Senha provisória: " + senha + " (será trocada no primeiro acesso)." : " A senha será trocada no primeiro acesso.";
+    }
+
     @PostMapping("/alunos/redefinir-senha/{id}")
     public String redefinirSenhaAluno(@PathVariable Long id, RedirectAttributes redirect) {
         Aluno aluno = alunoRepository.findById(id).orElse(null);
         if (aluno != null) {
-            aluno.setSenha(encoder.encode("123"));
+            String senha = senhaService.provisoria();
+            aluno.setSenha(encoder.encode(senha));
+            aluno.setTrocarSenha(senhaService.fortes());
             alunoRepository.save(aluno);
-            redirect.addFlashAttribute("sucesso", "A senha de " + aluno.getNome() + " voltou para 123.");
+            redirect.addFlashAttribute("sucesso", "A senha de " + aluno.getNome() + " voltou para " + senha + "."
+                    + (senhaService.fortes() ? " Ela terá de ser trocada no próximo acesso." : ""));
         }
         return "redirect:/";
     }
@@ -249,13 +268,19 @@ public class AcademiaController {
             return "redirect:/";
         }
 
-        String senha = (professor.getSenha() == null || professor.getSenha().isBlank()) ? "123" : professor.getSenha();
+        boolean semSenha = professor.getSenha() == null || professor.getSenha().isBlank();
+        String senha = semSenha ? senhaService.provisoria() : professor.getSenha();
+        if (!semSenha && senhaService.validarNova(senha) != null) {
+            redirect.addFlashAttribute("erro", senhaService.validarNova(senha));
+            return "redirect:/";
+        }
+        professor.setTrocarSenha(senhaService.fortes());
         professor.setNome(professor.getNome().trim());
         professor.setEmail(professor.getEmail().trim());
         professor.setSenha(encoder.encode(senha));
         try {
             professorRepository.save(professor);
-            redirect.addFlashAttribute("sucesso", "Professor cadastrado com sucesso!");
+            redirect.addFlashAttribute("sucesso", "Professor cadastrado com sucesso!" + avisoSenha(semSenha, senha));
         } catch (Exception e) {
             redirect.addFlashAttribute("erro", "Erro ao cadastrar professor: CPF já cadastrado.");
         }
@@ -296,9 +321,12 @@ public class AcademiaController {
     public String redefinirSenhaProfessor(@PathVariable Long id, RedirectAttributes redirect) {
         Professor professor = professorRepository.findById(id).orElse(null);
         if (professor != null) {
-            professor.setSenha(encoder.encode("123"));
+            String senha = senhaService.provisoria();
+            professor.setSenha(encoder.encode(senha));
+            professor.setTrocarSenha(senhaService.fortes());
             professorRepository.save(professor);
-            redirect.addFlashAttribute("sucesso", "A senha de " + professor.getNome() + " voltou para 123.");
+            redirect.addFlashAttribute("sucesso", "A senha de " + professor.getNome() + " voltou para " + senha + "."
+                    + (senhaService.fortes() ? " Ela terá de ser trocada no próximo acesso." : ""));
         }
         return "redirect:/";
     }

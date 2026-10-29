@@ -5,6 +5,8 @@ import com.example.sistema.academia.model.Professor;
 import com.example.sistema.academia.repository.AlunoRepository;
 import com.example.sistema.academia.repository.ProfessorRepository;
 import com.example.sistema.academia.service.LimiteTentativasService;
+import com.example.sistema.academia.service.SenhaService;
+import jakarta.annotation.PostConstruct;
 import com.example.sistema.academia.config.SessaoService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -20,21 +22,29 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 public class AuthController {
 
-    private static final int TAMANHO_MINIMO_SENHA = 4;
-
     @Autowired private AlunoRepository alunoRepository;
     @Autowired private ProfessorRepository professorRepository;
     @Autowired private PasswordEncoder encoder;
     @Autowired private SessaoService sessaoService;
     @Autowired private LimiteTentativasService limite;
+    @Autowired private SenhaService senhaService;
 
     @Value("${gymsync.admin.usuario:admin}") private String adminUsuario;
     @Value("${gymsync.admin.senha:123}") private String adminSenha;
     @Value("${gymsync.login.max-falhas:5}") private int maxFalhasConta;
     @Value("${gymsync.login.max-falhas-ip:30}") private int maxFalhasIp;
 
+    /** No modo de senhas fortes, o sistema não sobe com a senha de administrador fraca. */
+    @PostConstruct
+    void conferirSenhaAdmin() {
+        if (senhaService.fortes() && !adminSenha.startsWith("$2") && senhaService.validarNova(adminSenha) != null) {
+            throw new IllegalStateException("gymsync.senhas-fortes=true exige gymsync.admin.senha com pelo menos "
+                    + senhaService.tamanhoMinimo() + " caracteres (ou um hash BCrypt).");
+        }
+    }
+
     private boolean senhaConfere(String salva, String digitada) {
-        if (salva == null || salva.isBlank()) return "123".equals(digitada);
+        if (salva == null || salva.isBlank()) return senhaService.aceitaSenhaVaziaComo123() && "123".equals(digitada);
         if (salva.startsWith("$2")) return encoder.matches(digitada, salva);
         return salva.equals(digitada);
     }
@@ -66,7 +76,7 @@ public class AuthController {
         }
 
         if ("ADMIN".equals(tipo)) {
-            if (adminUsuario.equalsIgnoreCase(usuario) && adminSenha.equals(senha)) {
+            if (adminUsuario.equalsIgnoreCase(usuario) && senhaConfere(adminSenha, senha)) {
                 limite.registrarSucesso(conta);
                 sessaoService.iniciar(request, response, "ADMIN", "Administrador", null);
                 return "redirect:/";
@@ -87,6 +97,7 @@ public class AuthController {
                 }
                 limite.registrarSucesso(conta);
                 sessaoService.iniciar(request, response, "PROFESSOR", prof.getNome(), prof.getId());
+                if (prof.isTrocarSenha()) request.getSession().setAttribute("trocarSenha", true);
                 return "redirect:/";
             }
             registrarFalha(conta, ip);
@@ -103,6 +114,7 @@ public class AuthController {
                 }
                 limite.registrarSucesso(conta);
                 sessaoService.iniciar(request, response, "ALUNO", aluno.getNome(), aluno.getId());
+                if (aluno.isTrocarSenha()) request.getSession().setAttribute("trocarSenha", true);
                 return "redirect:/";
             }
             registrarFalha(conta, ip);
@@ -117,8 +129,9 @@ public class AuthController {
                                  @RequestParam String email,
                                  @RequestParam String novaSenha,
                                  RedirectAttributes redirect) {
-        if (novaSenha.length() < TAMANHO_MINIMO_SENHA) {
-            redirect.addFlashAttribute("erroLogin", "A senha precisa ter pelo menos " + TAMANHO_MINIMO_SENHA + " caracteres.");
+        String erroSenha = senhaService.validarNova(novaSenha);
+        if (erroSenha != null) {
+            redirect.addFlashAttribute("erroLogin", erroSenha);
             return "redirect:/";
         }
 
@@ -126,6 +139,7 @@ public class AuthController {
             Aluno aluno = alunoRepository.findFirstByCpfAndEmailIgnoreCase(cpf.trim(), email.trim()).orElse(null);
             if (aluno != null) {
                 aluno.setSenha(encoder.encode(novaSenha));
+                aluno.setTrocarSenha(false);
                 alunoRepository.save(aluno);
                 redirect.addFlashAttribute("sucessoLogin", "Senha definida com sucesso! Faça seu login abaixo.");
                 return "redirect:/";
@@ -134,6 +148,7 @@ public class AuthController {
             Professor prof = professorRepository.findFirstByCpfAndEmailIgnoreCase(cpf.trim(), email.trim()).orElse(null);
             if (prof != null) {
                 prof.setSenha(encoder.encode(novaSenha));
+                prof.setTrocarSenha(false);
                 professorRepository.save(prof);
                 redirect.addFlashAttribute("sucessoLogin", "Senha definida com sucesso! Faça seu login abaixo.");
                 return "redirect:/";
@@ -145,8 +160,9 @@ public class AuthController {
 
     @PostMapping("/alterar-senha")
     public String alterarMinhaSenha(@RequestParam String novaSenha, HttpSession session, RedirectAttributes redirect) {
-        if (novaSenha.length() < TAMANHO_MINIMO_SENHA) {
-            redirect.addFlashAttribute("erro", "A senha precisa ter pelo menos " + TAMANHO_MINIMO_SENHA + " caracteres.");
+        String erroSenha = senhaService.validarNova(novaSenha);
+        if (erroSenha != null) {
+            redirect.addFlashAttribute("erro", erroSenha);
             return "redirect:/";
         }
 
@@ -157,14 +173,18 @@ public class AuthController {
             Aluno a = alunoRepository.findById(usuarioId).orElse(null);
             if (a != null) {
                 a.setSenha(encoder.encode(novaSenha));
+                a.setTrocarSenha(false);
                 alunoRepository.save(a);
+                session.removeAttribute("trocarSenha");
                 redirect.addFlashAttribute("sucesso", "Sua senha foi atualizada com sucesso!");
             }
         } else if ("PROFESSOR".equals(perfil) && usuarioId != null) {
             Professor p = professorRepository.findById(usuarioId).orElse(null);
             if (p != null) {
                 p.setSenha(encoder.encode(novaSenha));
+                p.setTrocarSenha(false);
                 professorRepository.save(p);
+                session.removeAttribute("trocarSenha");
                 redirect.addFlashAttribute("sucesso", "Sua senha foi atualizada com sucesso!");
             }
         }

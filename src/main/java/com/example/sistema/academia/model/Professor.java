@@ -24,6 +24,9 @@ public class Professor {
 
     private String senha = "123";
 
+    /** true quando a senha é provisória e precisa ser trocada no próximo acesso (só no modo de senhas fortes). */
+    private Boolean trocarSenha;
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -44,4 +47,7 @@ public class Professor {
 
     public String getSenha() { return senha; }
     public void setSenha(String senha) { this.senha = senha; }
+
+    public boolean isTrocarSenha() { return Boolean.TRUE.equals(trocarSenha); }
+    public void setTrocarSenha(boolean trocarSenha) { this.trocarSenha = trocarSenha; }
 }

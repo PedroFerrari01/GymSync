@@ -19,6 +19,11 @@ public final class RegrasAcesso {
                 || caminho.startsWith("/vendor/");
     }
 
+    /** Com senha provisória, o usuário só vê a tela inicial e troca a senha (ou sai). */
+    public static boolean liberadaDuranteTrocaDeSenha(String caminho) {
+        return publica(caminho) || caminho.equals("/alterar-senha") || caminho.equals("/logout");
+    }
+
     public static boolean permitido(String perfil, String caminho) {
         if (publica(caminho)) return true;
         if (perfil == null) return false;

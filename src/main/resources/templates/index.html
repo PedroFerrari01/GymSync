@@ -566,7 +566,7 @@
                                     <input type="text" name="contato" class="form-control mb-2 mascara-telefone" minlength="14" maxlength="15" required>
                                     <label class="form-label">Senha Inicial</label>
                                     <div class="pass-group mb-3">
-                                        <input type="password" name="senha" id="senhaCadAluno" class="form-control pe-5" value="123" required>
+                                        <input type="password" name="senha" id="senhaCadAluno" class="form-control pe-5" th:value="${senhasFortes ? '' : '123'}" th:required="${!senhasFortes}" th:placeholder="${senhasFortes ? 'Em branco: o sistema gera uma provisória' : null}">
                                         <button type="button" class="pass-toggle" onclick="alternarSenha('senhaCadAluno', this)"><i class="bi bi-eye"></i></button>
                                     </div>
                                     <button type="submit" class="btn-brand w-100">Salvar Cadastro</button>
@@ -658,7 +658,7 @@
                                     <input type="text" name="especialidade" class="form-control mb-2 campo-apenas-letras" maxlength="50" required>
                                     <label class="form-label">Senha Inicial</label>
                                     <div class="pass-group mb-3">
-                                        <input type="password" name="senha" id="senhaCadProf" class="form-control pe-5" value="123" required>
+                                        <input type="password" name="senha" id="senhaCadProf" class="form-control pe-5" th:value="${senhasFortes ? '' : '123'}" th:required="${!senhasFortes}" th:placeholder="${senhasFortes ? 'Em branco: o sistema gera uma provisória' : null}">
                                         <button type="button" class="pass-toggle" onclick="alternarSenha('senhaCadProf', this)"><i class="bi bi-eye"></i></button>
                                     </div>
                                     <button type="submit" class="btn-brand w-100">Salvar Professor</button>
@@ -878,23 +878,24 @@
     </div>
 </div>
 
-<div th:if="${logado and (perfil == 'ALUNO' or perfil == 'PROFESSOR')}" class="modal fade" id="modalMinhaSenha" tabindex="-1" aria-hidden="true">
+<div th:if="${logado and (perfil == 'ALUNO' or perfil == 'PROFESSOR')}" class="modal fade" id="modalMinhaSenha" tabindex="-1" aria-hidden="true" th:data-obrigatorio="${trocarSenha}" th:data-bs-backdrop="${trocarSenha ? 'static' : null}" th:data-bs-keyboard="${trocarSenha ? 'false' : null}">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content p-2">
             <div class="modal-header">
                 <h5 class="modal-title fw-bold"><i class="bi bi-shield-lock-fill me-2" style="color:var(--accent);"></i>Alterar Minha Senha</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                <button th:unless="${trocarSenha}" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
             <form th:action="@{/alterar-senha}" method="post">
                 <div class="modal-body">
-                    <label class="form-label">Digite sua Nova Senha (mínimo 4 caracteres)</label>
+                    <div th:if="${trocarSenha}" class="alert alert-warning py-2 small border-0 rounded-3">Sua senha é provisória. Crie uma senha nova para continuar usando o sistema.</div>
+                    <label class="form-label">Digite sua Nova Senha (mínimo <span th:text="${tamanhoMinimoSenha}">4</span> caracteres)</label>
                     <div class="pass-group">
-                        <input type="password" name="novaSenha" id="inputMinhaNovaSenha" class="form-control pe-5" minlength="4" required>
+                        <input type="password" name="novaSenha" id="inputMinhaNovaSenha" class="form-control pe-5" th:minlength="${tamanhoMinimoSenha}" required>
                         <button type="button" class="pass-toggle" onclick="alternarSenha('inputMinhaNovaSenha', this)"><i class="bi bi-eye"></i></button>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn-theme" data-bs-dismiss="modal">Cancelar</button>
+                    <button th:unless="${trocarSenha}" type="button" class="btn-theme" data-bs-dismiss="modal">Cancelar</button>
                     <button type="submit" class="btn-brand">Atualizar Senha</button>
                 </div>
             </form>

@@ -27,6 +27,15 @@ class RegrasAcessoTest {
     }
 
     @Test
+    void comSenhaProvisoriaSoTrocaASenhaOuSai() {
+        assertTrue(RegrasAcesso.liberadaDuranteTrocaDeSenha("/"));
+        assertTrue(RegrasAcesso.liberadaDuranteTrocaDeSenha("/alterar-senha"));
+        assertTrue(RegrasAcesso.liberadaDuranteTrocaDeSenha("/logout"));
+        assertFalse(RegrasAcesso.liberadaDuranteTrocaDeSenha("/mensagens"));
+        assertFalse(RegrasAcesso.liberadaDuranteTrocaDeSenha("/aluno/exercicios/registrar"));
+    }
+
+    @Test
     void rotaDesconhecidaEDoAdministrador() {
         assertTrue(RegrasAcesso.permitido("ADMIN", "/rota-inventada/salvar"));
         assertFalse(RegrasAcesso.permitido("PROFESSOR", "/rota-inventada/salvar"));
