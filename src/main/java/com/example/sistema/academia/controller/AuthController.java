@@ -7,6 +7,7 @@ import com.example.sistema.academia.repository.ProfessorRepository;
 import com.example.sistema.academia.service.LimiteTentativasService;
 import com.example.sistema.academia.service.RecuperacaoSenhaService;
 import com.example.sistema.academia.service.SenhaService;
+import com.example.sistema.academia.service.VisitanteService;
 import jakarta.annotation.PostConstruct;
 import com.example.sistema.academia.config.SessaoService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -36,6 +37,7 @@ public class AuthController {
     @Autowired private LimiteTentativasService limite;
     @Autowired private SenhaService senhaService;
     @Autowired private RecuperacaoSenhaService recuperacao;
+    @Autowired private VisitanteService visitanteService;
 
     @Value("${gymsync.admin.usuario:admin}") private String adminUsuario;
     @Value("${gymsync.admin.senha:123}") private String adminSenha;
@@ -147,6 +149,34 @@ public class AuthController {
             log.warn("Login recusado: perfil={} conta={} ip={}", tipo, mascarar(quem), request.getRemoteAddr());
             redirect.addFlashAttribute("erroLogin", "CPF/E-mail ou senha de aluno incorretos.");
         }
+        return "redirect:/";
+    }
+
+    /** Entra só para olhar, com o perfil escolhido no login e os dados de exemplo. Nada pode ser salvo. */
+    @PostMapping("/visitante")
+    public String entrarComoVisitante(@RequestParam(defaultValue = "ADMIN") String tipo,
+                                      HttpServletRequest request,
+                                      HttpServletResponse response,
+                                      RedirectAttributes redirect) {
+        if (!visitanteService.habilitado()) return "redirect:/";
+        if ("ALUNO".equals(tipo)) {
+            Aluno aluno = visitanteService.alunoExemplo().orElse(null);
+            if (aluno == null) return semDadosDeExemplo(redirect);
+            sessaoService.iniciar(request, response, "ALUNO", aluno.getNome(), aluno.getId());
+        } else if ("PROFESSOR".equals(tipo)) {
+            Professor prof = visitanteService.professorExemplo().orElse(null);
+            if (prof == null) return semDadosDeExemplo(redirect);
+            sessaoService.iniciar(request, response, "PROFESSOR", prof.getNome(), prof.getId());
+        } else {
+            sessaoService.iniciar(request, response, "ADMIN", "Administrador", null);
+        }
+        request.getSession().setAttribute("visitante", true);
+        log.info("Entrada de visitante: perfil={} ip={}", tipo, request.getRemoteAddr());
+        return "redirect:/";
+    }
+
+    private String semDadosDeExemplo(RedirectAttributes redirect) {
+        redirect.addFlashAttribute("erroLogin", "Os dados de exemplo não estão disponíveis. Entre como administrador visitante.");
         return "redirect:/";
     }
 

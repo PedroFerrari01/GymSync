@@ -14,6 +14,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.security.web.header.writers.StaticHeadersWriter;
+import org.springframework.web.servlet.FlashMap;
+import org.springframework.web.servlet.support.SessionFlashMapManager;
 
 @Configuration
 @EnableWebSecurity
@@ -44,12 +46,22 @@ public class SegurancaConfig {
                 HttpSession sessao = req.getSession(false);
                 boolean trocarSenha = sessao != null && Boolean.TRUE.equals(sessao.getAttribute("trocarSenha"));
                 if (trocarSenha && !RegrasAcesso.liberadaDuranteTrocaDeSenha(caminho)) return new AuthorizationDecision(false);
+                boolean visitante = sessao != null && Boolean.TRUE.equals(sessao.getAttribute("visitante"));
+                if (visitante && !RegrasAcesso.visitantePode(req.getMethod(), caminho)) return new AuthorizationDecision(false);
                 return new AuthorizationDecision(RegrasAcesso.permitido(perfil(autenticacao.get()), caminho));
             }))
             // Sem login ou sem permissão: volta para a tela inicial, como antes
             .exceptionHandling(ex -> ex
                 .authenticationEntryPoint((req, res, e) -> res.sendRedirect(req.getContextPath() + "/"))
-                .accessDeniedHandler((req, res, e) -> res.sendRedirect(req.getContextPath() + "/")))
+                .accessDeniedHandler((req, res, e) -> {
+                    HttpSession sessao = req.getSession(false);
+                    if (sessao != null && Boolean.TRUE.equals(sessao.getAttribute("visitante"))) {
+                        FlashMap aviso = new FlashMap();
+                        aviso.put("erro", "Você está no modo visitante: dá para ver tudo, mas nada é salvo.");
+                        new SessionFlashMapManager().saveOutputFlashMap(aviso, req, res);
+                    }
+                    res.sendRedirect(req.getContextPath() + "/");
+                }))
             .logout(l -> l.logoutUrl("/logout").logoutSuccessUrl("/").deleteCookies("JSESSIONID"))
             .headers(h -> h
                 .frameOptions(f -> f.deny())

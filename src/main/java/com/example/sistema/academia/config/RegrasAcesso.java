@@ -13,6 +13,7 @@ public final class RegrasAcesso {
                 || caminho.equals("/login")
                 || caminho.equals("/recuperar-senha")
                 || caminho.equals("/redefinir-senha")
+                || caminho.equals("/visitante")
                 || caminho.equals("/error")
                 || caminho.startsWith("/css/")
                 || caminho.startsWith("/js/")
@@ -23,6 +24,11 @@ public final class RegrasAcesso {
     /** Com senha provisória, o usuário só vê a tela inicial e troca a senha (ou sai). */
     public static boolean liberadaDuranteTrocaDeSenha(String caminho) {
         return publica(caminho) || caminho.equals("/alterar-senha") || caminho.equals("/logout");
+    }
+
+    /** Visitante só olha: pode abrir páginas (GET) e sair, mas não envia nenhum formulário. */
+    public static boolean visitantePode(String metodo, String caminho) {
+        return "GET".equals(metodo) || caminho.equals("/logout");
     }
 
     public static boolean permitido(String perfil, String caminho) {

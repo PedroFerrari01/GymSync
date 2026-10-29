@@ -46,6 +46,7 @@ public class AcademiaController {
     @Autowired private FichaService fichaService;
     @Autowired private PasswordEncoder encoder;
     @Autowired private SenhaService senhaService;
+    @Autowired private VisitanteService visitanteService;
 
     @Value("${gymsync.validar-cpf:true}") private boolean validarCpf;
     @Value("${gymsync.recuperacao-por-email:false}") private boolean recuperacaoPorEmail;
@@ -83,6 +84,7 @@ public class AcademiaController {
         if (perfil == null) {
             model.addAttribute("logado", false);
             model.addAttribute("recuperacaoPorEmail", recuperacaoPorEmail);
+            model.addAttribute("visitanteHabilitado", visitanteService.habilitado());
             return "index";
         }
 
@@ -92,6 +94,7 @@ public class AcademiaController {
         model.addAttribute("perfil", perfil);
         model.addAttribute("senhasFortes", senhaService.fortes());
         model.addAttribute("trocarSenha", Boolean.TRUE.equals(session.getAttribute("trocarSenha")));
+        model.addAttribute("visitante", Boolean.TRUE.equals(session.getAttribute("visitante")));
         model.addAttribute("nomeUsuario", session.getAttribute("nomeUsuario"));
         Long usuarioId = (Long) session.getAttribute("usuarioId");
 

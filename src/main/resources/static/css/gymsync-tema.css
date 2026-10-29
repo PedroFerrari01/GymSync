@@ -779,3 +779,16 @@ html:has(.sobre) { scroll-behavior: smooth; }
     .halter-canvas { position: relative; display: block; height: 260px; }
     .jornada-fixa { padding: 0 var(--s3) 80px; }
 }
+
+/* Acesso de visitante: botão no login e faixa de aviso dentro do sistema */
+.btn-visitante { justify-content: center; }
+.aviso-visitante {
+    display: flex;
+    align-items: center;
+    gap: var(--s3);
+    padding: 12px var(--s3);
+    border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+    border-radius: var(--raio);
+    background: var(--accent-soft);
+}
+.aviso-visitante > i { color: var(--accent); font-size: 1.25rem; }

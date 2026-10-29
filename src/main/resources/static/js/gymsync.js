@@ -255,8 +255,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.querySelector('.login-wrapper form');
     if (loginForm) {
         loginForm.addEventListener('submit', e => {
-            if (!loginForm.checkValidity()) return;
+            const botao = e.submitter;
+            const semValidar = botao && botao.formNoValidate; // "Testar como visitante" não precisa de CPF e senha
+            if (!semValidar && !loginForm.checkValidity()) return;
             e.preventDefault();
+            if (botao && botao.hasAttribute('formaction')) loginForm.action = botao.formAction;
             let enviado = false;
             const enviar = () => { if (!enviado) { enviado = true; loginForm.submit(); } };
             gsap.to('.login-wrapper', { opacity: 0, y: -12, duration: 0.35, ease: 'power2.in', onComplete: enviar });

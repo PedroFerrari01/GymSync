@@ -22,6 +22,10 @@ spring.jpa.show-sql=false
 # Ligado, o sistema não sobe se gymsync.admin.senha tiver menos de 8 caracteres.
 # gymsync.senhas-fortes=false
 
+# Acesso de visitante: botão "Testar como visitante" no login, só leitura. Com o banco vazio,
+# cria dados de exemplo. Deixe desligado num sistema com dados reais.
+# gymsync.visitante=false
+
 # Bloqueio de login: erros seguidos por conta e por endereço de IP, e minutos de espera
 # gymsync.login.max-falhas=5
 # gymsync.login.max-falhas-ip=30

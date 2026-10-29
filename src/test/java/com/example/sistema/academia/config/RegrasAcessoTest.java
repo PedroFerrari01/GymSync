@@ -37,6 +37,17 @@ class RegrasAcessoTest {
     }
 
     @Test
+    void visitanteSoOlha() {
+        assertTrue(RegrasAcesso.permitido(null, "/visitante"));
+        assertTrue(RegrasAcesso.visitantePode("GET", "/"));
+        assertTrue(RegrasAcesso.visitantePode("GET", "/mensagens"));
+        assertTrue(RegrasAcesso.visitantePode("POST", "/logout"));
+        assertFalse(RegrasAcesso.visitantePode("POST", "/alunos/salvar"));
+        assertFalse(RegrasAcesso.visitantePode("POST", "/mensalidades/pagar/1"));
+        assertFalse(RegrasAcesso.visitantePode("POST", "/alterar-senha"));
+    }
+
+    @Test
     void rotaDesconhecidaEDoAdministrador() {
         assertTrue(RegrasAcesso.permitido("ADMIN", "/rota-inventada/salvar"));
         assertFalse(RegrasAcesso.permitido("PROFESSOR", "/rota-inventada/salvar"));
