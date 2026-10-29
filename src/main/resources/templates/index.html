@@ -306,25 +306,32 @@
             </div>
             <form th:action="@{/recuperar-senha}" method="post">
                 <div class="modal-body">
-                    <p class="small mb-3" style="color:var(--text-secondary);">Confirme seu CPF e E-mail cadastrados para definir sua nova senha pessoal.</p>
                     <label class="form-label">Seu Perfil</label>
                     <select name="tipo" class="form-select mb-3" required>
                         <option value="ALUNO">Aluno</option>
                         <option value="PROFESSOR">Professor</option>
                     </select>
-                    <label class="form-label">CPF Cadastrado</label>
-                    <input type="text" name="cpf" class="form-control mb-3 mascara-cpf" minlength="14" maxlength="14" required>
-                    <label class="form-label">E-mail Cadastrado</label>
-                    <input type="email" name="email" class="form-control mb-3" required>
-                    <label class="form-label">Nova Senha (mínimo 4 caracteres)</label>
-                    <div class="pass-group">
-                        <input type="password" name="novaSenha" id="senhaRecuperacao" class="form-control pe-5" minlength="4" required>
-                        <button type="button" class="pass-toggle" onclick="alternarSenha('senhaRecuperacao', this)"><i class="bi bi-eye"></i></button>
-                    </div>
+                    <th:block th:if="${recuperacaoPorEmail}">
+                        <p class="small mb-3" style="color:var(--text-secondary);">Informe seu CPF ou e-mail. Vamos enviar um link para o e-mail cadastrado; ele vale 30 minutos.</p>
+                        <label class="form-label">CPF ou E-mail</label>
+                        <input type="text" name="identificador" class="form-control mb-1 campo-cpf-ou-email" required>
+                    </th:block>
+                    <th:block th:unless="${recuperacaoPorEmail}">
+                        <p class="small mb-3" style="color:var(--text-secondary);">Confirme seu CPF e E-mail cadastrados para definir sua nova senha pessoal.</p>
+                        <label class="form-label">CPF Cadastrado</label>
+                        <input type="text" name="cpf" class="form-control mb-3 mascara-cpf" minlength="14" maxlength="14" required>
+                        <label class="form-label">E-mail Cadastrado</label>
+                        <input type="email" name="email" class="form-control mb-3" required>
+                        <label class="form-label">Nova Senha (mínimo <span th:text="${tamanhoMinimoSenha}">4</span> caracteres)</label>
+                        <div class="pass-group">
+                            <input type="password" name="novaSenha" id="senhaRecuperacao" class="form-control pe-5" th:minlength="${tamanhoMinimoSenha}" required>
+                            <button type="button" class="pass-toggle" onclick="alternarSenha('senhaRecuperacao', this)"><i class="bi bi-eye"></i></button>
+                        </div>
+                    </th:block>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn-theme" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn-brand">Salvar Nova Senha</button>
+                    <button type="submit" class="btn-brand" th:text="${recuperacaoPorEmail} ? 'Enviar link' : 'Salvar Nova Senha'">Salvar Nova Senha</button>
                 </div>
             </form>
         </div>

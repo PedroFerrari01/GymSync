@@ -47,6 +47,7 @@ public class AcademiaController {
     @Autowired private SenhaService senhaService;
 
     @Value("${gymsync.validar-cpf:true}") private boolean validarCpf;
+    @Value("${gymsync.recuperacao-por-email:false}") private boolean recuperacaoPorEmail;
 
     private Map<Long, RegistroExercicio> ultimosRegistros(List<RegistroExercicio> lista) {
         List<RegistroExercicio> ordenada = new ArrayList<>(lista);
@@ -61,8 +62,10 @@ public class AcademiaController {
     @GetMapping("/")
     public String paginaInicial(Model model, HttpSession session) {
         String perfil = (String) session.getAttribute("perfil");
+        model.addAttribute("tamanhoMinimoSenha", senhaService.tamanhoMinimo());
         if (perfil == null) {
             model.addAttribute("logado", false);
+            model.addAttribute("recuperacaoPorEmail", recuperacaoPorEmail);
             return "index";
         }
 
@@ -71,7 +74,6 @@ public class AcademiaController {
         model.addAttribute("logado", true);
         model.addAttribute("perfil", perfil);
         model.addAttribute("senhasFortes", senhaService.fortes());
-        model.addAttribute("tamanhoMinimoSenha", senhaService.tamanhoMinimo());
         model.addAttribute("trocarSenha", Boolean.TRUE.equals(session.getAttribute("trocarSenha")));
         model.addAttribute("nomeUsuario", session.getAttribute("nomeUsuario"));
         Long usuarioId = (Long) session.getAttribute("usuarioId");

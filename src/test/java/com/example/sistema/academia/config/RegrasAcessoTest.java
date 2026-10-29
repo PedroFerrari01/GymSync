@@ -19,6 +19,7 @@ class RegrasAcessoTest {
         assertTrue(RegrasAcesso.permitido(null, "/"));
         assertTrue(RegrasAcesso.permitido(null, "/login"));
         assertTrue(RegrasAcesso.permitido(null, "/recuperar-senha"));
+        assertTrue(RegrasAcesso.permitido(null, "/redefinir-senha"));
         assertTrue(RegrasAcesso.permitido(null, "/css/gymsync-tema.css"));
         assertFalse(RegrasAcesso.permitido(null, "/alunos/salvar"));
         assertFalse(RegrasAcesso.permitido(null, "/aluno/ficha/email"));

@@ -12,6 +12,7 @@ public final class RegrasAcesso {
         return caminho.equals("/")
                 || caminho.equals("/login")
                 || caminho.equals("/recuperar-senha")
+                || caminho.equals("/redefinir-senha")
                 || caminho.equals("/error")
                 || caminho.startsWith("/css/")
                 || caminho.startsWith("/js/")

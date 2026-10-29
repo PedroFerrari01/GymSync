@@ -32,3 +32,16 @@ server.servlet.session.tracking-modes=cookie
 
 # Durante o desenvolvimento, para o HTML atualizar sem reiniciar:
 # spring.thymeleaf.cache=false
+
+# E-mail de suporte (Gmail), usado para enviar a ficha e o link de nova senha.
+# Precisa de uma "senha de app" do Google (myaccount.google.com/apppasswords, com verificação em 2 etapas ligada).
+# Para ligar: tire o # das linhas abaixo e cole a senha de app (16 letras, sem espaços).
+# spring.mail.host=smtp.gmail.com
+# spring.mail.port=587
+# spring.mail.username=suportegymsync@gmail.com
+# spring.mail.password=COLE_AQUI_A_SENHA_DE_APP
+# spring.mail.properties.mail.smtp.auth=true
+# spring.mail.properties.mail.smtp.starttls.enable=true
+# Com o e-mail ligado, a recuperação de senha passa a mandar um link (em vez de trocar direto pelo CPF + e-mail):
+# gymsync.recuperacao-por-email=true
+# gymsync.url-base=http://localhost:8080

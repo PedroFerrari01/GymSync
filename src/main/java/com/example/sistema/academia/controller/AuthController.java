@@ -5,6 +5,7 @@ import com.example.sistema.academia.model.Professor;
 import com.example.sistema.academia.repository.AlunoRepository;
 import com.example.sistema.academia.repository.ProfessorRepository;
 import com.example.sistema.academia.service.LimiteTentativasService;
+import com.example.sistema.academia.service.RecuperacaoSenhaService;
 import com.example.sistema.academia.service.SenhaService;
 import jakarta.annotation.PostConstruct;
 import com.example.sistema.academia.config.SessaoService;
@@ -15,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -28,11 +31,13 @@ public class AuthController {
     @Autowired private SessaoService sessaoService;
     @Autowired private LimiteTentativasService limite;
     @Autowired private SenhaService senhaService;
+    @Autowired private RecuperacaoSenhaService recuperacao;
 
     @Value("${gymsync.admin.usuario:admin}") private String adminUsuario;
     @Value("${gymsync.admin.senha:123}") private String adminSenha;
     @Value("${gymsync.login.max-falhas:5}") private int maxFalhasConta;
     @Value("${gymsync.login.max-falhas-ip:30}") private int maxFalhasIp;
+    @Value("${gymsync.recuperacao-por-email:false}") private boolean recuperacaoPorEmail;
 
     /** No modo de senhas fortes, o sistema não sobe com a senha de administrador fraca. */
     @PostConstruct
@@ -125,10 +130,63 @@ public class AuthController {
 
     @PostMapping("/recuperar-senha")
     public String recuperarSenha(@RequestParam String tipo,
-                                 @RequestParam String cpf,
-                                 @RequestParam String email,
-                                 @RequestParam String novaSenha,
+                                 @RequestParam(required = false) String identificador,
+                                 @RequestParam(required = false) String cpf,
+                                 @RequestParam(required = false) String email,
+                                 @RequestParam(required = false) String novaSenha,
+                                 HttpServletRequest request,
                                  RedirectAttributes redirect) {
+        if (!recuperacaoPorEmail) return recuperarSenhaDireto(tipo, cpf, email, novaSenha, redirect);
+
+        // Limita pedidos para ninguém usar o formulário para lotar a caixa de e-mail de alguém
+        String ip = "recuperar-ip:" + request.getRemoteAddr();
+        String conta = "recuperar-conta:" + tipo + ":" + (identificador == null ? "" : identificador.trim().toLowerCase());
+        long espera = Math.max(limite.minutosRestantes(ip), limite.minutosRestantes(conta));
+        if (espera > 0) {
+            redirect.addFlashAttribute("erroLogin", "Muitos pedidos de nova senha. Tente de novo em " + espera + " minuto(s).");
+            return "redirect:/";
+        }
+        limite.registrarFalha(ip, 10);
+        limite.registrarFalha(conta, 3);
+
+        if (!recuperacao.disponivel()) {
+            redirect.addFlashAttribute("erroLogin", "A recuperação por e-mail está indisponível no momento. Procure a recepção da academia.");
+            return "redirect:/";
+        }
+        recuperacao.solicitar(tipo, identificador);
+        redirect.addFlashAttribute("sucessoLogin", "Se os dados estiverem certos, enviamos um link para o e-mail cadastrado. Ele vale "
+                + RecuperacaoSenhaService.VALIDADE_MINUTOS + " minutos.");
+        return "redirect:/";
+    }
+
+    @GetMapping("/redefinir-senha")
+    public String telaRedefinirSenha(@RequestParam(required = false) String token, Model model) {
+        if (!recuperacaoPorEmail) return "redirect:/";
+        model.addAttribute("token", token);
+        model.addAttribute("tokenValido", recuperacao.valido(token) != null);
+        model.addAttribute("tamanhoMinimoSenha", senhaService.tamanhoMinimo());
+        return "redefinir-senha";
+    }
+
+    @PostMapping("/redefinir-senha")
+    public String redefinirSenha(@RequestParam String token, @RequestParam String novaSenha, RedirectAttributes redirect) {
+        if (!recuperacaoPorEmail) return "redirect:/";
+        String erro = recuperacao.redefinir(token, novaSenha);
+        if (erro != null) {
+            redirect.addFlashAttribute("erro", erro);
+            redirect.addAttribute("token", token);
+            return "redirect:/redefinir-senha";
+        }
+        redirect.addFlashAttribute("sucessoLogin", "Senha criada com sucesso! Faça seu login abaixo.");
+        return "redirect:/";
+    }
+
+    /** Modo de desenvolvimento: troca a senha direto conferindo CPF e e-mail (sem link por e-mail). */
+    private String recuperarSenhaDireto(String tipo, String cpf, String email, String novaSenha, RedirectAttributes redirect) {
+        if (cpf == null || email == null) {
+            redirect.addFlashAttribute("erroLogin", "Informe o CPF e o e-mail cadastrados.");
+            return "redirect:/";
+        }
         String erroSenha = senhaService.validarNova(novaSenha);
         if (erroSenha != null) {
             redirect.addFlashAttribute("erroLogin", erroSenha);
