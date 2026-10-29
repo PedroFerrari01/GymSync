@@ -377,25 +377,6 @@ html:has(.sobre) { scroll-behavior: smooth; }
     margin: 0;
 }
 .halter-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 3; pointer-events: none; }
-.halter-sombra {
-    position: absolute;
-    left: 50%;
-    bottom: 12vh;
-    width: min(44vw, 640px);
-    height: 50px;
-    margin-left: calc(min(44vw, 640px) / -2);
-    background: radial-gradient(closest-side, rgba(0, 0, 0, 0.7), transparent);
-    opacity: 0;
-    z-index: 1;
-}
-:root[data-theme="light"] .halter-sombra { background: radial-gradient(closest-side, rgba(0, 0, 0, 0.28), transparent); }
-/* Na abertura animada o halter fica à direita (halter.js desloca 28% da largura): a sombra vai junto */
-.abertura-animada .halter-sombra {
-    left: 78%;
-    width: min(36vw, 560px);
-    margin-left: calc(min(36vw, 560px) / -2);
-}
-
 .abertura-cartoes { position: absolute; inset: 0; z-index: 1; }
 .cartao-flutuante {
     position: absolute;
@@ -794,7 +775,7 @@ html:has(.sobre) { scroll-behavior: smooth; }
     /* No celular: sem prints flutuando, título e halter parado logo abaixo */
     .abertura { height: auto; min-height: 0; display: block; padding: 96px 0 var(--s4); }
     .abertura-texto { transform: none; padding: 0 var(--s3); }
-    .abertura-cartoes, .halter-sombra { display: none; }
+    .abertura-cartoes { display: none; }
     .halter-canvas { position: relative; display: block; height: 260px; }
     .jornada-fixa { padding: 0 var(--s3) 80px; }
 }

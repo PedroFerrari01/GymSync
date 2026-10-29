@@ -162,7 +162,6 @@ function iniciar() {
     });
     linha.to(estado, { y: fim.y, duration: 0.7, ease: 'bounce.out' }, 0)
         .to(estado, { rx: fim.rx, ry: fim.ry, rz: fim.rz, duration: 0.7, ease: 'power2.out' }, 0)
-        .fromTo('.halter-sombra', { opacity: 0, scaleX: 0.3 }, { opacity: 1, scaleX: 1, duration: 0.7, ease: 'power2.in' }, 0)
         .to('.abertura-texto', { scale: 0.96, duration: 1 }, 0);
     secao.querySelectorAll('.cartao-flutuante').forEach(cartao => {
         const profundidade = parseFloat(cartao.dataset.profundidade || '0.5');
