@@ -584,21 +584,98 @@ html:has(.sobre) { scroll-behavior: smooth; }
 .visual-item.ativo .cena-progresso span { width: 100%; transition: width 1.4s 0.9s cubic-bezier(0.45, 0, 0.2, 1); }
 .visual-item.ativo .cena-nota.cena-depois { animation-delay: 2.3s; }
 
-/* Galeria 3D: as demonstrações (fragments/demonstracoes.html) giram numa órbita conforme a rolagem;
-   sem animação viram uma fileira com rolagem lateral */
-.galeria-palco {
+/* Bancada de teste ("Por dentro do sistema"): abas com as telas e uma demonstração por vez.
+   Os painéis ficam empilhados no mesmo lugar, então o palco tem a altura do maior e nada pula ao trocar. */
+.bancada {
     max-width: 1120px;
     margin: 0 auto;
-    padding: 40px var(--s4) 120px;
+    padding: 120px var(--s4);
 }
-.galeria-anel {
+.galeria-sub { color: var(--text-secondary); max-width: 62ch; margin: calc(-1 * var(--s2)) 0 var(--s4); }
+.bancada-abas {
     display: flex;
-    gap: var(--s3);
+    gap: var(--s2);
+    margin-bottom: var(--s3);
     overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    padding-bottom: var(--s3);
+    scrollbar-width: none;
 }
-.galeria-sub { color: var(--text-secondary); max-width: 52ch; margin: calc(-1 * var(--s2)) 0 var(--s4); }
+.bancada-aba {
+    flex: 1 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 18px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--raio);
+    color: var(--text-secondary);
+    font-weight: 600;
+    white-space: nowrap;
+    transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+.bancada-aba i { font-size: 1.35rem; }
+.bancada-aba:hover { color: var(--text-primary); }
+.bancada-aba[aria-selected="true"] {
+    color: var(--text-primary);
+    border-color: var(--accent);
+    background: var(--accent-soft);
+}
+.bancada-aba[aria-selected="true"] i { color: var(--accent); }
+.bancada-palco {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    padding: 40px;
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    /* Brilho laranja atrás da demonstração, o mesmo da abertura */
+    background: radial-gradient(55% 75% at 32% 50%, var(--accent-soft), transparent 70%), var(--bg-sidebar);
+}
+.bancada-painel {
+    grid-area: 1 / 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 48px;
+    align-items: center;
+}
+.bancada-painel:not(.ativo) { visibility: hidden; }
+.bancada-demo { width: 100%; max-width: 560px; justify-self: center; min-width: 0; }
+/* Tabela larga no celular: rola de lado dentro do cartão, sem alargar a página */
+.bancada-demo .table-custom { min-width: 100%; }
+.bancada-demo .panel-card { overflow-x: auto; }
+.bancada-demo > .panel-card { margin: 0; box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.7); }
+.bancada-quem {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: var(--s3);
+    padding: var(--s1) 10px;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+.bancada-titulo { font-size: 1.5rem; font-weight: 700; margin-bottom: var(--s2); }
+.bancada-texto { color: var(--text-secondary); line-height: 1.6; margin-bottom: var(--s3); }
+.bancada-experimente { font-weight: 700; font-size: 0.9rem; margin-bottom: var(--s1); }
+.bancada-dicas { padding-left: 1.1em; margin: 0; color: var(--text-secondary); font-size: 0.92rem; line-height: 1.55; }
+.bancada-dicas li + li { margin-top: var(--s1); }
+.bancada-dicas li::marker { color: var(--accent); }
+/* Troca de tela: só quando a pessoa clica numa aba */
+.bancada-painel.entrando .bancada-demo { animation: bancada-entra 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
+.bancada-painel.entrando .bancada-guia { animation: bancada-entra 0.35s cubic-bezier(0.22, 1, 0.36, 1) 0.05s backwards; }
+@keyframes bancada-entra { from { opacity: 0; transform: translateY(10px); } }
+@media (prefers-reduced-motion: reduce) {
+    .bancada-painel.entrando .bancada-demo, .bancada-painel.entrando .bancada-guia { animation: none; }
+}
+@media (max-width: 991px) {
+    .bancada { padding: 80px var(--s3); }
+    .bancada-aba { flex: 0 0 auto; }
+    .bancada-palco { padding: var(--s3); }
+    .bancada-painel { grid-template-columns: minmax(0, 1fr); gap: var(--s4); align-items: start; }
+    .bancada-guia { order: -1; }
+}
 
 /* Demonstrações: pequenos estados que o JavaScript liga e desliga */
 .demo-sub { color: var(--text-secondary); }
@@ -620,48 +697,6 @@ html:has(.sobre) { scroll-behavior: smooth; }
 .demo-periodo-btn { background: transparent; border: 0; color: var(--text-secondary); font-size: 0.8rem; font-weight: 600; padding: var(--s1) 10px; }
 .demo-periodo-btn.ativo { background: var(--accent); color: #0d0d10; }
 .demo .vbar { transition: height 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
-.galeria-item { flex: 0 0 min(420px, 86vw); scroll-snap-align: start; border-radius: var(--raio); }
-.galeria-item > .panel-card { height: 100%; margin: 0; }
-
-.galeria-animada .galeria-palco {
-    height: 100vh;
-    padding: 0;
-    max-width: none;
-    display: grid;
-    grid-template-rows: auto auto 1fr;
-    align-items: center;
-    overflow: hidden;
-}
-.galeria-animada .galeria-titulo { text-align: center; margin: 64px 0 0; }
-.galeria-animada .galeria-sub { text-align: center; margin: var(--s2) auto 0; }
-.galeria-animada .galeria-anel {
-    position: relative;
-    width: 540px;
-    height: 400px;
-    margin: 0 auto;
-    overflow: visible;
-    /* Perspectiva no anel (sem preserve-3d): a profundidade aparece, mas quem fica na frente é o z-index,
-       e o clique sempre chega no cartão da frente */
-    perspective: 1600px;
-    perspective-origin: 50% 30%;
-    padding: 0;
-}
-.galeria-animada .galeria-item {
-    position: absolute;
-    inset: 0;
-    box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.75);
-}
-/* Os cartões de trás vão "sumindo" no fundo da página (camada por cima, em vez de filter, que deixava a imagem borrada) */
-.galeria-animada .galeria-item::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background: var(--bg-body);
-    opacity: var(--apagado, 0);
-    pointer-events: none;
-}
-
 /* Perfis: seletor + réplica do menu lateral; os itens que o perfil não vê se fecham */
 .perfis-sub { color: var(--text-secondary); max-width: 52ch; margin: calc(-1 * var(--s2)) 0 var(--s4); }
 .perfis-seletor { max-width: 460px; margin-bottom: var(--s4); }

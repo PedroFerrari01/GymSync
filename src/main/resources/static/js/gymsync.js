@@ -382,46 +382,6 @@ document.addEventListener('DOMContentLoaded', () => {
             visuais.forEach(v => v.classList.remove('ativo'));
         };
     });
-
-    // Galeria: os prints dão a volta numa órbita enquanto a seção está presa na tela.
-    // Cada cartão continua virado para a frente (não fica espelhado); os de trás ficam menores e mais apagados.
-    mm.add('(min-width: 992px) and (prefers-reduced-motion: no-preference)', () => {
-        const galeria = sobre.querySelector('.galeria');
-        const itens = [...galeria.querySelectorAll('.galeria-item')];
-        const volta = Math.PI * 2;
-        const orbita = { angulo: 0 };
-        galeria.classList.add('galeria-animada');
-
-        const posicionar = () => {
-            const largura = Math.min(window.innerWidth * 0.38, 640);
-            itens.forEach((item, i) => {
-                const a = orbita.angulo + (i / itens.length) * volta;
-                const frente = (Math.cos(a) + 1) / 2; // 1 = na frente, 0 = atrás
-                item.style.transform = `translate3d(${Math.sin(a) * largura}px, ${(1 - frente) * -190}px, ${(frente - 1) * 900}px) rotateY(${Math.sin(a) * -18}deg)`;
-                item.style.setProperty('--apagado', ((1 - frente) * 0.65).toFixed(3));
-                item.style.zIndex = Math.round(frente * 100);
-                item.inert = frente < 0.9; // só o cartão da frente pode ser clicado
-
-            });
-        };
-        posicionar();
-        gsap.to(orbita, {
-            angulo: -volta * (itens.length - 1) / itens.length,
-            ease: 'none',
-            onUpdate: posicionar,
-            scrollTrigger: {
-                trigger: galeria, start: 'top top', end: '+=200%', pin: true, scrub: 0.6,
-                // Ao parar de rolar, a órbita encaixa com um cartão de frente, pronto para clicar
-                snap: { snapTo: 1 / (itens.length - 1), duration: { min: 0.2, max: 0.6 }, ease: 'power1.inOut' }
-            }
-        });
-        window.addEventListener('resize', posicionar);
-        return () => {
-            window.removeEventListener('resize', posicionar);
-            galeria.classList.remove('galeria-animada');
-            itens.forEach(item => { item.style.transform = ''; item.style.removeProperty('--apagado'); item.style.zIndex = ''; item.inert = false; });
-        };
-    });
 });
 
 /* Botão de tema do login: aparece só com o login ou o final do "Quem somos" na tela, entrando com fade */
