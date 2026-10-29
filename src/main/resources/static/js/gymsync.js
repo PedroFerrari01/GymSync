@@ -503,3 +503,19 @@ document.addEventListener('click', (e) => {
     }
     if (e.target.closest('[data-imprimir]')) window.print();
 });
+
+// Vídeo do "Quem somos": o YouTube só é carregado quando a pessoa clica em assistir
+document.addEventListener('click', (e) => {
+    const play = e.target.closest('.video-play');
+    if (!play) return;
+    const quadro = play.closest('.video-quadro');
+    const id = quadro.dataset.video || '';
+    if (!/^[A-Za-z0-9_-]{11}$/.test(id)) return;
+    const frame = document.createElement('iframe');
+    frame.src = 'https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1&rel=0';
+    frame.title = 'Vídeo de apresentação do GymSync';
+    frame.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+    frame.allowFullscreen = true;
+    frame.referrerPolicy = 'strict-origin-when-cross-origin'; // o YouTube exige saber de qual site vem (sem isso: erro 153)
+    quadro.replaceChildren(frame);
+});

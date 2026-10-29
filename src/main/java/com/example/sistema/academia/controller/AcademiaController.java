@@ -50,6 +50,7 @@ public class AcademiaController {
 
     @Value("${gymsync.validar-cpf:true}") private boolean validarCpf;
     @Value("${gymsync.recuperacao-por-email:false}") private boolean recuperacaoPorEmail;
+    @Value("${gymsync.video-youtube:}") private String videoYoutube;
 
     // Os cadastros recebem a entidade inteira: só estes campos podem vir do formulário (nada de id, situacao etc.)
     @InitBinder("aluno")
@@ -85,6 +86,7 @@ public class AcademiaController {
             model.addAttribute("logado", false);
             model.addAttribute("recuperacaoPorEmail", recuperacaoPorEmail);
             model.addAttribute("visitanteHabilitado", visitanteService.habilitado());
+            model.addAttribute("videoYoutube", videoYoutube.matches("[A-Za-z0-9_-]{11}") ? videoYoutube : "");
             return "index";
         }
 

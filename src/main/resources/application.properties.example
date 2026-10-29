@@ -49,3 +49,7 @@ server.servlet.session.tracking-modes=cookie
 # Com o e-mail ligado, a recuperação de senha passa a mandar um link (em vez de trocar direto pelo CPF + e-mail):
 # gymsync.recuperacao-por-email=true
 # gymsync.url-base=http://localhost:8080
+
+# Vídeo do "Quem somos": o código do vídeo no YouTube (11 caracteres, o que vem depois de watch?v=).
+# Vazio, a seção do vídeo não aparece.
+# gymsync.video-youtube=

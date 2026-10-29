@@ -295,12 +295,27 @@
         </div>
     </section>
 
+    <!-- Vídeo de apresentação: só aparece com gymsync.video-youtube preenchido (o código do vídeo no YouTube).
+         O YouTube só carrega quando a pessoa clica em assistir (gymsync.js). -->
+    <section th:if="${videoYoutube != null and !#strings.isEmpty(videoYoutube)}" class="sobre-bloco sobre-video" aria-labelledby="tituloVideo">
+        <h2 id="tituloVideo" class="sobre-titulo">O GymSync em funcionamento</h2>
+        <p class="video-sub">Um passeio pelo sistema, do cadastro do aluno ao treino do dia.</p>
+        <div class="video-quadro" th:data-video="${videoYoutube}">
+            <button type="button" class="video-play">
+                <span class="video-play-icone"><i class="ph ph-play" aria-hidden="true"></i></span>
+                <span>Assistir ao vídeo</span>
+            </button>
+        </div>
+        <p class="video-nota">O vídeo abre pelo YouTube.</p>
+    </section>
+
     <section class="sobre-bloco sobre-fim">
         <h2 class="sobre-titulo">Feito em sala de aula</h2>
         <p>O GymSync é um trabalho acadêmico desenvolvido por um grupo de quatro estudantes, pensando na rotina real de uma academia.</p>
         <div class="sobre-acoes">
             <a href="#" class="btn-brand sobre-voltar"><i class="ph ph-sign-in"></i> Entrar no sistema</a>
             <a href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=suportegymsync@gmail.com&amp;su=Suporte%20GymSync" target="_blank" rel="noopener" class="btn-theme"><i class="ph ph-envelope-simple"></i> Falar com o suporte</a>
+            <a href="https://github.com/PedroFerrari01/GymSync" target="_blank" rel="noopener" class="btn-theme"><i class="ph ph-github-logo"></i> Ver o código no GitHub</a>
         </div>
     </section>
     <script type="module" th:src="@{/js/halter.js}"></script>

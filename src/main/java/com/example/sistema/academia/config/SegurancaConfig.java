@@ -31,6 +31,7 @@ public class SegurancaConfig {
             + "font-src 'self' https://fonts.gstatic.com; "
             + "img-src 'self' data: blob:; "
             + "connect-src 'self'; "
+            + "frame-src https://www.youtube-nocookie.com; " // só o vídeo do "Quem somos", depois do clique
             + "object-src 'none'; "
             + "base-uri 'self'; "
             + "form-action 'self'; "
