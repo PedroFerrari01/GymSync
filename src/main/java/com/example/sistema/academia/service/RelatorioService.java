@@ -8,6 +8,7 @@ import com.example.sistema.academia.model.Matricula;
 import com.example.sistema.academia.model.Mensalidade;
 import com.example.sistema.academia.repository.AlunoRepository;
 import com.example.sistema.academia.repository.EntradaRepository;
+import com.example.sistema.academia.repository.HistoricoAcaoRepository;
 import com.example.sistema.academia.repository.MatriculaRepository;
 import com.example.sistema.academia.repository.MensalidadeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,7 @@ public class RelatorioService {
     @Autowired private MensalidadeRepository mensalidadeRepository;
     @Autowired private AlunoRepository alunoRepository;
     @Autowired private MatriculaRepository matriculaRepository;
+    @Autowired private HistoricoAcaoRepository historicoAcaoRepository;
 
     private String dinheiro(BigDecimal valor) {
         NumberFormat nf = NumberFormat.getNumberInstance(BR);
@@ -141,6 +143,7 @@ public class RelatorioService {
 
         model.addAttribute("relMesAMes", mesAMes(hoje, entradas, matriculaRepository.findAll(), mensalidades));
         model.addAttribute("relMesAMesTitulo", "Dia 1 a " + hoje.getDayOfMonth() + " de cada mês");
+        model.addAttribute("historico", historicoAcaoRepository.findTop50ByOrderByDataHoraDescIdDesc());
     }
 
     /** Números de um mês, do dia 1 até {@code ateDia} (para comparar períodos iguais). */
