@@ -131,6 +131,9 @@ São 88 testes; não precisam do banco. `SistemaAcademiaApplicationTests` precis
 - [ ] Pagamento real (Pix ou cartão) com um provedor de pagamento
 - [ ] Avisos por e-mail ou WhatsApp e chat em tempo real
 - [ ] Leitor biométrico e catraca de verdade
+- [ ] Rodar os testes automaticamente a cada envio (GitHub Actions)
+- [ ] Testes de integração com o banco de dados
+- [ ] Varredura de segurança com o OWASP ZAP e correção do que aparecer
 
 ## Autoria
 
