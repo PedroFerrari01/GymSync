@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GymSync — Política de privacidade</title>
+    <link rel="stylesheet" th:href="@{/vendor/bootstrap/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/vendor/bootstrap-icons/bootstrap-icons.min.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/gymsync.css}">
+    <link rel="stylesheet" th:href="@{/css/gymsync-tema.css}">
+    <link rel="icon" type="image/png" th:href="@{/img/favicon.png}">
+</head>
+<body>
+
+<main class="pagina-privacidade">
+    <a th:href="@{/}" class="btn-theme btn-sm mb-4 d-inline-flex"><i class="bi bi-arrow-left"></i>&nbsp;<span th:text="${logado ? 'Voltar ao sistema' : 'Voltar ao login'}">Voltar</span></a>
+
+    <h1 class="fw-bold mb-1">Política de privacidade</h1>
+    <p class="texto-apoio mb-4">Última atualização: 30/10/2026</p>
+
+    <div class="panel-card mb-4 aviso-academico">
+        <i class="bi bi-mortarboard"></i>
+        <div>O GymSync é um <strong>trabalho acadêmico</strong> (Análise e Desenvolvimento de Sistemas). A versão publicada
+            usa dados de exemplo. Esta política descreve como o sistema trata dados pessoais quando usado por uma academia,
+            seguindo a Lei Geral de Proteção de Dados (Lei 13.709/2018).</div>
+    </div>
+
+    <section>
+        <h2>1. Quais dados o GymSync guarda</h2>
+        <ul>
+            <li><strong>Cadastro:</strong> nome, CPF, e-mail, telefone e data de nascimento.</li>
+            <li><strong>Plano e pagamentos:</strong> matrícula, plano, mensalidades (valor, vencimento, situação e data do pagamento). O Pix é simulado: o sistema não recebe dados bancários.</li>
+            <li><strong>Frequência:</strong> data e hora de cada passagem pela catraca.</li>
+            <li><strong>Treino:</strong> fichas montadas pelo professor, exercícios marcados como feitos (com carga) e reservas de aulas coletivas.</li>
+            <li><strong>Avaliações físicas:</strong> peso, altura, percentual de gordura e medidas. São <strong>dados de saúde</strong> (dados sensíveis na LGPD) e só o aluno, os professores e a administração da academia os veem.</li>
+            <li><strong>Mensagens</strong> trocadas entre aluno e professor dentro do sistema.</li>
+            <li><strong>Segurança:</strong> a senha é guardada só de forma criptografada (BCrypt); tentativas de login erradas ficam na memória do servidor por 15 minutos, para bloquear ataques.</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>2. Para que os dados são usados</h2>
+        <ul>
+            <li>Cumprir o contrato com a academia: matrícula, cobrança das mensalidades e liberação da catraca.</li>
+            <li>Acompanhar o treino e a evolução física, com o <strong>consentimento</strong> do aluno, dado no primeiro acesso.</li>
+            <li>Avisar o aluno de mensalidades perto do vencimento e o professor de alunos que pararam de vir.</li>
+            <li>Gerar relatórios internos da academia (frequência e faturamento).</li>
+        </ul>
+        <p>Os dados não são vendidos nem usados para propaganda.</p>
+    </section>
+
+    <section>
+        <h2>3. Com quem os dados são compartilhados</h2>
+        <ul>
+            <li><strong>Hospedagem:</strong> o site publicado roda no Render e o banco de dados na Aiven (servidores nos Estados Unidos).</li>
+            <li><strong>E-mail:</strong> só quando o aluno pede a ficha por e-mail ou a recuperação de senha, o endereço e a mensagem passam pelo provedor de envio (Brevo ou Gmail).</li>
+            <li><strong>WhatsApp:</strong> os botões de WhatsApp só abrem o aplicativo no seu aparelho com o texto pronto; nada é enviado sem você confirmar.</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>4. Por quanto tempo</h2>
+        <p>Enquanto o aluno tiver vínculo com a academia. Depois, os dados de cobrança podem ser mantidos pelo prazo exigido por lei;
+            os demais podem ser excluídos a pedido. A exclusão de um aluno no sistema apaga junto as matrículas, mensalidades,
+            entradas, fichas, avaliações e mensagens dele.</p>
+    </section>
+
+    <section>
+        <h2>5. Seus direitos</h2>
+        <p>Pela LGPD (art. 18), você pode:</p>
+        <ul>
+            <li><strong>Acessar e levar seus dados:</strong> na Minha Área, use <em>Baixar meus dados</em> para receber um arquivo com tudo o que o sistema guarda sobre você.</li>
+            <li><strong>Corrigir</strong> dados errados ou desatualizados.</li>
+            <li><strong>Pedir a exclusão</strong> dos dados ou <strong>revogar o consentimento</strong> das avaliações físicas.</li>
+            <li>Saber com quem os dados foram compartilhados.</li>
+        </ul>
+        <p>Para correção, exclusão ou dúvidas, fale com a recepção da academia ou escreva para
+            <a href="mailto:suportegymsync@gmail.com">suportegymsync@gmail.com</a>.</p>
+    </section>
+
+    <section>
+        <h2>6. Cookies e armazenamento no navegador</h2>
+        <p>O GymSync usa apenas o cookie de sessão, necessário para manter o login, e guarda no seu navegador preferências como
+            o tema claro ou escuro. Não há cookies de propaganda nem de rastreamento. O vídeo de apresentação do YouTube só é
+            carregado se você clicar para assistir.</p>
+    </section>
+
+    <section>
+        <h2>7. Segurança</h2>
+        <p>Acesso separado por perfil (aluno, professor e administração), senhas criptografadas, conexão HTTPS no site publicado,
+            bloqueio após tentativas de login erradas e histórico das ações feitas no sistema.</p>
+    </section>
+</main>
+
+<script th:src="@{/vendor/bootstrap/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/js/gymsync.js}"></script>
+</body>
+</html>

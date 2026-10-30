@@ -997,6 +997,30 @@ html:has(.sobre) { scroll-behavior: smooth; }
 }
 .adesao-barra { height: 100%; border-radius: 999px; background: var(--accent); }
 
+/* LGPD (30/10): página de política de privacidade */
+.pagina-privacidade {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: var(--s4) var(--s3) 64px;
+    line-height: 1.65;
+}
+.pagina-privacidade h2 { font-size: 1.15rem; font-weight: 700; margin: var(--s4) 0 var(--s2); }
+.pagina-privacidade ul { padding-left: 1.2rem; }
+.pagina-privacidade li { margin-bottom: var(--s1); }
+.pagina-privacidade a:not(.btn-theme) { color: var(--accent); }
+.aviso-academico { display: flex; gap: var(--s3); align-items: flex-start; }
+.aviso-academico > i { font-size: 1.5rem; color: var(--accent); }
+.link-privacidade { color: var(--text-secondary); font-size: 0.85rem; text-decoration: none; }
+.link-privacidade:hover { color: var(--accent); }
+.meus-dados {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s3);
+    padding: var(--s3) var(--s4);
+}
+
 /* Admin (30/10): exportar relatórios e comparação mês a mês */
 .barra-exportar {
     display: flex;

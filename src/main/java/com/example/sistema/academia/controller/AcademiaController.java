@@ -139,6 +139,9 @@ public class AcademiaController {
             model.addAttribute("visitasSemana", visitasSemana);
             model.addAttribute("visitas30", visitas30);
             model.addAttribute("calendario", frequenciaService.calendario(entradas, frequenciaService.mesPedido(mes, hoje), hoje));
+            model.addAttribute("pedirAceite", aluno.getAceitePrivacidade() == null
+                    && !Boolean.TRUE.equals(session.getAttribute("visitante"))
+                    && !Boolean.TRUE.equals(session.getAttribute("trocarSenha")));
             model.addAttribute("avisos", avisoService.paraAluno(usuarioId));
             model.addAttribute("ultimosRegistros", ultimosRegistros(registroExercicioRepository.findByAlunoId(usuarioId)));
             model.addAttribute("avaliacoes", avaliacoes);

@@ -2,6 +2,7 @@ package com.example.sistema.academia.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "alunos")
@@ -30,6 +31,9 @@ public class Aluno {
 
     private String situacao = "ATIVO";
 
+    /** Quando o aluno aceitou a política de privacidade (LGPD). Null = ainda não aceitou. */
+    private LocalDateTime aceitePrivacidade;
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -56,4 +60,7 @@ public class Aluno {
 
     public String getSituacao() { return situacao; }
     public void setSituacao(String situacao) { this.situacao = situacao; }
+
+    public LocalDateTime getAceitePrivacidade() { return aceitePrivacidade; }
+    public void setAceitePrivacidade(LocalDateTime aceitePrivacidade) { this.aceitePrivacidade = aceitePrivacidade; }
 }

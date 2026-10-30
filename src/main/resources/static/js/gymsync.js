@@ -518,10 +518,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Senha provisória (modo de senhas fortes): abre o modal de troca e não deixa fechar
 document.addEventListener('DOMContentLoaded', () => {
-    const modal = document.getElementById('modalMinhaSenha');
-    if (modal && modal.dataset.obrigatorio === 'true' && window.bootstrap) {
-        bootstrap.Modal.getOrCreateInstance(modal).show();
-    }
+    // Também o aceite da política de privacidade (LGPD), que só aparece quando a senha não precisa ser trocada
+    ['modalMinhaSenha', 'modalPrivacidade'].forEach(id => {
+        const modal = document.getElementById(id);
+        if (modal && modal.dataset.obrigatorio === 'true' && window.bootstrap) {
+            bootstrap.Modal.getOrCreateInstance(modal).show();
+        }
+    });
 });
 
 // Sem onclick no HTML (a política de segurança CSP bloqueia scripts escritos dentro do HTML)

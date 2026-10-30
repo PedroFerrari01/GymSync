@@ -134,6 +134,17 @@
                 </div>
                 <div th:if="${#lists.isEmpty(entradas)}" class="vazio">Nenhum acesso registrado ainda.</div>
             </div>
+
+            <div class="panel-card mt-4 meus-dados">
+                <div>
+                    <div class="fw-semibold"><i class="bi bi-shield-check me-1 icone-destaque"></i>Seus dados</div>
+                    <div class="small texto-apoio">Baixe tudo o que o GymSync guarda sobre você (LGPD).</div>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <a th:href="@{/aluno/meus-dados}" class="btn-theme btn-sm"><i class="bi bi-download"></i> Baixar meus dados</a>
+                    <a th:href="@{/privacidade}" class="btn-theme btn-sm"><i class="bi bi-file-text"></i> Privacidade</a>
+                </div>
+            </div>
         </div>
     </div>
 </div>
