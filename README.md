@@ -4,6 +4,8 @@ Sistema web de gestão de academias feito em **Java com Spring Boot**: cadastros
 
 Desenvolvi este sistema para um trabalho acadêmico do curso de Análise e Desenvolvimento de Sistemas: modelagem, regras de negócio, back-end, telas e testes.
 
+**Experimente agora:** [gymsync-ucfj.onrender.com](https://gymsync-ucfj.onrender.com), com o botão "Testar como visitante" (dados de exemplo, só leitura). O site roda em plano gratuito e dorme sem uso, então a primeira visita pode levar cerca de um minuto para abrir.
+
 ![Java](https://img.shields.io/badge/Java_25-ED8B00?style=flat-square&logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot_4-6DB33F?style=flat-square&logo=springboot&logoColor=white)
 ![MySQL](https://img.shields.io/badge/MySQL_8-4479A1?style=flat-square&logo=mysql&logoColor=white)
@@ -15,9 +17,11 @@ Desenvolvi este sistema para um trabalho acadêmico do curso de Análise e Desen
 ## Destaques
 
 - **Regras de negócio que rodam sozinhas.** A matrícula gera todas as mensalidades; a mensalidade vira atrasada quando o vencimento passa; a catraca só libera quem está ativo, com matrícula ativa e nada em atraso, e mostra o motivo quando bloqueia.
-- **Acesso por perfil, testado.** Um interceptador separa o que admin, professor e aluno podem abrir, inclusive digitando a URL. São 44 testes automatizados, e um deles falha se alguém criar uma rota nova e esquecer de protegê-la.
+- **Acesso por perfil, testado.** O Spring Security separa o que admin, professor e aluno podem abrir, inclusive digitando a URL. Tudo fica bloqueado por padrão, e a regra de cada rota fica em `RegrasAcesso`, com testes automatizados.
 - **Página de apresentação interativa.** Abaixo do login fica um "Quem somos" com um halter em 3D (Three.js), animações de rolagem (GSAP) e réplicas das telas do sistema que dá para clicar: liberar a catraca, pagar uma mensalidade, reservar aula.
-- **Interface pensada para o dia a dia.** Tema claro e escuro, funciona no computador e no celular, roda offline (bibliotecas servidas pelo próprio projeto).
+- **Interface pensada para o dia a dia.** Tema claro e escuro, funciona no computador e no celular e pode ser instalada no celular como app (PWA). As bibliotecas ficam no próprio projeto, então roda offline no computador.
+- **Publicado na internet.** Roda no Render (Docker) com MySQL na Aiven, HTTPS, senhas e chaves em variáveis do servidor (nunca no código) e usuário próprio no banco, sem o administrador do serviço.
+- **LGPD.** Política de privacidade, aceite do aluno no primeiro acesso e "Baixar meus dados" em JSON.
 
 ## Telas
 
@@ -29,6 +33,10 @@ Desenvolvi este sistema para um trabalho acadêmico do curso de Análise e Desen
 | "Quem somos": halter 3D caindo na frente do título | A jornada da matrícula ao treino, passo a passo |
 | ![Demonstrações clicáveis](docs/img/demonstracoes.jpg) | ![Menu de cada perfil](docs/img/perfis.jpg) |
 | Demonstrações clicáveis das telas | O menu que cada perfil enxerga |
+| ![Relatórios do administrador](docs/img/relatorios.jpg) | ![Acompanhamento do professor](docs/img/acompanhamento-professor.jpg) |
+| Relatórios: comparação com o mês passado e exportação em planilha | Professor: alunos sumidos e adesão ao treino na semana |
+| ![Calendário de frequência do aluno](docs/img/calendario-frequencia.jpg) | |
+| Aluno: calendário com os dias treinados no mês | |
 
 *Os nomes e o CPF nas imagens são de exemplo.*
 
@@ -36,9 +44,11 @@ Desenvolvi este sistema para um trabalho acadêmico do curso de Análise e Desen
 
 | Perfil | O que faz |
 | :--- | :--- |
-| **Administrador** | Cadastra alunos, professores e planos; faz e cancela matrículas; confirma pagamentos; controla a catraca e os equipamentos; acompanha relatórios e avisos. |
-| **Professor** | Monta as fichas de treino; registra avaliações físicas; cria aulas coletivas; conversa com os alunos e envia a ficha por WhatsApp ou e-mail. |
-| **Aluno** | Vê e imprime o treino e registra a carga; acompanha frequência, mensalidades e avaliações; informa pagamentos; reserva aulas; fala com o professor. |
+| **Administrador** | Cadastra alunos, professores e planos; faz e cancela matrículas; confirma pagamentos; controla a catraca e os equipamentos; acompanha relatórios e avisos, compara o mês com o anterior, exporta planilhas (CSV) e consulta o histórico de ações. |
+| **Professor** | Monta e copia fichas de treino; registra avaliações físicas; cria aulas coletivas; vê os alunos sumidos (10 dias ou mais sem catraca) e a adesão ao treino na semana; conversa com os alunos e envia a ficha por WhatsApp ou e-mail. |
+| **Aluno** | Vê e imprime o treino e registra a carga; acompanha frequência (calendário), mensalidades e avaliações (evolução); informa pagamentos; reserva aulas; fala com o professor; baixa os próprios dados (LGPD). |
+
+Quem não tem login pode usar o botão **Testar como visitante**: entra com dados de exemplo, só para leitura.
 
 ## Regras de negócio
 
@@ -58,12 +68,12 @@ Aplicação MVC com páginas montadas no servidor:
 
 ```text
 src/main/java/com/example/sistema/academia
-├── config       # interceptador de acesso por perfil e BCrypt
-├── controller   # login, cadastros e financeiro, treinos, aulas, avaliações, equipamentos, mensagens
+├── config       # Spring Security (acesso por perfil, CSRF, CSP), regras de acesso, sessão
+├── controller   # login, cadastros e financeiro, treinos, aulas, avaliações, equipamentos, mensagens, privacidade
 ├── dto          # dados de apoio para as telas (avisos, gráficos, contatos)
-├── model        # 15 entidades JPA
+├── model        # entidades JPA (alunos, planos, matrículas, mensalidades, treinos, aulas, histórico etc.)
 ├── repository   # Spring Data JPA (consultas derivadas do nome do método)
-├── service      # situação das mensalidades, avisos, relatórios, exclusão em cascata, ficha
+├── service      # situação das mensalidades, avisos, relatórios, frequência, evolução, exclusão em cascata, ficha, recuperação de senha
 ├── util         # validação de CPF, e-mail e telefone
 └── view         # formatação de dinheiro, datas e status para os templates
 ```
@@ -76,13 +86,16 @@ src/main/java/com/example/sistema/academia
 
 O que já existe:
 
-- Senhas guardadas com BCrypt.
-- Acesso separado por perfil, coberto por testes (`AutenticacaoInterceptorTest` e `RotasProtegidasTest`).
+- Spring Security: tudo bloqueado por padrão, proteção CSRF e Content Security Policy rígida.
+- Senhas guardadas com BCrypt; senhas fortes opcionais.
+- Limite de tentativas de login (bloqueio temporário por conta e por IP).
+- Recuperação de senha por link de uso único enviado por e-mail (opcional).
 - Ações que alteram dados só por `POST`, com confirmação antes de excluir.
-- Validação dos dados também no servidor.
-- Sessão só por cookie e senha do banco fora do repositório (`application.properties` no `.gitignore`).
+- Validação dos dados também no servidor, e campos aceitos limitados no cadastro.
+- Sessão só por cookie; senha do banco fora do repositório (`application.properties` no `.gitignore`).
+- Política de privacidade e aceite do aluno no primeiro acesso.
 
-O que falta antes de colocar na internet (próxima etapa do projeto): trocar o interceptador pelo Spring Security, ligar a proteção CSRF, limitar tentativas de login, recuperar senha por link enviado ao e-mail e usar HTTPS.
+Publicado na internet com HTTPS pela plataforma de hospedagem.
 
 ## Como rodar
 
@@ -104,8 +117,10 @@ cd GymSync
 **Testes de acesso** (não precisam do banco):
 
 ```bash
-./mvnw test -Dtest=AutenticacaoInterceptorTest,RotasProtegidasTest
+./mvnw test -Dtest=RegrasAcessoTest,LimiteTentativasServiceTest,SenhaServiceTest,AuthControllerTest,CamposPermitidosTest,VisitanteServiceTest,FrequenciaServiceTest,EvolucaoServiceTest,AvisoVencimentoTest,AcompanhamentoServiceTest,ExportacaoServiceTest,SituacaoServiceTest,HistoricoConfigTest
 ```
+
+São 88 testes; não precisam do banco. `SistemaAcademiaApplicationTests` precisa do MySQL ligado.
 
 | Erro | Solução |
 | :--- | :--- |
@@ -116,12 +131,12 @@ cd GymSync
 
 ## Próximos passos
 
-- [ ] Spring Security, CSRF e limite de tentativas de login
-- [ ] Recuperação de senha por e-mail
+- [x] Spring Security, CSRF e limite de tentativas de login
+- [x] Recuperação de senha por e-mail
+- [x] Publicação na nuvem e aplicativo para o aluno (PWA)
 - [ ] Pagamento real (Pix ou cartão) com um provedor de pagamento
 - [ ] Avisos por e-mail ou WhatsApp e chat em tempo real
 - [ ] Leitor biométrico e catraca de verdade
-- [ ] Publicação na nuvem e aplicativo para o aluno
 
 ## Autoria
 
