@@ -158,6 +158,9 @@
 .table-custom th { color: var(--text-secondary); letter-spacing: 0.06em; }
 .table-custom tbody tr:hover > * { --bs-table-bg-state: rgba(127, 127, 127, 0.1); }
 
+/* Situações: o selo não quebra em duas linhas ("EM ANÁLISE" em coluna estreita) */
+.status-ok, .status-err, .status-off, .status-wait, .status-info { white-space: nowrap; }
+
 /* Situações: no tema claro, cores mais escuras para manter o contraste */
 :root[data-theme="light"] .status-ok { color: #047857; }
 :root[data-theme="light"] .status-err { color: #b91c1c; }
