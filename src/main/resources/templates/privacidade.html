@@ -29,12 +29,13 @@
     <section>
         <h2>1. Quais dados o GymSync guarda</h2>
         <ul>
-            <li><strong>Cadastro:</strong> nome, CPF, e-mail, telefone e data de nascimento.</li>
+            <li><strong>Cadastro:</strong> nome, CPF, e-mail, telefone e data de nascimento (do professor, também a especialidade), além da data em que o aluno aceitou esta política.</li>
             <li><strong>Plano e pagamentos:</strong> matrícula, plano, mensalidades (valor, vencimento, situação e data do pagamento). O Pix é simulado: o sistema não recebe dados bancários.</li>
             <li><strong>Frequência:</strong> data e hora de cada passagem pela catraca.</li>
             <li><strong>Treino:</strong> fichas montadas pelo professor, exercícios marcados como feitos (com carga) e reservas de aulas coletivas.</li>
             <li><strong>Avaliações físicas:</strong> peso, altura, percentual de gordura e medidas. São <strong>dados de saúde</strong> (dados sensíveis na LGPD) e só o aluno, os professores e a administração da academia os veem.</li>
             <li><strong>Mensagens</strong> trocadas entre aluno e professor dentro do sistema.</li>
+            <li><strong>Histórico de ações:</strong> o sistema registra quem fez cada alteração (nome, perfil, data e hora e uma descrição), para a administração poder conferir.</li>
             <li><strong>Segurança:</strong> a senha é guardada só de forma criptografada (BCrypt); tentativas de login erradas ficam na memória do servidor por 15 minutos, para bloquear ataques.</li>
         </ul>
     </section>
@@ -54,7 +55,8 @@
         <h2>3. Com quem os dados são compartilhados</h2>
         <ul>
             <li><strong>Hospedagem:</strong> o site publicado roda no Render e o banco de dados na Aiven (servidores nos Estados Unidos).</li>
-            <li><strong>E-mail:</strong> só quando o aluno pede a ficha por e-mail ou a recuperação de senha, o endereço e a mensagem passam pelo provedor de envio (Brevo ou Gmail).</li>
+            <li><strong>E-mail:</strong> só quando a ficha de treino é enviada por e-mail (pelo aluno ou pelo professor) ou quando alguém pede a recuperação de senha, o endereço e a mensagem passam pelo provedor de envio (Brevo ou Gmail).</li>
+            <li><strong>Fonte das letras:</strong> as páginas carregam a fonte Outfit do Google Fonts, então o Google recebe o endereço IP do seu aparelho ao abrir o sistema.</li>
             <li><strong>WhatsApp:</strong> os botões de WhatsApp só abrem o aplicativo no seu aparelho com o texto pronto; nada é enviado sem você confirmar.</li>
         </ul>
     </section>
@@ -63,7 +65,7 @@
         <h2>4. Por quanto tempo</h2>
         <p>Enquanto o aluno tiver vínculo com a academia. Depois, os dados de cobrança podem ser mantidos pelo prazo exigido por lei;
             os demais podem ser excluídos a pedido. A exclusão de um aluno no sistema apaga junto as matrículas, mensalidades,
-            entradas, fichas, avaliações e mensagens dele.</p>
+            entradas, fichas, avaliações, reservas de aula e mensagens dele. O histórico de ações não é apagado junto.</p>
     </section>
 
     <section>
@@ -82,7 +84,7 @@
     <section>
         <h2>6. Cookies e armazenamento no navegador</h2>
         <p>O GymSync usa apenas o cookie de sessão, necessário para manter o login, e guarda no seu navegador preferências como
-            o tema claro ou escuro. Não há cookies de propaganda nem de rastreamento. O vídeo de apresentação do YouTube só é
+            o tema claro ou escuro e, se você instalar o app no celular, arquivos visuais para ele abrir sem internet (sem dados pessoais). Não há cookies de propaganda nem de rastreamento. O vídeo de apresentação do YouTube só é
             carregado se você clicar para assistir.</p>
     </section>
 
