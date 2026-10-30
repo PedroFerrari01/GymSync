@@ -2,6 +2,17 @@
 
     <th:block th:replace="~{fragments/avisos :: lista}"></th:block>
 
+    <!-- Instalar no celular: o gymsync.js mostra este cartão só quando o navegador permite instalar (ou no iPhone) -->
+    <div class="instalar-app panel-card mb-4 ocultar-impressao" hidden>
+        <img th:src="@{/img/app/icone-192.png}" alt="" width="48" height="48">
+        <div class="flex-grow-1">
+            <div class="fw-semibold">Use o GymSync como app</div>
+            <div class="small texto-apoio instalar-texto">Abra a sua ficha direto da tela inicial do celular.</div>
+        </div>
+        <button type="button" class="btn btn-brand btn-sm fw-semibold instalar-botao" hidden><i class="bi bi-download"></i> Instalar</button>
+        <button type="button" class="btn-close instalar-fechar" aria-label="Agora não"></button>
+    </div>
+
     <div class="cabecalho-impressao">
         <h3 class="fw-bold mb-1">GymSync - FICHA DE TREINO</h3>
         <p class="mb-0" th:text="|Aluno(a): ${nomeUsuario}|"></p>
@@ -88,6 +99,28 @@
                     <div class="col-6"><div class="mini-kpi"><div class="valor" th:text="${visitasSemana}">0</div><div class="rotulo">Esta semana</div></div></div>
                     <div class="col-6"><div class="mini-kpi"><div class="valor" th:text="${visitas30}">0</div><div class="rotulo">Últimos 30 dias</div></div></div>
                 </div>
+
+                <div th:if="${calendario != null}" class="calendario-freq mb-3" id="calendario-frequencia">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <a class="cal-nav" th:href="@{/#calendario-frequencia(mes=${calendario.mesAnterior})}" title="Mês anterior"><i class="bi bi-chevron-left"></i></a>
+                        <div class="text-center">
+                            <div class="fw-semibold" th:text="${calendario.titulo}"></div>
+                            <div class="small cal-resumo" th:text="${calendario.diasTreinados == 1 ? '1 dia treinado' : calendario.diasTreinados + ' dias treinados'}"></div>
+                        </div>
+                        <a th:if="${calendario.mesSeguinte != null}" class="cal-nav" th:href="@{/#calendario-frequencia(mes=${calendario.mesSeguinte})}" title="Próximo mês"><i class="bi bi-chevron-right"></i></a>
+                        <span th:if="${calendario.mesSeguinte == null}" class="cal-nav desligado"><i class="bi bi-chevron-right"></i></span>
+                    </div>
+                    <div class="cal-grade cal-semana">
+                        <span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span><span>D</span>
+                    </div>
+                    <div class="cal-grade" th:each="semana : ${calendario.semanas}">
+                        <span th:each="d : ${semana}" class="cal-dia"
+                              th:classappend="${(d.vazio ? 'vazio ' : '') + (d.treinou ? 'treinou ' : '') + (d.hoje ? 'hoje ' : '') + (d.futuro ? 'futuro' : '')}"
+                              th:text="${d.vazio ? '' : d.dia}"
+                              th:title="${d.treinou ? 'Treinou neste dia' : null}"></span>
+                    </div>
+                </div>
+
                 <div class="table-responsive">
                     <table class="table table-custom">
                         <thead><tr><th>Registro</th><th>Data e Hora da Entrada</th></tr></thead>

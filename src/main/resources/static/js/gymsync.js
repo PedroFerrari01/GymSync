@@ -197,11 +197,12 @@ if (chatBox) chatBox.scrollTop = chatBox.scrollHeight;
 document.querySelectorAll('.btn-pagar').forEach(btn => {
     btn.addEventListener('click', () => {
         const form = document.getElementById('formPagarPix');
+        // O botão do aviso de vencimento traz valor e data nele mesmo; o da tabela lê da linha
         const linha = btn.closest('tr');
-        if (!form || !linha) return;
+        if (!form || (!linha && !btn.dataset.valor)) return;
         form.action = '/aluno/mensalidades/informar/' + btn.dataset.id;
-        form.elements['valor'].value = linha.querySelector('.cel-valor').textContent.trim();
-        form.elements['vencimento'].value = linha.querySelector('.cel-venc').textContent.trim();
+        form.elements['valor'].value = btn.dataset.valor || linha.querySelector('.cel-valor').textContent.trim();
+        form.elements['vencimento'].value = btn.dataset.vencimento || linha.querySelector('.cel-venc').textContent.trim();
         form.elements['codigo'].value = 'GYMSYNC-PIX-SIMULADO-' + btn.dataset.id;
     });
 });
@@ -549,3 +550,47 @@ document.addEventListener('click', (e) => {
     frame.referrerPolicy = 'strict-origin-when-cross-origin'; // o YouTube exige saber de qual site vem (sem isso: erro 153)
     quadro.replaceChildren(frame);
 });
+
+// Instalar no celular (PWA). O service worker só guarda o visual para a página "sem conexão".
+if ('serviceWorker' in navigator && window.isSecureContext) {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+}
+
+(() => {
+    const cartao = document.querySelector('.instalar-app');
+    if (!cartao) return;
+    const botao = cartao.querySelector('.instalar-botao');
+    const jaInstalado = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+    let dispensado = false;
+    try { dispensado = localStorage.getItem('gymsync_instalar_dispensado') === 'sim'; } catch (e) {}
+    if (jaInstalado || dispensado) return;
+
+    // Android e computador: o navegador avisa quando dá para instalar
+    let pedido = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        pedido = e;
+        botao.hidden = false;
+        cartao.hidden = false;
+    });
+    botao.addEventListener('click', async () => {
+        if (!pedido) return;
+        pedido.prompt();
+        await pedido.userChoice;
+        pedido = null;
+        cartao.hidden = true;
+    });
+    window.addEventListener('appinstalled', () => { cartao.hidden = true; });
+
+    // iPhone: não existe botão de instalar, só o caminho pelo Safari
+    if (/iphone|ipad|ipod/i.test(navigator.userAgent)) {
+        cartao.querySelector('.instalar-texto').textContent =
+            'No Safari, toque em Compartilhar e depois em "Adicionar à Tela de Início".';
+        cartao.hidden = false;
+    }
+
+    cartao.querySelector('.instalar-fechar').addEventListener('click', () => {
+        cartao.hidden = true;
+        try { localStorage.setItem('gymsync_instalar_dispensado', 'sim'); } catch (e) {}
+    });
+})();

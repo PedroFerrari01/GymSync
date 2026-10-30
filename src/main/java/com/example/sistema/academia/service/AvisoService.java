@@ -5,10 +5,12 @@ import com.example.sistema.academia.model.Equipamento;
 import com.example.sistema.academia.model.Matricula;
 import com.example.sistema.academia.model.Mensalidade;
 import com.example.sistema.academia.repository.*;
+import com.example.sistema.academia.view.FormatadorView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -16,6 +18,7 @@ import java.util.stream.Collectors;
 public class AvisoService {
 
     private static final DateTimeFormatter DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final FormatadorView FORMATO = new FormatadorView();
 
     @Autowired private MensalidadeRepository mensalidadeRepository;
     @Autowired private MatriculaRepository matriculaRepository;
@@ -72,12 +75,7 @@ public class AvisoService {
             avisos.add(new Aviso("danger", "Você tem " + atrasadas + " mensalidade(s) em atraso. Regularize para liberar a catraca."));
         }
 
-        mensalidades.stream()
-                .filter(m -> "PENDENTE".equals(m.getSituacao()) && m.getVencimento() != null
-                        && !m.getVencimento().isBefore(hoje) && !m.getVencimento().isAfter(hoje.plusDays(5)))
-                .map(Mensalidade::getVencimento)
-                .min(Comparator.naturalOrder())
-                .ifPresent(data -> avisos.add(new Aviso("warning", "Sua mensalidade vence em " + data.format(DATA) + ".")));
+        avisoVencimento(mensalidades, hoje).ifPresent(avisos::add);
 
         long emAnalise = mensalidades.stream().filter(m -> "EM_ANALISE".equals(m.getSituacao())).count();
         if (emAnalise > 0) {
@@ -92,5 +90,21 @@ public class AvisoService {
             avisos.add(new Aviso("warning", "Seu plano termina em " + ativa.get().getDataFim().format(DATA) + "."));
         }
         return avisos;
+    }
+
+    /** Mensalidade pendente que vence nos próximos 3 dias (a mais próxima), com o botão de pagar no aviso. */
+    public Optional<Aviso> avisoVencimento(List<Mensalidade> mensalidades, LocalDate hoje) {
+        return mensalidades.stream()
+                .filter(m -> "PENDENTE".equals(m.getSituacao()) && m.getVencimento() != null
+                        && !m.getVencimento().isBefore(hoje) && !m.getVencimento().isAfter(hoje.plusDays(3)))
+                .min(Comparator.comparing(Mensalidade::getVencimento))
+                .map(m -> {
+                    long dias = ChronoUnit.DAYS.between(hoje, m.getVencimento());
+                    String quando = dias == 0 ? "vence hoje" : dias == 1 ? "vence amanhã" : "vence em " + dias + " dias";
+                    String valor = "R$ " + FORMATO.dinheiro(m.getValor());
+                    String data = m.getVencimento().format(DATA);
+                    return new Aviso("warning", "Sua mensalidade de " + valor + " " + quando + " (" + data + "). Pague pelo Pix para não atrasar.",
+                            m.getId(), valor, data);
+                });
     }
 }

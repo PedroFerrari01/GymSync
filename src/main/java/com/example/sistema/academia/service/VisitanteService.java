@@ -88,8 +88,9 @@ public class VisitanteService {
         Aluno elisa = aluno("Elisa Rocha", "elisa.rocha@exemplo.gymsync", LocalDate.of(2003, 11, 8), "ATIVO", 7);
         Aluno felipe = aluno("Felipe Costa", "felipe.costa@exemplo.gymsync", LocalDate.of(1987, 2, 17), "ATIVO", 8);
 
-        // Matrículas: Ana em dia (anual), Bruno com mensalidade atrasada, os outros em dia
-        matricula(ana, anual, hoje.minusMonths(4), 4);
+        // Matrículas: Ana em dia (anual, a próxima vence em 2 dias para o visitante ver o aviso com "Pagar agora"),
+        // Bruno com mensalidade atrasada, os outros em dia
+        matricula(ana, anual, hoje.minusMonths(4).minusDays(8), 4);
         matricula(bruno, trimestral, hoje.minusMonths(2), 1);
         matricula(carlaDias, mensal, hoje.minusMonths(1), 1);
         matricula(diego, anual, hoje.minusMonths(7), 7);

@@ -64,6 +64,46 @@
         </div>
     </div>
 
+    <div th:if="${perfil == 'ALUNO'}" class="row g-4 mb-4">
+        <div class="col-lg-5">
+            <div class="panel-card h-100">
+                <h5 class="panel-title mb-1">Primeira x última avaliação</h5>
+                <p class="small mb-3 texto-apoio">Gordura e medidas desde que você começou.</p>
+                <div th:if="${#lists.isEmpty(comparacao)}" class="vazio">Com duas ou mais avaliações a comparação aparece aqui.</div>
+                <div th:if="${!#lists.isEmpty(comparacao)}" class="table-responsive">
+                    <table class="table table-custom tabela-evolucao mb-0">
+                        <thead><tr><th>Medida</th><th>Primeira</th><th>Última</th><th class="text-end">Diferença</th></tr></thead>
+                        <tbody>
+                            <tr th:each="c : ${comparacao}">
+                                <td class="fw-semibold" th:text="${c.rotulo}"></td>
+                                <td th:text="${c.primeira}"></td>
+                                <td th:text="${c.ultima}"></td>
+                                <td class="text-end"><span class="evo-dif" th:classappend="${c.classe}" th:text="${c.diferenca}"></span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-7">
+            <div class="panel-card h-100">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <h5 class="panel-title">Evolução da gordura</h5>
+                    <span class="tag-pill">%</span>
+                </div>
+                <p class="small mb-2 texto-apoio">Percentual de gordura em cada avaliação.</p>
+                <div th:if="${#lists.isEmpty(barrasGordura)}" class="vazio">O professor ainda não mediu a sua gordura.</div>
+                <div class="vchart">
+                    <div class="vcol" th:each="b : ${barrasGordura}">
+                        <span class="vval" th:text="${b.texto}"></span>
+                        <div class="vtrack"><div class="vbar" th:style="|height:${b.percentual}%|"></div></div>
+                        <span class="vlbl" th:text="${b.rotulo}"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div th:if="${perfil == 'ALUNO'}" class="row g-4">
         <div class="col-lg-5">
             <div class="panel-card">

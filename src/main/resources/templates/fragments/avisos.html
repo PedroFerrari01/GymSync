@@ -1,5 +1,10 @@
 <div th:fragment="lista" th:if="${avisos != null and !#lists.isEmpty(avisos)}" class="mb-4 ocultar-impressao">
-    <div th:each="av : ${avisos}" class="alert py-2 small rounded-3 border-0 mb-2" th:classappend="|alert-${av.tipo}|">
-        <i class="bi bi-bell-fill me-2"></i><span th:text="${av.texto}"></span>
+    <div th:each="av : ${avisos}" class="alert py-2 small rounded-3 border-0 mb-2" th:classappend="|alert-${av.tipo} ${av.mensalidadeId != null ? 'aviso-com-acao' : ''}|">
+        <span><i class="bi bi-bell-fill me-2"></i><span th:text="${av.texto}"></span></span>
+        <button th:if="${av.mensalidadeId != null}" type="button" class="btn btn-sm btn-success fw-semibold btn-pagar"
+                data-bs-toggle="modal" data-bs-target="#modalPagarPix"
+                th:data-id="${av.mensalidadeId}" th:data-valor="${av.valor}" th:data-vencimento="${av.vencimento}">
+            <i class="bi bi-qr-code"></i> Pagar agora
+        </button>
     </div>
 </div>

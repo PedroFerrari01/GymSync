@@ -44,6 +44,8 @@ public class AcademiaController {
     @Autowired private RelatorioService relatorioService;
     @Autowired private AulaService aulaService;
     @Autowired private FichaService fichaService;
+    @Autowired private FrequenciaService frequenciaService;
+    @Autowired private EvolucaoService evolucaoService;
     @Autowired private PasswordEncoder encoder;
     @Autowired private SenhaService senhaService;
     @Autowired private VisitanteService visitanteService;
@@ -79,7 +81,7 @@ public class AcademiaController {
     }
 
     @GetMapping("/")
-    public String paginaInicial(Model model, HttpSession session) {
+    public String paginaInicial(@RequestParam(required = false) String mes, Model model, HttpSession session) {
         String perfil = (String) session.getAttribute("perfil");
         model.addAttribute("tamanhoMinimoSenha", senhaService.tamanhoMinimo());
         if (perfil == null) {
@@ -120,11 +122,14 @@ public class AcademiaController {
             model.addAttribute("entradas", entradas);
             model.addAttribute("visitasSemana", visitasSemana);
             model.addAttribute("visitas30", visitas30);
+            model.addAttribute("calendario", frequenciaService.calendario(entradas, frequenciaService.mesPedido(mes, hoje), hoje));
             model.addAttribute("avisos", avisoService.paraAluno(usuarioId));
             model.addAttribute("ultimosRegistros", ultimosRegistros(registroExercicioRepository.findByAlunoId(usuarioId)));
             model.addAttribute("avaliacoes", avaliacoes);
             model.addAttribute("barrasPeso", relatorioService.barrasPeso(avaliacoes));
             model.addAttribute("resumoPeso", relatorioService.resumoPeso(avaliacoes));
+            model.addAttribute("barrasGordura", evolucaoService.barrasGordura(avaliacoes));
+            model.addAttribute("comparacao", evolucaoService.comparacao(avaliacoes));
             model.addAttribute("linkWhatsappFicha", fichaService.linkWhatsapp(aluno.getContato(), fichaService.textoAluno(aluno)));
             model.addAttribute("naoLidas", mensagemRepository.countByAlunoIdAndRemetenteAndLidaFalse(usuarioId, "PROFESSOR"));
             aulaService.preencher(model, usuarioId);
