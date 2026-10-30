@@ -1,11 +1,14 @@
 package com.example.sistema.academia.service;
 
 import com.example.sistema.academia.dto.Barra;
+import com.example.sistema.academia.dto.Comparacao;
 import com.example.sistema.academia.model.AvaliacaoFisica;
 import com.example.sistema.academia.model.Entrada;
+import com.example.sistema.academia.model.Matricula;
 import com.example.sistema.academia.model.Mensalidade;
 import com.example.sistema.academia.repository.AlunoRepository;
 import com.example.sistema.academia.repository.EntradaRepository;
+import com.example.sistema.academia.repository.MatriculaRepository;
 import com.example.sistema.academia.repository.MensalidadeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,6 +30,7 @@ public class RelatorioService {
     @Autowired private EntradaRepository entradaRepository;
     @Autowired private MensalidadeRepository mensalidadeRepository;
     @Autowired private AlunoRepository alunoRepository;
+    @Autowired private MatriculaRepository matriculaRepository;
 
     private String dinheiro(BigDecimal valor) {
         NumberFormat nf = NumberFormat.getNumberInstance(BR);
@@ -46,7 +50,8 @@ public class RelatorioService {
     public void montar(Model model) {
         LocalDate hoje = LocalDate.now();
         YearMonth mesAtual = YearMonth.now();
-        List<Entrada> entradas = entradaRepository.findByDataHoraEntradaAfter(LocalDateTime.now().minusDays(35));
+        // Desde o começo do mês passado: cobre os últimos 30 dias e a comparação mês a mês
+        List<Entrada> entradas = entradaRepository.findByDataHoraEntradaAfter(mesAtual.minusMonths(1).atDay(1).atStartOfDay().minusSeconds(1));
         LocalDateTime limite30 = LocalDateTime.now().minusDays(30);
         List<Entrada> ultimos30 = entradas.stream().filter(e -> e.getDataHoraEntrada().isAfter(limite30)).collect(Collectors.toList());
 
@@ -133,6 +138,61 @@ public class RelatorioService {
             receita.add(new Barra(rotulos.get(i), dinheiro(valores.get(i)), percentual(valores.get(i).doubleValue(), maxReceita)));
         }
         model.addAttribute("relReceita", receita);
+
+        model.addAttribute("relMesAMes", mesAMes(hoje, entradas, matriculaRepository.findAll(), mensalidades));
+        model.addAttribute("relMesAMesTitulo", "Dia 1 a " + hoje.getDayOfMonth() + " de cada mês");
+    }
+
+    /** Números de um mês, do dia 1 até {@code ateDia} (para comparar períodos iguais). */
+    public record ResumoMes(long entradas, long alunosQueTreinaram, long novasMatriculas, BigDecimal recebido) {}
+
+    public ResumoMes resumoMes(YearMonth mes, int ateDia, List<Entrada> entradas, List<Matricula> matriculas, List<Mensalidade> mensalidades) {
+        LocalDate inicio = mes.atDay(1);
+        LocalDate fim = mes.atDay(Math.min(ateDia, mes.lengthOfMonth()));
+        List<Entrada> doPeriodo = entradas.stream()
+                .filter(e -> e.getDataHoraEntrada() != null && dentro(e.getDataHoraEntrada().toLocalDate(), inicio, fim))
+                .toList();
+        long alunos = doPeriodo.stream().filter(e -> e.getAluno() != null).map(e -> e.getAluno().getId()).distinct().count();
+        long novas = matriculas.stream().filter(m -> m.getDataInicio() != null && dentro(m.getDataInicio(), inicio, fim)).count();
+        BigDecimal recebido = mensalidades.stream()
+                .filter(m -> "PAGA".equals(m.getSituacao()) && m.getDataPagamento() != null && dentro(m.getDataPagamento(), inicio, fim))
+                .map(this::valorOuZero).reduce(BigDecimal.ZERO, BigDecimal::add);
+        return new ResumoMes(doPeriodo.size(), alunos, novas, recebido);
+    }
+
+    private boolean dentro(LocalDate dia, LocalDate inicio, LocalDate fim) {
+        return !dia.isBefore(inicio) && !dia.isAfter(fim);
+    }
+
+    /** Este mês (até hoje) x o mesmo período do mês passado. Primeira coluna = mês passado, última = este mês. */
+    public List<Comparacao> mesAMes(LocalDate hoje, List<Entrada> entradas, List<Matricula> matriculas, List<Mensalidade> mensalidades) {
+        YearMonth atual = YearMonth.from(hoje);
+        ResumoMes agora = resumoMes(atual, hoje.getDayOfMonth(), entradas, matriculas, mensalidades);
+        ResumoMes antes = resumoMes(atual.minusMonths(1), hoje.getDayOfMonth(), entradas, matriculas, mensalidades);
+        return List.of(
+                linhaMes("Entradas na catraca", antes.entradas(), agora.entradas(), v -> Long.toString(v)),
+                linhaMes("Alunos que treinaram", antes.alunosQueTreinaram(), agora.alunosQueTreinaram(), v -> Long.toString(v)),
+                linhaMes("Novas matrículas", antes.novasMatriculas(), agora.novasMatriculas(), v -> Long.toString(v)),
+                linhaMes("Recebido", antes.recebido().doubleValue(), agora.recebido().doubleValue(), v -> dinheiro(BigDecimal.valueOf(v))));
+    }
+
+    private <T extends Number> Comparacao linhaMes(String rotulo, T antes, T agora, java.util.function.Function<T, String> formato) {
+        double a = antes.doubleValue();
+        double b = agora.doubleValue();
+        String variacao;
+        String classe;
+        if (a == 0 && b == 0) {
+            variacao = "igual";
+            classe = "neutro";
+        } else if (a == 0) {
+            variacao = "novo";
+            classe = "melhorou";
+        } else {
+            long pct = Math.round((b - a) / a * 100);
+            variacao = (pct > 0 ? "+" : "") + pct + "%";
+            classe = pct > 0 ? "melhorou" : pct < 0 ? "piorou" : "neutro";
+        }
+        return new Comparacao(rotulo, formato.apply(antes), formato.apply(agora), variacao, classe);
     }
 
     public List<Barra> barrasPeso(List<AvaliacaoFisica> avaliacoes) {

@@ -74,6 +74,46 @@ public class TreinoController {
         return "redirect:/";
     }
 
+    /**
+     * Copia uma ficha (com os exercícios) para outro aluno, para usar como modelo.
+     * Qualquer professor pode copiar qualquer ficha; a cópia fica com quem copiou (o admin mantém o professor da original).
+     */
+    @PostMapping("/treinos/copiar")
+    public String copiarTreino(@RequestParam Long id, @RequestParam Long alunoId, @RequestParam String descricao,
+                               HttpSession session, RedirectAttributes redirect) {
+        Treino origem = treinoRepository.findById(id).orElse(null);
+        Aluno aluno = alunoRepository.findById(alunoId).orElse(null);
+        if (origem == null || aluno == null || descricao.isBlank()) {
+            redirect.addFlashAttribute("erro", "Selecione o aluno e informe o nome da nova ficha.");
+            return "redirect:/";
+        }
+        Professor dono = origem.getProfessor();
+        if ("PROFESSOR".equals(session.getAttribute("perfil"))) {
+            dono = professorRepository.findById((Long) session.getAttribute("usuarioId")).orElse(null);
+            if (dono == null) return "redirect:/";
+        }
+
+        Treino copia = new Treino();
+        copia.setAluno(aluno);
+        copia.setProfessor(dono);
+        copia.setDescricao(descricao.trim());
+        copia.setDataCriacao(LocalDate.now());
+        treinoRepository.save(copia);
+
+        int quantos = 0;
+        for (ExercicioTreino ex : exercicioTreinoRepository.findByTreinoId(origem.getId())) {
+            ExercicioTreino novo = new ExercicioTreino();
+            novo.setTreino(copia);
+            novo.setExercicio(ex.getExercicio());
+            novo.setSeries(ex.getSeries());
+            novo.setRepeticoes(ex.getRepeticoes());
+            exercicioTreinoRepository.save(novo);
+            quantos++;
+        }
+        redirect.addFlashAttribute("sucesso", "Ficha copiada para " + aluno.getNome() + " com " + quantos + " exercício(s).");
+        return "redirect:/";
+    }
+
     @PostMapping("/treinos/excluir/{id}")
     public String excluirTreino(@PathVariable Long id, HttpSession session, RedirectAttributes redirect) {
         Treino t = treinoRepository.findById(id).orElse(null);

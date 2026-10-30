@@ -959,3 +959,67 @@ html:has(.sobre) { scroll-behavior: smooth; }
     background: var(--bg-body);
 }
 .pagina-offline main { max-width: 420px; }
+
+/* Professor (30/10): alunos sumidos, adesão ao treino e copiar ficha. Para desfazer, apague este bloco. */
+.icone-destaque { color: var(--accent); }
+
+.lista-sumidos {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-height: 320px;
+    overflow-y: auto;
+}
+.lista-sumidos li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s2);
+    padding: var(--s2) 0;
+    border-bottom: 1px solid var(--border-color);
+}
+.lista-sumidos li:last-child { border-bottom: 0; }
+
+.col-adesao { min-width: 140px; }
+.adesao {
+    display: flex;
+    align-items: center;
+    gap: var(--s2);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+.adesao-trilho {
+    flex: 1;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--bg-input);
+    overflow: hidden;
+}
+.adesao-barra { height: 100%; border-radius: 999px; background: var(--accent); }
+
+/* Admin (30/10): exportar relatórios e comparação mês a mês */
+.barra-exportar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s2);
+}
+@media print {
+    .vbar, .hbar-fill, .adesao-barra, .evo-dif {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    #aba-relatorios .panel-card { break-inside: avoid; }
+    #aba-relatorios .mini-kpi,
+    #aba-relatorios .panel-card {
+        background: #ffffff !important;
+        border-color: #d4d4d8 !important;
+        color: #000000 !important;
+        opacity: 1 !important;
+        transform: none !important;
+    }
+    #aba-relatorios .mini-kpi .valor { color: #000000; }
+    #aba-relatorios .mini-kpi .rotulo,
+    #aba-relatorios .vval,
+    #aba-relatorios .vlbl { color: #52525b !important; }
+}

@@ -1,5 +1,6 @@
 package com.example.sistema.academia.controller;
 
+import com.example.sistema.academia.dto.Acompanhamento;
 import com.example.sistema.academia.model.*;
 import com.example.sistema.academia.repository.*;
 import com.example.sistema.academia.service.*;
@@ -46,6 +47,7 @@ public class AcademiaController {
     @Autowired private FichaService fichaService;
     @Autowired private FrequenciaService frequenciaService;
     @Autowired private EvolucaoService evolucaoService;
+    @Autowired private AcompanhamentoService acompanhamentoService;
     @Autowired private PasswordEncoder encoder;
     @Autowired private SenhaService senhaService;
     @Autowired private VisitanteService visitanteService;
@@ -78,6 +80,20 @@ public class AcademiaController {
             mapa.putIfAbsent(r.getExercicio().getId(), r);
         }
         return mapa;
+    }
+
+    private List<Acompanhamento> acompanhamento(List<Treino> treinos, List<ExercicioTreino> exercicios, List<Entrada> entradas,
+                                                List<RegistroExercicio> registros, String nomeUsuario, boolean professor) {
+        List<Acompanhamento> linhas = acompanhamentoService.montar(treinos, exercicios, entradas, registros, LocalDate.now());
+        String quem = professor && nomeUsuario != null ? "o(a) professor(a) " + nomeUsuario : "a recepção";
+        for (Acompanhamento l : linhas) {
+            if (!l.isSumido()) continue;
+            String primeiroNome = l.getNome().trim().split("\\s+")[0];
+            String texto = "Oi, " + primeiroNome + "! Aqui é " + quem + " da academia. Sentimos sua falta nos treinos."
+                    + " Está tudo bem? Vamos voltar esta semana?";
+            l.setLinkWhatsapp(fichaService.linkWhatsapp(l.getContato(), texto));
+        }
+        return linhas;
     }
 
     @GetMapping("/")
@@ -148,18 +164,26 @@ public class AcademiaController {
         model.addAttribute("alunos", alunoRepository.findAll());
         model.addAttribute("professores", professorRepository.findAll());
         model.addAttribute("planos", planoRepository.findAll());
+        List<ExercicioTreino> todosExercicios = exercicioTreinoRepository.findAll();
+        List<RegistroExercicio> todosRegistros = registroExercicioRepository.findAll();
+        boolean professor = "PROFESSOR".equals(perfil);
+        List<Treino> meusTreinos = professor ? treinoRepository.findByProfessorId(usuarioId) : treinos;
+
         model.addAttribute("treinos", treinos);
-        model.addAttribute("exercicios", exercicioTreinoRepository.findAll());
+        model.addAttribute("exercicios", todosExercicios);
         model.addAttribute("entradas", todasEntradas);
         model.addAttribute("entradasRecentes", todasEntradas.stream().limit(30).toList());
         model.addAttribute("avaliacoes", avaliacaoFisicaRepository.findAllByOrderByDataAvaliacaoDescIdDesc());
-        model.addAttribute("ultimosRegistros", ultimosRegistros(registroExercicioRepository.findAll()));
+        model.addAttribute("ultimosRegistros", ultimosRegistros(todosRegistros));
         model.addAttribute("linksWhatsapp", linksWhatsapp);
+        model.addAttribute("acompanhamento", acompanhamento(meusTreinos, todosExercicios, todasEntradas, todosRegistros,
+                (String) session.getAttribute("nomeUsuario"), professor));
+        model.addAttribute("diasSumido", AcompanhamentoService.DIAS_SUMIDO);
         aulaService.preencher(model, null);
 
-        if ("PROFESSOR".equals(perfil)) {
+        if (professor) {
             model.addAttribute("professorId", usuarioId);
-            model.addAttribute("meusTreinos", treinoRepository.findByProfessorId(usuarioId));
+            model.addAttribute("meusTreinos", meusTreinos);
             model.addAttribute("naoLidas", mensagemRepository.countByProfessorIdAndRemetenteAndLidaFalse(usuarioId, "ALUNO"));
             return "index";
         }

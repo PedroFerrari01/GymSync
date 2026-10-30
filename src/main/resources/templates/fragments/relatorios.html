@@ -1,5 +1,19 @@
 <div th:fragment="aba" class="tab-pane fade" id="aba-relatorios" role="tabpanel">
 
+    <div class="cabecalho-impressao">
+        <h3 class="fw-bold mb-1">GymSync - RELATÓRIO DA ACADEMIA</h3>
+        <p class="mb-0" th:text="|Impresso em ${#temporals.format(#temporals.createNow(), 'dd/MM/yyyy HH:mm')}|"></p>
+    </div>
+
+    <div class="barra-exportar mb-4 ocultar-impressao">
+        <span class="small texto-apoio me-1"><i class="bi bi-download"></i> Exportar planilha:</span>
+        <a class="btn-theme btn-sm" th:href="@{/relatorios/exportar/resumo-mensal}"><i class="bi bi-table"></i> Resumo dos 12 meses</a>
+        <a class="btn-theme btn-sm" th:href="@{/relatorios/exportar/alunos}"><i class="bi bi-people"></i> Alunos</a>
+        <a class="btn-theme btn-sm" th:href="@{/relatorios/exportar/mensalidades}"><i class="bi bi-cash-coin"></i> Mensalidades</a>
+        <a class="btn-theme btn-sm" th:href="@{/relatorios/exportar/entradas}"><i class="bi bi-door-open"></i> Entradas (90 dias)</a>
+        <button type="button" class="btn-brand btn-sm ms-lg-auto" data-imprimir><i class="bi bi-printer"></i> Imprimir / PDF</button>
+    </div>
+
     <div class="row g-3 mb-4">
         <div class="col-6 col-lg-3"><div class="mini-kpi"><div class="valor" th:text="${relEntradasHoje}">0</div><div class="rotulo">Entradas hoje</div></div></div>
         <div class="col-6 col-lg-3"><div class="mini-kpi"><div class="valor" th:text="${relEntradasMes}">0</div><div class="rotulo">Entradas no mês</div></div></div>
@@ -8,6 +22,26 @@
         <div class="col-6 col-lg-4"><div class="mini-kpi"><div class="valor" style="color:#10b981;" th:text="${relReceitaMes}">R$ 0,00</div><div class="rotulo">Recebido no mês</div></div></div>
         <div class="col-6 col-lg-4"><div class="mini-kpi"><div class="valor" th:text="${relAReceber}">R$ 0,00</div><div class="rotulo">A receber (pendente)</div></div></div>
         <div class="col-12 col-lg-4"><div class="mini-kpi"><div class="valor text-danger" th:text="${relAtrasado}">R$ 0,00</div><div class="rotulo">Em atraso</div></div></div>
+    </div>
+
+    <div th:if="${relMesAMes != null}" class="panel-card mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+            <h5 class="panel-title">Este mês x mês passado</h5>
+            <span class="tag-pill" th:text="${relMesAMesTitulo}"></span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-custom tabela-evolucao mb-0">
+                <thead><tr><th></th><th>Mês passado</th><th>Este mês</th><th class="text-end">Variação</th></tr></thead>
+                <tbody>
+                    <tr th:each="c : ${relMesAMes}">
+                        <td class="fw-semibold" th:text="${c.rotulo}"></td>
+                        <td th:text="${c.primeira}"></td>
+                        <td th:text="${c.ultima}"></td>
+                        <td class="text-end"><span class="evo-dif" th:classappend="${c.classe}" th:text="${c.diferenca}"></span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <div class="row g-4 mb-4">

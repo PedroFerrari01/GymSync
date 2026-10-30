@@ -679,6 +679,53 @@
                 </div>
 
                 <div th:if="${perfil == 'ADMIN' or perfil == 'PROFESSOR'}" class="tab-pane fade" th:classappend="${perfil == 'PROFESSOR' ? 'show active' : ''}" id="aba-treinos" role="tabpanel">
+                    <!-- Acompanhamento: alunos ativos com ficha (do professor logado; todos para o admin) -->
+                    <div th:if="${acompanhamento != null and !#lists.isEmpty(acompanhamento)}" class="row g-4 mb-4">
+                        <div class="col-lg-5">
+                            <div class="panel-card h-100">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <h5 class="panel-title">Alunos sumidos</h5>
+                                    <span class="tag-pill" th:text="|${diasSumido}+ dias|"></span>
+                                </div>
+                                <p class="small mb-3 texto-apoio" th:text="|Sem passar pela catraca há ${diasSumido} dias ou mais. Mande uma mensagem antes que desistam.|"></p>
+                                <ul class="lista-sumidos">
+                                    <li th:each="l : ${acompanhamento}" th:if="${l.sumido}">
+                                        <div>
+                                            <div class="fw-semibold" th:text="${l.nome}"></div>
+                                            <div class="small status-wait" th:text="${l.ultimaVisita}"></div>
+                                        </div>
+                                        <a th:if="${l.linkWhatsapp != null}" th:href="${l.linkWhatsapp}" target="_blank" rel="noopener" class="btn-theme btn-sm"><i class="bi bi-whatsapp"></i> Chamar</a>
+                                    </li>
+                                </ul>
+                                <div th:if="${#lists.isEmpty(acompanhamento.?[sumido])}" class="vazio">Ninguém sumido. Todos os alunos vieram nos últimos dias.</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-7">
+                            <div class="panel-card h-100">
+                                <h5 class="panel-title mb-1">Adesão ao treino na semana</h5>
+                                <p class="small mb-3 texto-apoio">Exercícios da ficha que o aluno marcou como feitos desde segunda.</p>
+                                <div class="table-responsive tabela-scroll">
+                                    <table class="table table-custom tabela-filtravel mb-0">
+                                        <thead><tr><th>Aluno</th><th>Catraca</th><th>Feitos</th><th class="col-adesao">Adesão</th></tr></thead>
+                                        <tbody>
+                                            <tr th:each="l : ${acompanhamento}">
+                                                <td class="fw-semibold" th:text="${l.nome}"></td>
+                                                <td class="small" th:text="${l.entradasSemana == 1 ? '1 vez' : l.entradasSemana + ' vezes'}"></td>
+                                                <td class="small" th:text="${l.totalExercicios == 0 ? 'Ficha vazia' : l.feitosSemana + ' de ' + l.totalExercicios}"></td>
+                                                <td>
+                                                    <div class="adesao">
+                                                        <div class="adesao-trilho"><div class="adesao-barra" th:style="|width:${l.adesao}%|"></div></div>
+                                                        <span th:text="|${l.adesao}%|"></span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row g-4 mb-4">
 
                         <div th:if="${perfil == 'ADMIN'}" class="col-lg-4">
@@ -770,6 +817,9 @@
                                                     <form th:action="@{/treinos/enviar-email/{id}(id=${t.id})}" method="post" class="d-inline" data-confirm="Enviar esta ficha por e-mail para o aluno?">
                                                         <button type="submit" class="action-btn action-toggle me-1" title="Enviar por e-mail"><i class="bi bi-envelope"></i></button>
                                                     </form>
+                                                    <button type="button" class="action-btn action-toggle me-1 btn-fill" title="Copiar para outro aluno"
+                                                            data-bs-toggle="modal" data-bs-target="#modalCopiarFicha" data-form="formCopiarFicha"
+                                                            th:data-campo-id="${t.id}" th:data-campo-descricao="${t.descricao}" th:data-campo-origem="|${t.descricao} (${t.aluno.nome})|"><i class="bi bi-copy"></i></button>
                                                     <th:block th:if="${perfil == 'ADMIN' or t.professor.id == professorId}">
                                                         <button type="button" class="action-btn action-toggle me-1 btn-fill" title="Editar"
                                                                 data-bs-toggle="modal" data-bs-target="#modalEditarFicha" data-form="formEditarFicha"
@@ -959,6 +1009,36 @@
                 <div class="modal-footer">
                     <button type="button" class="btn-theme" data-bs-dismiss="modal">Cancelar</button>
                     <button type="submit" class="btn-brand">Salvar Alteração</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div th:if="${logado and (perfil == 'ADMIN' or perfil == 'PROFESSOR')}" class="modal fade" id="modalCopiarFicha" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content p-2">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold"><i class="bi bi-copy me-2 icone-destaque"></i>Copiar Ficha de Treino</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <form id="formCopiarFicha" th:action="@{/treinos/copiar}" method="post">
+                <div class="modal-body">
+                    <input type="hidden" name="id">
+                    <label class="form-label">Ficha de origem</label>
+                    <input type="text" name="origem" class="form-control mb-2" readonly tabindex="-1">
+                    <label class="form-label">Copiar para o aluno</label>
+                    <select name="alunoId" class="form-select mb-2" required>
+                        <option value="">Selecionar aluno...</option>
+                        <option th:each="a : ${alunos}" th:value="${a.id}" th:text="${a.nome}"></option>
+                    </select>
+                    <label class="form-label">Nome da nova ficha</label>
+                    <input type="text" name="descricao" class="form-control" maxlength="60" required>
+                    <p class="small texto-apoio mt-2 mb-0">Os exercícios, séries e repetições vão juntos. As cargas registradas pelo aluno de origem não são copiadas.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-theme" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn-brand">Copiar Ficha</button>
                 </div>
             </form>
         </div>

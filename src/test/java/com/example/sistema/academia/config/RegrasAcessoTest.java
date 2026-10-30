@@ -70,6 +70,9 @@ class RegrasAcessoTest {
             "ADMIN, /equipamentos/salvar, true",
             "ADMIN, /treinos/salvar, true",
             "ADMIN, /aulas/salvar, true",
+            "ADMIN, /relatorios/exportar/alunos, true",
+            "PROFESSOR, /relatorios/exportar/alunos, false",
+            "ALUNO, /relatorios/exportar/mensalidades, false",
             "ADMIN, /aluno/mensalidades/informar/1, false",
             "ADMIN, /aulas/reservar/1, false",
             "ADMIN, /mensagens, false",
@@ -77,6 +80,8 @@ class RegrasAcessoTest {
 
             // Professor: treinos, exercícios, avaliações, aulas e mensagens
             "PROFESSOR, /treinos/salvar, true",
+            "PROFESSOR, /treinos/copiar, true",
+            "ALUNO, /treinos/copiar, false",
             "PROFESSOR, /exercicios/salvar, true",
             "PROFESSOR, /avaliacoes/salvar, true",
             "PROFESSOR, /aulas/salvar, true",

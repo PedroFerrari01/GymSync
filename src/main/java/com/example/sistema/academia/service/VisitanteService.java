@@ -120,13 +120,25 @@ public class VisitanteService {
         exercicio(treinoDiego, "Agachamento livre", 4, 10);
         exercicio(treinoDiego, "Leg press", 4, 12);
 
-        // Entradas na catraca nos últimos 30 dias, com pico no fim da tarde
+        // Bruno também treina com o Marcos, mas parou de vir (aparece em "Alunos sumidos")
+        Treino treinoBruno = new Treino();
+        treinoBruno.setAluno(bruno);
+        treinoBruno.setProfessor(marcos);
+        treinoBruno.setDescricao("Treino A - corpo inteiro");
+        treinoBruno.setDataCriacao(hoje.minusDays(40));
+        treinoRepository.save(treinoBruno);
+        exercicio(treinoBruno, "Agachamento livre", 3, 12);
+        exercicio(treinoBruno, "Puxada frontal", 3, 12);
+
+        // Entradas na catraca nos últimos 60 dias (o relatório compara com o mês passado), com pico no fim da tarde
         int[] horas = {6, 7, 8, 12, 17, 18, 18, 19, 19, 20};
         List<Aluno> frequentes = List.of(ana, ana, diego, diego, elisa, felipe, bruno);
-        for (int dia = 29; dia >= 0; dia--) {
+        for (int dia = 59; dia >= 0; dia--) {
             LocalDate data = hoje.minusDays(dia);
             if (data.getDayOfWeek() == DayOfWeek.SUNDAY) continue;
             for (Aluno aluno : frequentes) {
+                if (aluno == bruno && dia < 12) continue;
+                if (aluno == felipe && dia > 5) continue; // matriculou há 5 dias
                 if (sorteio.nextInt(10) < 5) continue;
                 Entrada e = new Entrada();
                 e.setAluno(aluno);
