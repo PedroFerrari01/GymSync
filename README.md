@@ -1,16 +1,10 @@
-# GymSync
+<img src="docs/img/banner.png" alt="GymSync: sistema web de gestão de academia com três perfis. Java 25, Spring Boot 4, MySQL e Thymeleaf" width="100%">
 
 Sistema web de gestão de academias feito em **Java com Spring Boot**: cadastros, planos, matrículas, mensalidades com Pix simulado, catraca, fichas de treino, avaliações físicas, aulas coletivas, equipamentos, mensagens e relatórios. Cada pessoa entra com o próprio perfil (administrador, professor ou aluno) e só vê o que é dela.
 
 Desenvolvi este sistema para um trabalho acadêmico do curso de Análise e Desenvolvimento de Sistemas: modelagem, regras de negócio, back-end, telas e testes.
 
 **Experimente agora:** [gymsync-ucfj.onrender.com](https://gymsync-ucfj.onrender.com), com o botão "Testar como visitante" (dados de exemplo, só leitura). O site roda em plano gratuito e dorme sem uso, então a primeira visita pode levar cerca de um minuto para abrir.
-
-![Java](https://img.shields.io/badge/Java_25-ED8B00?style=flat-square&logo=openjdk&logoColor=white)
-![Spring Boot](https://img.shields.io/badge/Spring_Boot_4-6DB33F?style=flat-square&logo=springboot&logoColor=white)
-![MySQL](https://img.shields.io/badge/MySQL_8-4479A1?style=flat-square&logo=mysql&logoColor=white)
-![Thymeleaf](https://img.shields.io/badge/Thymeleaf-005F0F?style=flat-square&logo=thymeleaf&logoColor=white)
-![JUnit](https://img.shields.io/badge/JUnit_5-25A162?style=flat-square&logo=junit5&logoColor=white)
 
 ![Tela de login do GymSync](docs/img/login.jpg)
 
