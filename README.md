@@ -6,6 +6,10 @@ Desenvolvi este sistema para um trabalho acadêmico do curso de Análise e Desen
 
 **Experimente agora:** [gymsync-ucfj.onrender.com](https://gymsync-ucfj.onrender.com), com o botão "Testar como visitante" (dados de exemplo, só leitura). O site roda em plano gratuito e dorme sem uso, então a primeira visita pode levar cerca de um minuto para abrir.
 
+[![Vídeo de apresentação do GymSync, cerca de 2 minutos](docs/img/video-capa.jpg)](https://gymsync-ucfj.onrender.com/#video)
+
+**Vídeo de apresentação (2 min):** matrícula, mensalidade com Pix, catraca, ficha de treino e relatórios, com narração. Ele toca no próprio site, no fim do "Quem somos" (clique na imagem); o arquivo também está no repositório, em [`static/video/gymsync.mp4`](src/main/resources/static/video/gymsync.mp4).
+
 ![Tela de login do GymSync](docs/img/login.jpg)
 
 ## Destaques
@@ -141,4 +145,4 @@ Desenvolvido por **Pedro Ferrari** ([GitHub](https://github.com/PedroFerrari01) 
 
 O trabalho acadêmico foi feito em grupo: os colegas contribuíram com ideias, a proposta, o canvas e os slides da apresentação.
 
-A página de apresentação "Quem somos" (halter 3D, animações e demonstrações) foi feita com apoio de IA.
+A página de apresentação "Quem somos" (halter 3D, animações e demonstrações) e o vídeo de apresentação foram feitos com apoio de IA.

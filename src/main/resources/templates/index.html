@@ -300,18 +300,19 @@
         </div>
     </section>
 
-    <!-- Vídeo de apresentação: só aparece com gymsync.video-youtube preenchido (o código do vídeo no YouTube).
-         O YouTube só carrega quando a pessoa clica em assistir (gymsync.js). -->
-    <section th:if="${videoYoutube != null and !#strings.isEmpty(videoYoutube)}" class="sobre-bloco sobre-video" aria-labelledby="tituloVideo">
+    <!-- Vídeo de apresentação: por padrão toca o arquivo do próprio site (static/video), que só carrega no clique.
+         Com gymsync.video-youtube preenchido (o código do vídeo no YouTube), abre pelo YouTube (gymsync.js). -->
+    <section id="video" class="sobre-bloco sobre-video" aria-labelledby="tituloVideo">
         <h2 id="tituloVideo" class="sobre-titulo">O GymSync em funcionamento</h2>
         <p class="video-sub">Um passeio pelo sistema, do cadastro do aluno ao treino do dia.</p>
-        <div class="video-quadro" th:data-video="${videoYoutube}">
+        <div class="video-quadro com-capa" th:data-video="${videoYoutube}" th:data-arquivo="@{/video/gymsync.mp4}">
             <button type="button" class="video-play">
                 <span class="video-play-icone"><i class="ph ph-play" aria-hidden="true"></i></span>
                 <span>Assistir ao vídeo</span>
             </button>
         </div>
-        <p class="video-nota">O vídeo abre pelo YouTube.</p>
+        <p class="video-nota" th:if="${!#strings.isEmpty(videoYoutube)}">O vídeo abre pelo YouTube.</p>
+        <p class="video-nota" th:if="${#strings.isEmpty(videoYoutube)}">Cerca de 2 minutos, com narração.</p>
     </section>
 
     <section class="sobre-bloco sobre-fim">

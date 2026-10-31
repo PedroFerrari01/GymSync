@@ -538,13 +538,25 @@ document.addEventListener('click', (e) => {
     if (e.target.closest('[data-imprimir]')) window.print();
 });
 
-// Vídeo do "Quem somos": o YouTube só é carregado quando a pessoa clica em assistir
+// Vídeo do "Quem somos": só é carregado quando a pessoa clica em assistir.
+// Sem código do YouTube, toca o arquivo do próprio site (static/video/gymsync.mp4)
 document.addEventListener('click', (e) => {
     const play = e.target.closest('.video-play');
     if (!play) return;
     const quadro = play.closest('.video-quadro');
     const id = quadro.dataset.video || '';
-    if (!/^[A-Za-z0-9_-]{11}$/.test(id)) return;
+    if (!/^[A-Za-z0-9_-]{11}$/.test(id)) {
+        const arquivo = quadro.dataset.arquivo || '';
+        if (!arquivo.endsWith('.mp4')) return;
+        const video = document.createElement('video');
+        video.src = arquivo;
+        video.controls = true;
+        video.playsInline = true;
+        video.title = 'Vídeo de apresentação do GymSync';
+        quadro.replaceChildren(video);
+        video.play().catch(() => {});
+        return;
+    }
     const frame = document.createElement('iframe');
     frame.src = 'https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1&rel=0';
     frame.title = 'Vídeo de apresentação do GymSync';

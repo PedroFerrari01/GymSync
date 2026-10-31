@@ -807,7 +807,11 @@ html:has(.sobre) { scroll-behavior: smooth; }
     overflow: hidden;
     background: radial-gradient(60% 80% at 50% 50%, var(--accent-soft), transparent 70%), var(--bg-sidebar);
 }
-.video-quadro iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.video-quadro iframe,
+.video-quadro video { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: #000; }
+/* Capa do vídeo (static/video/gymsync-capa.jpg) com um véu escuro para o botão aparecer nos dois temas */
+.video-quadro.com-capa { background: url('/video/gymsync-capa.jpg') center / cover no-repeat, #0b0b0e; }
+.video-quadro.com-capa .video-play { background: rgba(0, 0, 0, 0.28); color: #fff; }
 .video-play {
     position: absolute;
     inset: 0;

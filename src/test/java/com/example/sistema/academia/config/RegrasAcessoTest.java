@@ -21,6 +21,8 @@ class RegrasAcessoTest {
         assertTrue(RegrasAcesso.permitido(null, "/recuperar-senha"));
         assertTrue(RegrasAcesso.permitido(null, "/redefinir-senha"));
         assertTrue(RegrasAcesso.permitido(null, "/css/gymsync-tema.css"));
+        // Vídeo de apresentação do "Quem somos" (fica na tela de login, antes de entrar)
+        assertTrue(RegrasAcesso.permitido(null, "/video/gymsync.mp4"));
         // Instalar no celular: o navegador busca estes arquivos sem a sessão do usuário
         assertTrue(RegrasAcesso.permitido(null, "/manifest.json"));
         assertTrue(RegrasAcesso.permitido(null, "/sw.js"));
