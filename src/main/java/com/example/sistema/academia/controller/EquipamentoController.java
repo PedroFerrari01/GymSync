@@ -22,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.zip.CRC32;
 
 @Controller
 public class EquipamentoController {
@@ -86,10 +87,16 @@ public class EquipamentoController {
     @GetMapping("/equipamentos/imagem/{id}")
     public ResponseEntity<byte[]> verImagem(@PathVariable Long id) {
         return imagemRepository.findById(id)
-                .map(i -> ResponseEntity.ok()
-                        .contentType(MediaType.parseMediaType(i.getTipo()))
-                        .cacheControl(CacheControl.noCache())
-                        .body(i.getDados()))
+                .map(i -> {
+                    // ETag: o navegador pergunta se a foto mudou e recebe "não mudou" (304), sem baixar de novo
+                    CRC32 crc = new CRC32();
+                    crc.update(i.getDados());
+                    return ResponseEntity.ok()
+                            .contentType(MediaType.parseMediaType(i.getTipo()))
+                            .cacheControl(CacheControl.noCache())
+                            .eTag(Long.toHexString(crc.getValue()) + "-" + i.getDados().length)
+                            .body(i.getDados());
+                })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
@@ -104,8 +111,9 @@ public class EquipamentoController {
     }
 
     private void guardarImagem(Long equipamentoId, MultipartFile imagem) throws IOException {
-        byte[] dados = imagem.getBytes();
-        imagemRepository.save(new EquipamentoImagem(equipamentoId, ImagemValidador.tipo(dados), dados));
+        byte[] original = imagem.getBytes();
+        String tipo = ImagemValidador.tipo(original);
+        imagemRepository.save(new EquipamentoImagem(equipamentoId, tipo, ImagemValidador.reduzir(original, tipo)));
     }
 
     @PostMapping("/equipamentos/status/{id}")

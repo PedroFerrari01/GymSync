@@ -31,7 +31,9 @@
                             <tr th:each="equip : ${equipamentos}">
                                 <td>
                                     <img th:if="${equipamentosComFoto != null and equipamentosComFoto.contains(equip.id)}"
-                                         th:src="@{/equipamentos/imagem/{id}(id=${equip.id})}" th:alt="${equip.nome}" class="equip-foto" loading="lazy">
+                                         th:src="@{/equipamentos/imagem/{id}(id=${equip.id})}" th:alt="${equip.nome}" class="equip-foto" loading="lazy"
+                                         th:data-foto="@{/equipamentos/imagem/{id}(id=${equip.id})}" th:data-nome="${equip.nome}"
+                                         data-bs-toggle="modal" data-bs-target="#modalFotoEquipamento" role="button" title="Ampliar foto">
                                     <span th:unless="${equipamentosComFoto != null and equipamentosComFoto.contains(equip.id)}" class="equip-sem-foto" title="Sem imagem"><i class="bi bi-image"></i></span>
                                 </td>
                                 <td class="fw-semibold" th:text="${equip.nome}"></td>

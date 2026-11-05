@@ -621,3 +621,12 @@ document.addEventListener('change', (e) => {
     const campo = e.target.closest('.input-foto-auto');
     if (campo && campo.files.length) campo.form.submit();
 });
+
+// Equipamentos: clicar na miniatura abre a foto grande na janela
+document.addEventListener('show.bs.modal', (e) => {
+    if (e.target.id !== 'modalFotoEquipamento' || !e.relatedTarget) return;
+    const foto = e.relatedTarget.dataset.foto;
+    if (!foto) return;
+    e.target.querySelector('.foto-equip-grande').src = foto;
+    e.target.querySelector('.foto-equip-nome').textContent = e.relatedTarget.dataset.nome || 'Foto do aparelho';
+});
