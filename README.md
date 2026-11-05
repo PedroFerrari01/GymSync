@@ -115,10 +115,10 @@ cd GymSync
 **Testes de acesso** (não precisam do banco):
 
 ```bash
-./mvnw test -Dtest=RegrasAcessoTest,LimiteTentativasServiceTest,SenhaServiceTest,AuthControllerTest,CamposPermitidosTest,VisitanteServiceTest,FrequenciaServiceTest,EvolucaoServiceTest,AvisoVencimentoTest,AcompanhamentoServiceTest,ExportacaoServiceTest,SituacaoServiceTest,HistoricoConfigTest
+./mvnw test -Dtest=RegrasAcessoTest,LimiteTentativasServiceTest,SenhaServiceTest,AuthControllerTest,CamposPermitidosTest,VisitanteServiceTest,FrequenciaServiceTest,EvolucaoServiceTest,AvisoVencimentoTest,AcompanhamentoServiceTest,ExportacaoServiceTest,SituacaoServiceTest,HistoricoConfigTest,ImagemValidadorTest,RespostaAjaxConfigTest
 ```
 
-São 88 testes; não precisam do banco. `SistemaAcademiaApplicationTests` precisa do MySQL ligado.
+São 100 testes; não precisam do banco. `SistemaAcademiaApplicationTests` precisa do MySQL ligado.
 
 | Erro | Solução |
 | :--- | :--- |

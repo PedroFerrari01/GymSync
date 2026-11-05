@@ -630,3 +630,75 @@ document.addEventListener('show.bs.modal', (e) => {
     e.target.querySelector('.foto-equip-grande').src = foto;
     e.target.querySelector('.foto-equip-nome').textContent = e.relatedTarget.dataset.nome || 'Foto do aparelho';
 });
+
+// Alternar situação e excluir sem recarregar a página: o formulário vai por fetch e só a linha muda.
+// Sem JavaScript (ou se algo falhar) o formulário comum continua funcionando.
+(function () {
+    const PADRAO_ACAO = /\/(status|excluir)\/\d+$/;
+
+    function aviso(texto, erro) {
+        let caixa = document.querySelector('.toast-ajax');
+        if (!caixa) {
+            caixa = document.createElement('div');
+            caixa.className = 'toast-ajax';
+            caixa.setAttribute('role', 'status');
+            document.body.appendChild(caixa);
+        }
+        caixa.textContent = texto;
+        caixa.classList.toggle('toast-ajax-erro', !!erro);
+        caixa.classList.add('toast-ajax-visivel');
+        clearTimeout(caixa._tempo);
+        caixa._tempo = setTimeout(() => caixa.classList.remove('toast-ajax-visivel'), 3500);
+    }
+
+    // Uma ação mexe em dados que aparecem em outras abas (contagens, listas ligadas): ao trocar de aba, recarrega
+    function marcarDesatualizada() { document.body.dataset.desatualizada = '1'; }
+    document.addEventListener('shown.bs.tab', () => {
+        if (document.body.dataset.desatualizada === '1') location.reload();
+    });
+
+    function alternarSelo(linha) {
+        const selo = linha.querySelector('.status-ok, .status-off, .status-wait');
+        if (!selo) return;
+        const texto = selo.textContent.trim();
+        if (texto === 'ATIVO') { selo.textContent = 'INATIVO'; selo.className = 'status-off'; }
+        else if (texto === 'INATIVO') { selo.textContent = 'ATIVO'; selo.className = 'status-ok'; }
+        else if (texto === 'OPERANDO') { selo.textContent = 'EM MANUTENÇÃO'; selo.className = 'status-wait'; }
+        else { selo.textContent = 'OPERANDO'; selo.className = 'status-ok'; }
+    }
+
+    document.addEventListener('submit', async (e) => {
+        const form = e.target;
+        if (e.defaultPrevented || !(form instanceof HTMLFormElement) || form.method.toLowerCase() !== 'post') return;
+        const caminho = new URL(form.action, location.href).pathname;
+        const casou = PADRAO_ACAO.exec(caminho);
+        if (!casou) return;
+
+        e.preventDefault();
+        const excluir = casou[1] === 'excluir';
+        const linha = form.closest('tr');
+        const botao = form.querySelector('button[type="submit"]');
+        if (botao) botao.disabled = true;
+        try {
+            const resposta = await fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form),
+                headers: { 'X-Requested-With': 'fetch' },
+                credentials: 'same-origin',
+                redirect: 'manual'
+            });
+            const json = resposta.type === 'basic' && (resposta.headers.get('content-type') || '').includes('application/json')
+                ? await resposta.json() : null;
+            if (!json) { location.reload(); return; }   // recusado ou sessão vencida: a tela inicial mostra o motivo
+            if (!json.ok) { aviso(json.mensagem || 'Não foi possível concluir.', true); return; }
+            if (excluir && linha) linha.remove();
+            else if (linha) alternarSelo(linha);
+            marcarDesatualizada();
+            if (json.mensagem) aviso(json.mensagem, false);
+        } catch (erro) {
+            aviso('Sem conexão com o servidor. Tente de novo.', true);
+        } finally {
+            if (botao) botao.disabled = false;
+        }
+    });
+})();
