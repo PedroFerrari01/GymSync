@@ -53,3 +53,7 @@ server.servlet.session.tracking-modes=cookie
 # Vídeo do "Quem somos": o código do vídeo no YouTube (11 caracteres, o que vem depois de watch?v=).
 # Vazio, a seção do vídeo não aparece.
 # gymsync.video-youtube=
+
+# Envio de imagens (foto do equipamento): o sistema confere o limite de 2 MB e avisa; aqui só não deixa o servidor recusar antes.
+spring.servlet.multipart.max-file-size=8MB
+spring.servlet.multipart.max-request-size=8MB

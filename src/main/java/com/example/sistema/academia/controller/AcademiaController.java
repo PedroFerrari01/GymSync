@@ -36,6 +36,7 @@ public class AcademiaController {
     @Autowired private EntradaRepository entradaRepository;
     @Autowired private AvaliacaoFisicaRepository avaliacaoFisicaRepository;
     @Autowired private EquipamentoRepository equipamentoRepository;
+    @Autowired private EquipamentoImagemRepository equipamentoImagemRepository;
     @Autowired private ManutencaoRepository manutencaoRepository;
     @Autowired private MensagemRepository mensagemRepository;
     @Autowired private RegistroExercicioRepository registroExercicioRepository;
@@ -196,6 +197,7 @@ public class AcademiaController {
         model.addAttribute("mensalidades", mensalidadeRepository.findAll());
         model.addAttribute("avisos", avisoService.paraAdmin());
         model.addAttribute("equipamentos", equipamentoRepository.findAll());
+        model.addAttribute("equipamentosComFoto", equipamentoImagemRepository.idsComImagem());
         model.addAttribute("manutencoes", manutencaoRepository.findAllByOrderByDataManutencaoDescIdDesc());
         relatorioService.montar(model);
         return "index";

@@ -1054,3 +1054,7 @@ html:has(.sobre) { scroll-behavior: smooth; }
     #aba-relatorios .vval,
     #aba-relatorios .vlbl { color: #52525b !important; }
 }
+
+/* Foto do aparelho na lista de equipamentos */
+.equip-foto { width: 48px; height: 48px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(128, 128, 128, 0.3); display: block; }
+.equip-sem-foto { width: 48px; height: 48px; border-radius: 8px; border: 1px dashed rgba(128, 128, 128, 0.4); display: flex; align-items: center; justify-content: center; opacity: 0.55; }

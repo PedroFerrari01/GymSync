@@ -609,3 +609,15 @@ if ('serviceWorker' in navigator && window.isSecureContext) {
         try { localStorage.setItem('gymsync_instalar_dispensado', 'sim'); } catch (e) {}
     });
 })();
+
+// Equipamentos: o botão da câmera abre o seletor de arquivo e a foto é enviada assim que a pessoa escolhe
+document.addEventListener('click', (e) => {
+    const botao = e.target.closest('.btn-trocar-foto');
+    if (!botao) return;
+    const campo = botao.closest('form').querySelector('.input-foto-auto');
+    if (campo) campo.click();
+});
+document.addEventListener('change', (e) => {
+    const campo = e.target.closest('.input-foto-auto');
+    if (campo && campo.files.length) campo.form.submit();
+});

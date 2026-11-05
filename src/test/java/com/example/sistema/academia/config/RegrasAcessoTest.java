@@ -77,6 +77,7 @@ class RegrasAcessoTest {
             "ADMIN, /mensalidades/pagar/1, true",
             "ADMIN, /entradas/registrar, true",
             "ADMIN, /equipamentos/salvar, true",
+            "ADMIN, /equipamentos/imagem/1, true",
             "ADMIN, /treinos/salvar, true",
             "ADMIN, /aulas/salvar, true",
             "ADMIN, /relatorios/exportar/alunos, true",
@@ -102,6 +103,8 @@ class RegrasAcessoTest {
             "PROFESSOR, /mensalidades/pagar/1, false",
             "PROFESSOR, /entradas/registrar, false",
             "PROFESSOR, /equipamentos/salvar, false",
+            "PROFESSOR, /equipamentos/imagem/1, false",
+            "ALUNO, /equipamentos/imagem/1, false",
             "PROFESSOR, /aluno/ficha/email, false",
             "PROFESSOR, /aulas/reservar/1, false",
 

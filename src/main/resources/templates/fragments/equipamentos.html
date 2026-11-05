@@ -5,7 +5,7 @@
             <div class="panel-card">
                 <div class="d-flex justify-content-between align-items-center mb-3"><span class="tag-pill">Patrimônio</span><i class="bi bi-gear-wide-connected fs-5"></i></div>
                 <h5 class="panel-title mb-3">Cadastrar Equipamento</h5>
-                <form th:action="@{/equipamentos/salvar}" method="post">
+                <form th:action="@{/equipamentos/salvar}" method="post" enctype="multipart/form-data">
                     <label class="form-label">Nome</label>
                     <input type="text" name="nome" class="form-control mb-2" maxlength="60" placeholder="Esteira, Leg press..." required>
                     <label class="form-label">Tipo</label>
@@ -13,7 +13,10 @@
                     <label class="form-label">Código / Patrimônio</label>
                     <input type="text" name="codigo" class="form-control mb-2" maxlength="30">
                     <label class="form-label">Data de aquisição</label>
-                    <input type="date" name="dataAquisicao" class="form-control mb-3">
+                    <input type="date" name="dataAquisicao" class="form-control mb-2">
+                    <label class="form-label">Imagem do aparelho (opcional)</label>
+                    <input type="file" name="imagem" class="form-control mb-1" accept="image/jpeg,image/png">
+                    <div class="small opacity-75 mb-3">JPG ou PNG, até 2 MB.</div>
                     <button type="submit" class="btn-brand w-100">Salvar Equipamento</button>
                 </form>
             </div>
@@ -23,9 +26,14 @@
                 <h5 class="panel-title mb-3">Equipamentos</h5>
                 <div class="table-responsive">
                     <table class="table table-custom tabela-filtravel">
-                        <thead><tr><th>Nome</th><th>Tipo</th><th>Código</th><th>Situação</th><th>Próxima manutenção</th><th class="text-end">Ações</th></tr></thead>
+                        <thead><tr><th>Foto</th><th>Nome</th><th>Tipo</th><th>Código</th><th>Situação</th><th>Próxima manutenção</th><th class="text-end">Ações</th></tr></thead>
                         <tbody>
                             <tr th:each="equip : ${equipamentos}">
+                                <td>
+                                    <img th:if="${equipamentosComFoto != null and equipamentosComFoto.contains(equip.id)}"
+                                         th:src="@{/equipamentos/imagem/{id}(id=${equip.id})}" th:alt="${equip.nome}" class="equip-foto" loading="lazy">
+                                    <span th:unless="${equipamentosComFoto != null and equipamentosComFoto.contains(equip.id)}" class="equip-sem-foto" title="Sem imagem"><i class="bi bi-image"></i></span>
+                                </td>
                                 <td class="fw-semibold" th:text="${equip.nome}"></td>
                                 <td th:text="${equip.tipo != null and equip.tipo != '' ? equip.tipo : '-'}"></td>
                                 <td th:text="${equip.codigo != null and equip.codigo != '' ? equip.codigo : '-'}"></td>
@@ -35,6 +43,10 @@
                                     <button type="button" class="action-btn action-toggle me-1 btn-fill" title="Registrar manutenção"
                                             data-bs-toggle="modal" data-bs-target="#modalManutencao" data-form="formManutencao"
                                             th:attr="data-campo-equipamento-id=${equip.id}"><i class="bi bi-wrench"></i></button>
+                                    <form th:action="@{/equipamentos/imagem/{id}(id=${equip.id})}" method="post" enctype="multipart/form-data" class="d-inline">
+                                        <input type="file" name="imagem" accept="image/jpeg,image/png" class="input-foto-auto d-none">
+                                        <button type="button" class="action-btn action-toggle me-1 btn-trocar-foto" title="Anexar imagem do aparelho"><i class="bi bi-camera"></i></button>
+                                    </form>
                                     <form th:action="@{/equipamentos/status/{id}(id=${equip.id})}" method="post" class="d-inline">
                                         <button type="submit" class="action-btn action-toggle me-1" title="Alternar situação"><i class="bi bi-arrow-repeat"></i></button>
                                     </form>

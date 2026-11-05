@@ -25,6 +25,7 @@ public class ExclusaoService {
     @Autowired private MensagemRepository mensagemRepository;
     @Autowired private RegistroExercicioRepository registroExercicioRepository;
     @Autowired private EquipamentoRepository equipamentoRepository;
+    @Autowired private EquipamentoImagemRepository equipamentoImagemRepository;
     @Autowired private ManutencaoRepository manutencaoRepository;
 
     @Transactional
@@ -87,6 +88,7 @@ public class ExclusaoService {
     @Transactional
     public void excluirEquipamento(Long id) {
         manutencaoRepository.deleteAll(manutencaoRepository.findByEquipamentoId(id));
+        equipamentoImagemRepository.deleteById(id);
         equipamentoRepository.deleteById(id);
     }
 }
