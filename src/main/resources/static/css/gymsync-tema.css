@@ -1073,3 +1073,48 @@ html:has(.sobre) { scroll-behavior: smooth; }
 }
 .toast-ajax.toast-ajax-erro { background: #991b1b; }
 .toast-ajax.toast-ajax-visivel { opacity: 1; transform: translateY(0); }
+
+/* Alertas no tema escuro: fundo escuro translúcido, texto claro, barra lateral e ícone coloridos
+   (antes usavam o rosa e o azul pastel do Bootstrap, que destoavam do painel). Tema claro não muda. */
+:root[data-theme="dark"] .alert {
+    --alerta-cor: #38bdf8;
+    background-color: color-mix(in srgb, var(--alerta-cor) 12%, var(--bg-card));
+    color: #e8eaee;
+    border: 0;
+    border-left: 3px solid var(--alerta-cor);
+}
+:root[data-theme="dark"] .alert-danger  { --alerta-cor: #f87171; }
+:root[data-theme="dark"] .alert-warning { --alerta-cor: #fbbf24; }
+:root[data-theme="dark"] .alert-info    { --alerta-cor: #38bdf8; }
+:root[data-theme="dark"] .alert-success { --alerta-cor: #34d399; }
+:root[data-theme="dark"] .alert > i.bi,
+:root[data-theme="dark"] .alert > i[class*="ph"] { color: var(--alerta-cor); }
+:root[data-theme="dark"] .alert .btn-close { filter: invert(1) grayscale(1); opacity: .6; }
+
+/* Ações positivas (Liberar Catraca, Receber, Confirmar, Reservar, Pagar): um só verde, mesmo formato */
+:root { --positivo: #047857; --positivo-hover: #065f46; }
+.btn-biometria,
+.btn-success {
+    background: var(--positivo);
+    border-color: var(--positivo);
+    color: #fff;
+    border-radius: var(--s2);
+}
+.btn-biometria:hover,
+.btn-success:hover,
+.btn-success:focus-visible,
+.btn-success:active { background: var(--positivo-hover); border-color: var(--positivo-hover); color: #fff; }
+
+/* Login: "Testar como visitante" é secundário, mais discreto que "Entrar no Sistema" */
+.btn-visitante {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    min-height: 36px;
+    font-size: .85rem;
+    font-weight: 500;
+}
+.btn-visitante:hover { color: var(--text-primary); border-color: var(--accent); background: transparent; }
+
+/* Valor em reais da mensalidade (área do aluno) não quebra de linha */
+.cel-valor { white-space: nowrap; }
