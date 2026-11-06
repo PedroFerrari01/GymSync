@@ -40,10 +40,10 @@ public class AuthController {
     @Autowired private VisitanteService visitanteService;
 
     @Value("${gymsync.admin.usuario:admin}") private String adminUsuario;
-    @Value("${gymsync.admin.senha:123}") private String adminSenha;
+    @Value("${gymsync.admin.senha}") private String adminSenha;
     @Value("${gymsync.login.max-falhas:5}") private int maxFalhasConta;
     @Value("${gymsync.login.max-falhas-ip:30}") private int maxFalhasIp;
-    @Value("${gymsync.recuperacao-por-email:false}") private boolean recuperacaoPorEmail;
+    @Value("${gymsync.recuperacao-por-email:true}") private boolean recuperacaoPorEmail;
 
     /** No modo de senhas fortes, o sistema não sobe com a senha de administrador fraca. */
     @PostConstruct
@@ -159,6 +159,7 @@ public class AuthController {
                                       HttpServletResponse response,
                                       RedirectAttributes redirect) {
         if (!visitanteService.habilitado()) return "redirect:/";
+        visitanteService.renovarDatas(); // mantém os dados de exemplo sempre recentes
         if ("ALUNO".equals(tipo)) {
             Aluno aluno = visitanteService.alunoExemplo().orElse(null);
             if (aluno == null) return semDadosDeExemplo(redirect);

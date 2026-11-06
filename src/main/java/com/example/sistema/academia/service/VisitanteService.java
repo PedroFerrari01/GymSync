@@ -64,7 +64,94 @@ public class VisitanteService {
         return professorRepository.findFirstByCpfOrEmailIgnoreCase(EMAIL_PROFESSOR, EMAIL_PROFESSOR);
     }
 
+    @Autowired private ReservaAulaRepository reservaAulaRepository;
+
+    private static final String SUFIXO_EXEMPLO = "@exemplo.gymsync";
+    /** A ficha da Ana é criada sempre "hoje - 20 dias": serve de marcador para saber quanto os dados envelheceram. */
+    private static final int DIAS_FICHA_ANA = 20;
+
     @EventListener(ApplicationReadyEvent.class)
+    @Transactional
+    public void aoSubir() {
+        criarDadosDeExemplo();
+        renovarDatas();
+    }
+
+    /**
+     * Empurra para frente as datas dos dados de exemplo, para o painel do visitante parecer sempre recente.
+     * Mexe só em registros dos alunos com e-mail @exemplo.gymsync e nos aparelhos de exemplo; dado real não é tocado.
+     * Sem nada a renovar (marcador já em dia), não faz nada.
+     */
+    @Transactional
+    public void renovarDatas() {
+        if (!habilitado) return;
+        LocalDate hoje = LocalDate.now();
+        List<Aluno> exemplos = alunoRepository.findByEmailEndingWithIgnoreCase(SUFIXO_EXEMPLO);
+        Aluno ana = exemplos.stream().filter(a -> EMAIL_ALUNO.equalsIgnoreCase(a.getEmail())).findFirst().orElse(null);
+        if (ana == null) return;
+        List<Treino> fichasAna = treinoRepository.findByAlunoId(ana.getId());
+        if (fichasAna.isEmpty()) return;
+        LocalDate marcador = fichasAna.stream().map(Treino::getDataCriacao).min(LocalDate::compareTo).orElse(null);
+        if (marcador == null) return;
+        long dias = java.time.temporal.ChronoUnit.DAYS.between(marcador, hoje.minusDays(DIAS_FICHA_ANA));
+        if (dias <= 0) return;
+        log.info("Dados de exemplo do visitante com {} dia(s) de atraso: renovando as datas.", dias);
+        java.time.LocalDateTime agora = java.time.LocalDateTime.now();
+
+        for (Aluno a : exemplos) {
+            Long id = a.getId();
+            for (Entrada e : entradaRepository.findByAlunoId(id)) {
+                java.time.LocalDateTime nova = e.getDataHoraEntrada().plusDays(dias);
+                if (nova.isAfter(agora)) nova = nova.minusDays(1); // nunca uma entrada no futuro
+                e.setDataHoraEntrada(nova);
+                entradaRepository.save(e);
+            }
+            for (Matricula m : matriculaRepository.findByAlunoId(id)) {
+                m.setDataInicio(m.getDataInicio().plusDays(dias));
+                m.setDataFim(m.getDataFim().plusDays(dias));
+                matriculaRepository.save(m);
+            }
+            for (Mensalidade m : mensalidadeRepository.findByMatriculaAlunoId(id)) {
+                m.setVencimento(m.getVencimento().plusDays(dias));
+                if (m.getDataPagamento() != null) m.setDataPagamento(m.getDataPagamento().plusDays(dias));
+                mensalidadeRepository.save(m);
+            }
+            for (Treino t : treinoRepository.findByAlunoId(id)) {
+                t.setDataCriacao(t.getDataCriacao().plusDays(dias));
+                treinoRepository.save(t);
+            }
+            for (RegistroExercicio r : registroExercicioRepository.findByAlunoId(id)) {
+                r.setDataRegistro(r.getDataRegistro().plusDays(dias));
+                registroExercicioRepository.save(r);
+            }
+            for (AvaliacaoFisica av : avaliacaoFisicaRepository.findByAlunoId(id)) {
+                av.setDataAvaliacao(av.getDataAvaliacao().plusDays(dias));
+                avaliacaoFisicaRepository.save(av);
+            }
+            for (Mensagem m : mensagemRepository.findByAlunoId(id)) {
+                m.setDataHora(m.getDataHora().plusDays(dias));
+                mensagemRepository.save(m);
+            }
+            for (ReservaAula r : reservaAulaRepository.findByAlunoId(id)) {
+                r.setDataAula(r.getDataAula().plusDays(dias));
+                reservaAulaRepository.save(r);
+            }
+        }
+        // Aparelhos de exemplo (identificados pelo código) e a manutenção do aparelho "em manutenção"
+        java.util.Set<String> codigos = java.util.Set.of("EST-01", "LEG-01", "BIK-03");
+        for (Equipamento eq : equipamentoRepository.findAll()) {
+            if (!codigos.contains(eq.getCodigo()) || eq.getProximaManutencao() == null) continue;
+            eq.setProximaManutencao(eq.getProximaManutencao().plusDays(dias));
+            equipamentoRepository.save(eq);
+            if ("BIK-03".equals(eq.getCodigo())) {
+                for (Manutencao m : manutencaoRepository.findByEquipamentoId(eq.getId())) {
+                    m.setDataManutencao(m.getDataManutencao().plusDays(dias));
+                    manutencaoRepository.save(m);
+                }
+            }
+        }
+    }
+
     @Transactional
     public void criarDadosDeExemplo() {
         if (!habilitado) return;

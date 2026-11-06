@@ -54,7 +54,7 @@ public class AcademiaController {
     @Autowired private VisitanteService visitanteService;
 
     @Value("${gymsync.validar-cpf:true}") private boolean validarCpf;
-    @Value("${gymsync.recuperacao-por-email:false}") private boolean recuperacaoPorEmail;
+    @Value("${gymsync.recuperacao-por-email:true}") private boolean recuperacaoPorEmail;
     @Value("${gymsync.video-youtube:}") private String videoYoutube;
 
     // Os cadastros recebem a entidade inteira: só estes campos podem vir do formulário (nada de id, situacao etc.)

@@ -61,6 +61,14 @@ class RegrasAcessoTest {
     }
 
     @Test
+    void visitanteNaoBaixaPlanilhas() {
+        assertFalse(RegrasAcesso.visitantePode("GET", "/relatorios/exportar/alunos"));
+        assertFalse(RegrasAcesso.visitantePode("GET", "/relatorios/exportar/mensalidades"));
+        assertTrue(RegrasAcesso.visitantePode("GET", "/relatorios"));
+        assertTrue(RegrasAcesso.permitido("ADMIN", "/relatorios/exportar/alunos")); // o admin de verdade continua podendo
+    }
+
+    @Test
     void rotaDesconhecidaEDoAdministrador() {
         assertTrue(RegrasAcesso.permitido("ADMIN", "/rota-inventada/salvar"));
         assertFalse(RegrasAcesso.permitido("PROFESSOR", "/rota-inventada/salvar"));

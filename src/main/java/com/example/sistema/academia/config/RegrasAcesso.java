@@ -31,8 +31,12 @@ public final class RegrasAcesso {
         return publica(caminho) || caminho.equals("/alterar-senha") || caminho.equals("/logout");
     }
 
-    /** Visitante só olha: pode abrir páginas (GET) e sair, mas não envia nenhum formulário. */
+    /**
+     * Visitante só olha: pode abrir páginas (GET) e sair, mas não envia nenhum formulário
+     * nem baixa as planilhas (exportar leva a base inteira).
+     */
     public static boolean visitantePode(String metodo, String caminho) {
+        if (caminho.startsWith("/relatorios/exportar")) return false;
         return "GET".equals(metodo) || caminho.equals("/logout");
     }
 

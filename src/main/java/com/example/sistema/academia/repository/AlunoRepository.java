@@ -11,5 +11,6 @@ public interface AlunoRepository extends JpaRepository<Aluno, Long> {
     Optional<Aluno> findFirstByCpfOrEmailIgnoreCase(String cpf, String email);
     Optional<Aluno> findFirstByCpfAndEmailIgnoreCase(String cpf, String email);
     boolean existsByEmailIgnoreCase(String email);
+    java.util.List<Aluno> findByEmailEndingWithIgnoreCase(String sufixo);
     boolean existsByEmailIgnoreCaseAndIdNot(String email, Long id);
 }

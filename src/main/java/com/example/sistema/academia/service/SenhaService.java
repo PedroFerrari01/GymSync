@@ -23,7 +23,7 @@ public class SenhaService {
     private final SecureRandom aleatorio = new SecureRandom();
 
     @Autowired
-    public SenhaService(@Value("${gymsync.senhas-fortes:false}") boolean fortes) {
+    public SenhaService(@Value("${gymsync.senhas-fortes:true}") boolean fortes) {
         this.fortes = fortes;
     }
 
