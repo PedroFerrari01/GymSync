@@ -1,10 +1,20 @@
-<div th:fragment="lista" th:if="${avisos != null and !#lists.isEmpty(avisos)}" class="mb-4 ocultar-impressao">
-    <div th:each="av : ${avisos}" class="alert py-2 small rounded-3 border-0 mb-2" th:classappend="|alert-${av.tipo} ${av.mensalidadeId != null ? 'aviso-com-acao' : ''}|">
-        <span><i class="bi bi-bell-fill me-2"></i><span th:text="${av.texto}"></span></span>
-        <button th:if="${av.mensalidadeId != null}" type="button" class="btn btn-sm btn-success fw-semibold btn-pagar"
-                data-bs-toggle="modal" data-bs-target="#modalPagarPix"
-                th:data-id="${av.mensalidadeId}" th:data-valor="${av.valor}" th:data-vencimento="${av.vencimento}">
-            <i class="bi bi-qr-code"></i> Pagar agora
-        </button>
+<div th:fragment="lista" th:if="${avisos != null and !#lists.isEmpty(avisos)}" class="card-atencao panel-card mb-4 ocultar-impressao">
+    <div class="card-atencao-titulo fw-semibold mb-2">
+        <i class="bi bi-bell-fill me-2"></i>Atenção <span class="card-atencao-contagem" th:text="|(${#lists.size(avisos)})|">(0)</span>
     </div>
+    <ul class="list-unstyled mb-0">
+        <li th:each="av : ${avisos}" class="card-atencao-item d-flex flex-wrap justify-content-between align-items-center gap-2"
+            th:classappend="|alert-${av.tipo}|">
+            <a th:if="${av.mensalidadeId != null and perfil != 'ALUNO'}" class="small aviso-link" th:href="${'#mensalidade-' + av.mensalidadeId}" th:text="${av.texto}"></a>
+            <button th:if="${av.mensalidadeId != null and perfil == 'ALUNO'}" type="button" class="aviso-texto-botao small" data-bs-toggle="modal" data-bs-target="#modalTodasMensalidades" th:text="${av.texto}"></button>
+            <a th:if="${av.mensalidadeId == null and av.alunoId == null and (av.texto.startsWith('Equipamento em manutenção') or av.texto.startsWith('A manutenção de'))}" class="small aviso-link" th:href="${av.equipamentoId != null ? '#equipamento-' + av.equipamentoId : '#aba-equipamentos'}" data-aba="btn-aba-equipamentos" th:text="${av.texto}"></a>
+            <a th:if="${av.mensalidadeId == null and av.alunoId != null}" class="small aviso-link" th:href="${'#aluno-' + av.alunoId}" th:text="${av.texto}"></a>
+            <span th:if="${av.alunoId == null and av.mensalidadeId == null and !(av.texto.startsWith('Equipamento em manutenção') or av.texto.startsWith('A manutenção de'))}" class="small" th:text="${av.texto}"></span>
+            <button th:if="${av.mensalidadeId != null and perfil == 'ALUNO'}" type="button" class="btn btn-sm btn-success fw-semibold btn-pagar"
+                    data-bs-toggle="modal" data-bs-target="#modalPagarPix"
+                    th:data-id="${av.mensalidadeId}" th:data-valor="${av.valor}" th:data-vencimento="${av.vencimento}">
+                <i class="bi bi-qr-code"></i> Pagar agora
+            </button>
+        </li>
+    </ul>
 </div>

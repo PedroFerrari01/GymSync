@@ -193,6 +193,17 @@ public class AcademiaController {
         }
 
         model.addAttribute("meusTreinos", treinos);
+        if (!professor) {
+            List<com.example.sistema.academia.dto.ResumoProfessor> equipe = new java.util.ArrayList<>();
+            for (com.example.sistema.academia.model.Professor p : professorRepository.findAll()) {
+                List<Treino> dele = treinoRepository.findByProfessorId(p.getId());
+                List<Acompanhamento> linhas = acompanhamentoService.montar(dele, todosExercicios, todasEntradas, todosRegistros, LocalDate.now());
+                int sumidos = (int) linhas.stream().filter(Acompanhamento::isSumido).count();
+                int media = linhas.isEmpty() ? 0 : (int) Math.round(linhas.stream().mapToInt(Acompanhamento::getAdesao).average().orElse(0));
+                equipe.add(new com.example.sistema.academia.dto.ResumoProfessor(p.getNome(), p.getEspecialidade(), dele.size(), linhas.size(), sumidos, media));
+            }
+            model.addAttribute("equipe", equipe);
+        }
         model.addAttribute("matriculas", matriculaRepository.findAll());
         model.addAttribute("mensalidades", mensalidadeRepository.findAll());
         model.addAttribute("avisos", avisoService.paraAdmin());

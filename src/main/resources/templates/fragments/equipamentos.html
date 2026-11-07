@@ -28,7 +28,7 @@
                     <table class="table table-custom tabela-filtravel">
                         <thead><tr><th>Foto</th><th>Nome</th><th>Tipo</th><th>Código</th><th>Situação</th><th>Próxima manutenção</th><th class="text-end">Ações</th></tr></thead>
                         <tbody>
-                            <tr th:each="equip : ${equipamentos}">
+                            <tr th:each="equip : ${equipamentos}" th:id="${'equipamento-' + equip.id}">
                                 <td>
                                     <img th:if="${equipamentosComFoto != null and equipamentosComFoto.contains(equip.id)}"
                                          th:src="@{/equipamentos/imagem/{id}(id=${equip.id})}" th:alt="${equip.nome}" class="equip-foto" loading="lazy"

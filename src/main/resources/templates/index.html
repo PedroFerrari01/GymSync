@@ -372,7 +372,8 @@
 
 <div th:if="${logado}" class="layout-wrapper">
 
-    <aside class="sidebar" role="navigation">
+    <aside class="sidebar" role="navigation" id="menuLateral">
+        <button type="button" class="menu-fechar d-lg-none" id="btnFecharMenu" aria-label="Fechar menu"><i class="bi bi-x-lg"></i></button>
         <a href="/" class="brand-box">
             <span class="brand-logo"><img th:src="@{/img/logo-simbolo-fundo-escuro.png}" class="logo-fundo-escuro" alt="GymSync" height="48"><img th:src="@{/img/logo-simbolo-fundo-claro.png}" class="logo-fundo-claro" alt="GymSync" height="48"></span>
             <div><span class="brand-title">GymSync</span><span class="brand-sub">Gestão Fitness</span></div>
@@ -405,6 +406,8 @@
             <div class="small mt-1"><a th:href="@{/privacidade}" class="link-privacidade"><i class="bi bi-shield-check me-1"></i>Privacidade</a></div>
         </div>
     </aside>
+
+    <div class="menu-fundo" id="menuFundo"></div>
 
     <div class="main-area">
         <header class="topbar">
@@ -458,64 +461,10 @@
 
                     <th:block th:replace="~{fragments/avisos :: lista}"></th:block>
 
-                    <div class="row g-4 mb-4">
-                        <div class="col-lg-4">
-                            <div class="panel-card">
-                                <div class="d-flex justify-content-between align-items-center mb-3"><span class="tag-pill">Biometria</span><i class="bi bi-fingerprint fs-4 text-success"></i></div>
-                                <h5 class="panel-title mb-3">Controle de Catraca</h5>
-                                <form th:action="@{/entradas/registrar}" method="post">
-                                    <label class="form-label">Identificar Aluno</label>
-                                    <select name="alunoId" class="form-select mb-3" required>
-                                        <option value="">Selecionar aluno...</option>
-                                        <option th:each="a : ${alunos}" th:value="${a.id}" th:text="|${a.nome} (${a.situacao})|"></option>
-                                    </select>
-                                    <button type="submit" class="btn-biometria w-100"><i class="bi bi-unlock-fill me-2"></i>Liberar Catraca</button>
-                                </form>
-                            </div>
-                        </div>
-                        <div class="col-lg-4">
-                            <div class="panel-card">
-                                <div class="d-flex justify-content-between align-items-center mb-3"><span class="tag-pill">Matrícula</span><i class="bi bi-file-earmark-check fs-4" style="color:var(--accent);"></i></div>
-                                <h5 class="panel-title mb-3">Vincular Aluno a Plano</h5>
-                                <form th:action="@{/matriculas/salvar}" method="post">
-                                    <label class="form-label">Aluno</label>
-                                    <select name="alunoId" class="form-select mb-2" required>
-                                        <option value="">Selecionar aluno...</option>
-                                        <option th:each="a : ${alunos}" th:value="${a.id}" th:text="${a.nome}"></option>
-                                    </select>
-                                    <label class="form-label">Plano</label>
-                                    <select name="planoId" class="form-select mb-3" required>
-                                        <option value="">Selecionar plano...</option>
-                                        <option th:each="p : ${planos}" th:value="${p.id}" th:text="|${p.nome} — R$ ${@fmt.dinheiro(p.valor)} em ${p.duracaoMeses}x (≈ R$ ${@fmt.dinheiro(p.valor / p.duracaoMeses)}/mês)|"></option>
-                                    </select>
-                                    <button type="submit" class="btn-brand w-100">Confirmar Matrícula</button>
-                                </form>
-                            </div>
-                        </div>
-                        <div class="col-lg-4">
-                            <div class="panel-card">
-                                <div class="d-flex justify-content-between align-items-center mb-3"><span class="tag-pill">Frequência</span><i class="bi bi-clock-history fs-5"></i></div>
-                                <h5 class="panel-title mb-3">Registros da Catraca</h5>
-                                <div class="table-responsive tabela-scroll">
-                                    <table class="table table-custom tabela-filtravel">
-                                        <thead><tr><th>ID</th><th>Aluno</th><th>Data / Hora</th><th class="text-end"></th></tr></thead>
-                                        <tbody>
-                                            <tr th:each="e : ${entradasRecentes}">
-                                                <td th:text="|#${e.id}|"></td>
-                                                <td class="fw-semibold" th:text="${e.aluno.nome}"></td>
-                                                <td class="small" th:text="${e.dataHoraEntrada != null ? #temporals.format(e.dataHoraEntrada, 'dd/MM/yyyy HH:mm') : ''}"></td>
-                                                <td class="text-end">
-                                                    <form th:action="@{/entradas/excluir/{id}(id=${e.id})}" method="post" class="d-inline" data-confirm="Excluir este registro de acesso?">
-                                                        <button type="submit" class="action-btn" title="Excluir"><i class="bi bi-trash"></i></button>
-                                                    </form>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <div th:if="${#lists.isEmpty(entradasRecentes)}" class="vazio">Nenhum acesso registrado.</div>
-                            </div>
-                        </div>
+                    <div class="acoes-admin mb-4 d-flex flex-wrap gap-2">
+                        <button type="button" class="btn-brand" data-bs-toggle="modal" data-bs-target="#modalCatraca"><i class="bi bi-unlock-fill me-1"></i> Liberar catraca</button>
+                        <button type="button" class="btn-theme" data-bs-toggle="modal" data-bs-target="#modalMatricula"><i class="bi bi-plus-lg me-1"></i> Nova matrícula</button>
+                        <button type="button" class="btn-theme" data-bs-toggle="modal" data-bs-target="#modalRegistrosCatraca"><i class="bi bi-clock-history me-1"></i> Registros da catraca</button>
                     </div>
 
                     <div class="row g-4">
@@ -526,7 +475,7 @@
                                     <table class="table table-custom tabela-filtravel">
                                         <thead><tr><th>Nome</th><th>CPF</th><th>Situação</th><th class="text-end">Ações</th></tr></thead>
                                         <tbody>
-                                            <tr th:each="a : ${alunos}">
+                                            <tr th:each="a : ${alunos}" th:id="${'aluno-' + a.id}">
                                                 <td class="fw-semibold" th:text="${a.nome}"></td>
                                                 <td th:text="${a.cpf}"></td>
                                                 <td><span th:text="${a.situacao}" th:classappend="${a.situacao == 'ATIVO' ? 'status-ok' : 'status-off'}"></span></td>
@@ -554,12 +503,16 @@
                                         <option value="PAGA">Pagas</option>
                                         <option value="CANCELADA">Canceladas</option>
                                     </select>
+                                    <select id="filtroAlunoMensalidade" class="form-select form-select-sm w-auto" aria-label="Filtrar por aluno">
+                                        <option value="">Todos os alunos</option>
+                                        <option th:each="a : ${alunos}" th:value="${a.id}" th:text="${a.nome}"></option>
+                                    </select>
                                 </div>
                                 <div class="table-responsive tabela-scroll">
                                     <table class="table table-custom tabela-filtravel">
                                         <thead><tr><th>Aluno</th><th>Plano</th><th>Valor</th><th>Vencimento</th><th>Status</th><th class="text-end">Ações</th></tr></thead>
                                         <tbody>
-                                            <tr th:each="m : ${mensalidades}" th:attr="data-status=${m.situacao}">
+                                            <tr th:each="m : ${mensalidades}" th:attr="data-status=${m.situacao}" th:data-aluno="${m.matricula.aluno.id}" th:id="${'mensalidade-' + m.id}">
                                                 <td class="fw-semibold" th:text="${m.matricula.aluno.nome}"></td>
                                                 <td th:text="${m.matricula.plano.nome}"></td>
                                                 <td th:text="|R$ ${@fmt.dinheiro(m.valor)}|"></td>
@@ -685,8 +638,8 @@
                 <div th:if="${perfil == 'ADMIN' or perfil == 'PROFESSOR'}" class="tab-pane fade" th:classappend="${perfil == 'PROFESSOR' ? 'show active' : ''}" id="aba-treinos" role="tabpanel">
                     <!-- Acompanhamento: alunos ativos com ficha (do professor logado; todos para o admin) -->
                     <div th:if="${acompanhamento != null and !#lists.isEmpty(acompanhamento)}" class="row g-4 mb-4">
-                        <div class="col-lg-5">
-                            <div class="panel-card h-100">
+                        <div class="col-lg-5 align-self-start">
+                            <div class="panel-card">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
                                     <h5 class="panel-title">Alunos sumidos</h5>
                                     <span class="tag-pill" th:text="|${diasSumido}+ dias|"></span>
@@ -705,7 +658,7 @@
                             </div>
                         </div>
                         <div class="col-lg-7">
-                            <div class="panel-card h-100">
+                            <div class="panel-card">
                                 <h5 class="panel-title mb-1">Adesão ao treino na semana</h5>
                                 <p class="small mb-3 texto-apoio">Exercícios da ficha que o aluno marcou como feitos desde segunda.</p>
                                 <div class="table-responsive tabela-scroll">
@@ -727,6 +680,35 @@
                                     </table>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Visão geral da equipe: só o admin -->
+                    <div th:if="${perfil == 'ADMIN' and equipe != null and !#lists.isEmpty(equipe)}" class="panel-card mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <h5 class="panel-title">Visão geral da equipe</h5>
+                            <span class="tag-pill" th:text="|${#lists.size(equipe)} professor(es)|"></span>
+                        </div>
+                        <p class="small mb-3 texto-apoio">Carga de cada professor e adesão média dos alunos dele.</p>
+                        <div class="table-responsive">
+                            <table class="table table-custom mb-0">
+                                <thead><tr><th>Professor</th><th>Especialidade</th><th>Fichas</th><th>Alunos</th><th>Sumidos</th><th class="col-adesao">Adesão média</th></tr></thead>
+                                <tbody>
+                                    <tr th:each="r : ${equipe}">
+                                        <td class="fw-semibold" th:text="${r.nome}"></td>
+                                        <td class="small" th:text="${r.especialidade}"></td>
+                                        <td th:text="${r.fichas}"></td>
+                                        <td th:text="${r.alunos}"></td>
+                                        <td><span th:if="${r.sumidos > 0}" class="status-wait" th:text="${r.sumidos}"></span><span th:unless="${r.sumidos > 0}">0</span></td>
+                                        <td>
+                                            <div class="adesao">
+                                                <div class="adesao-trilho"><div class="adesao-barra" th:style="|width:${r.adesaoMedia}%|"></div></div>
+                                                <span th:text="|${r.adesaoMedia}%|"></span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
 
@@ -1309,5 +1291,76 @@
 
 <script th:src="@{/vendor/bootstrap/bootstrap.bundle.min.js}"></script>
 <script th:src="@{/js/gymsync.js}"></script>
+    <!-- Formulários do painel: abrem em modal (o painel fica só para olhar) -->
+    <div class="modal fade" id="modalCatraca" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title fw-bold">Controle de Catraca</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button></div>
+                <form th:action="@{/entradas/registrar}" method="post">
+                    <div class="modal-body">
+                        <label class="form-label">Identificar Aluno</label>
+                        <select name="alunoId" class="form-select" required>
+                            <option value="">Selecionar aluno...</option>
+                            <option th:each="a : ${alunos}" th:value="${a.id}" th:text="|${a.nome} (${a.situacao})|"></option>
+                        </select>
+                    </div>
+                    <div class="modal-footer"><button type="submit" class="btn-biometria"><i class="bi bi-unlock-fill me-2"></i>Liberar Catraca</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalMatricula" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title fw-bold">Vincular Aluno a Plano</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button></div>
+                <form th:action="@{/matriculas/salvar}" method="post">
+                    <div class="modal-body">
+                        <label class="form-label">Aluno</label>
+                        <select name="alunoId" class="form-select mb-2" required>
+                            <option value="">Selecionar aluno...</option>
+                            <option th:each="a : ${alunos}" th:value="${a.id}" th:text="${a.nome}"></option>
+                        </select>
+                        <label class="form-label">Plano</label>
+                        <select name="planoId" class="form-select" required>
+                            <option value="">Selecionar plano...</option>
+                            <option th:each="p : ${planos}" th:value="${p.id}" th:text="|${p.nome} — R$ ${@fmt.dinheiro(p.valor)} em ${p.duracaoMeses}x (≈ R$ ${@fmt.dinheiro(p.valor / p.duracaoMeses)}/mês)|"></option>
+                        </select>
+                    </div>
+                    <div class="modal-footer"><button type="submit" class="btn-brand">Confirmar Matrícula</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalRegistrosCatraca" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title fw-bold">Registros da catraca</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button></div>
+                <div class="modal-body">
+                    <p class="small texto-apoio mb-3">Últimas passagens pela catraca. Excluir remove só o registro de acesso, não o aluno.</p>
+                    <div class="registros-catraca" th:unless="${#lists.isEmpty(entradasRecentes)}">
+                        <div class="registro-catraca registro-catraca-cabecalho" aria-hidden="true">
+                            <span>Aluno</span><span>Data e hora</span><span class="text-end">Ação</span>
+                        </div>
+                        <div class="registro-catraca" th:each="e : ${entradasRecentes}">
+                            <span class="registro-aluno">
+                                <span class="fw-semibold" th:text="${e.aluno.nome}"></span>
+                                <span class="small texto-apoio" th:text="|Registro #${e.id}|"></span>
+                            </span>
+                            <span class="registro-data" th:text="${e.dataHoraEntrada != null ? #temporals.format(e.dataHoraEntrada, 'dd/MM/yyyy') + ' às ' + #temporals.format(e.dataHoraEntrada, 'HH:mm') : ''}"></span>
+                            <span class="text-end">
+                                <form th:action="@{/entradas/excluir/{id}(id=${e.id})}" method="post" class="d-inline" data-confirm="Excluir este registro de acesso?">
+                                    <button type="submit" class="btn-excluir-discreto" title="Excluir registro"><i class="bi bi-trash"></i><span>Excluir</span></button>
+                                </form>
+                            </span>
+                        </div>
+                    </div>
+                    <div th:if="${#lists.isEmpty(entradasRecentes)}" class="vazio">Nenhum acesso registrado.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>

@@ -77,14 +77,26 @@ document.querySelectorAll('.role-btn').forEach(btn => {
 
 const btnMenu = document.getElementById('btnMenu');
 const sidebar = document.querySelector('.sidebar');
-if (btnMenu && sidebar) {
-    btnMenu.addEventListener('click', () => sidebar.classList.toggle('aberta'));
+const menuFundo = document.getElementById('menuFundo');
+const btnFecharMenu = document.getElementById('btnFecharMenu');
+// Celular: o menu é uma gaveta que desliza da esquerda, com fundo escuro atrás
+function abrirMenu(aberto) {
+    if (!sidebar) return;
+    sidebar.classList.toggle('aberta', aberto);
+    if (menuFundo) menuFundo.classList.toggle('ativo', aberto);
+    document.body.classList.toggle('menu-aberto', aberto);
 }
+if (btnMenu && sidebar) {
+    btnMenu.addEventListener('click', () => abrirMenu(!sidebar.classList.contains('aberta')));
+}
+if (btnFecharMenu) btnFecharMenu.addEventListener('click', () => abrirMenu(false));
+if (menuFundo) menuFundo.addEventListener('click', () => abrirMenu(false));
+document.addEventListener('keydown', e => { if (e.key === 'Escape') abrirMenu(false); });
 
 document.querySelectorAll('#menuAbas button').forEach(btn => {
     btn.addEventListener('shown.bs.tab', e => {
         localStorage.setItem('gymsync_aba_ativa', e.target.id);
-        if (sidebar) sidebar.classList.remove('aberta');
+        if (sidebar) abrirMenu(false);
     });
 });
 
@@ -160,17 +172,21 @@ document.querySelectorAll('.campo-hoje').forEach(input => {
 });
 
 const selectFiltroStatus = document.getElementById('filtroStatusMensalidade');
+const selectFiltroAluno = document.getElementById('filtroAlunoMensalidade');
 function aplicarFiltros() {
     const termo = buscaGlobal ? buscaGlobal.value.toLowerCase() : '';
     const status = selectFiltroStatus ? selectFiltroStatus.value : '';
+    const aluno = selectFiltroAluno ? selectFiltroAluno.value : '';
     document.querySelectorAll('.tabela-filtravel tbody tr').forEach(tr => {
         const passaBusca = tr.textContent.toLowerCase().includes(termo);
         const passaStatus = !status || !tr.dataset.status || tr.dataset.status === status;
-        tr.style.display = passaBusca && passaStatus ? '' : 'none';
+        const passaAluno = !aluno || !tr.dataset.aluno || tr.dataset.aluno === aluno;
+        tr.style.display = passaBusca && passaStatus && passaAluno ? '' : 'none';
     });
 }
 if (buscaGlobal) buscaGlobal.addEventListener('input', aplicarFiltros);
 if (selectFiltroStatus) selectFiltroStatus.addEventListener('change', aplicarFiltros);
+if (selectFiltroAluno) selectFiltroAluno.addEventListener('change', aplicarFiltros);
 
 const btnCopiarPix = document.getElementById('btnCopiarPix');
 if (btnCopiarPix) {
@@ -701,4 +717,73 @@ document.addEventListener('show.bs.modal', (e) => {
             if (botao) botao.disabled = false;
         }
     });
+})();
+
+/* ===== Mensalidades do aluno: abas do modal (Todas, Pendentes, Atrasadas, Pagas) ===== */
+(function () {
+    const modal = document.getElementById('modalTodasMensalidades');
+    if (!modal) return;
+    const abas = modal.querySelectorAll('.aba-mensalidade');
+    const linhas = modal.querySelectorAll('.tabela-mensalidades tbody tr');
+    const vazio = modal.querySelector('.mensalidades-filtro-vazio');
+    abas.forEach(function (aba) {
+        aba.addEventListener('click', function () {
+            const filtro = aba.dataset.filtro;
+            abas.forEach(function (a) {
+                const ativa = a === aba;
+                a.classList.toggle('ativa', ativa);
+                a.setAttribute('aria-selected', ativa ? 'true' : 'false');
+            });
+            let visiveis = 0;
+            linhas.forEach(function (tr) {
+                const mostra = filtro === 'todas' || tr.dataset.grupo === filtro;
+                tr.hidden = !mostra;
+                if (mostra) visiveis++;
+            });
+            if (vazio) vazio.hidden = visiveis > 0;
+        });
+    });
+    modal.addEventListener('show.bs.modal', function () {
+        const todas = modal.querySelector('.aba-mensalidade[data-filtro="todas"]');
+        if (todas) todas.click();
+    });
+})();
+
+/* ===== Link do cartão "Atenção": pisca a linha de destino por ~2 s ===== */
+(function () {
+    function piscar(id) {
+        if (!id || id.length < 2) return;
+        const alvo = document.getElementById(id.slice(1));
+        if (!alvo) return;
+        alvo.classList.remove('destaque-piscar');
+        void alvo.offsetWidth; // reinicia a animação mesmo se já piscou
+        alvo.classList.add('destaque-piscar');
+        alvo.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(function () { alvo.classList.remove('destaque-piscar'); }, 2000);
+    }
+    document.addEventListener('click', function (e) {
+        const link = e.target.closest('a.aviso-link');
+        if (!link) return;
+        if (link.dataset.aba) {
+            // Alerta de equipamento: abre a aba (Equipamentos) e destaca o painel dela
+            e.preventDefault();
+            const botaoAba = document.getElementById(link.dataset.aba);
+            if (botaoAba) botaoAba.click();
+            setTimeout(function () {
+                // Com id de equipamento, pisca a linha do aparelho; senão, o painel da aba
+                const alvoId = link.getAttribute('href').slice(1);
+                const linha = document.getElementById(alvoId);
+                const alvo = linha && linha.tagName === 'TR' ? linha : document.querySelector('#aba-equipamentos .panel-card');
+                if (!alvo) return;
+                alvo.classList.remove('destaque-piscar');
+                void alvo.offsetWidth;
+                alvo.classList.add('destaque-piscar');
+                alvo.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setTimeout(function () { alvo.classList.remove('destaque-piscar'); }, 2000);
+            }, 350);
+            return;
+        }
+        piscar(link.getAttribute('href'));
+    });
+    window.addEventListener('hashchange', function () { piscar(location.hash); });
 })();

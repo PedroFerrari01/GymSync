@@ -4,7 +4,7 @@
 
     <!-- Instalar no celular: o gymsync.js mostra este cartão só quando o navegador permite instalar (ou no iPhone) -->
     <div class="instalar-app panel-card mb-4 ocultar-impressao" hidden>
-        <img th:src="@{/img/app/icone-192.png}" alt="" width="48" height="48">
+        <span class="brand-logo"><img th:src="@{/img/logo-simbolo-fundo-escuro.png}" class="logo-fundo-escuro" alt="" height="44"><img th:src="@{/img/logo-simbolo-fundo-claro.png}" class="logo-fundo-claro" alt="" height="44"></span>
         <div class="flex-grow-1">
             <div class="fw-semibold">Use o GymSync como app</div>
             <div class="small texto-apoio instalar-texto">Abra a sua ficha direto da tela inicial do celular.</div>
@@ -67,16 +67,15 @@
                 <div th:if="${#lists.isEmpty(exercicios)}" class="vazio">Seu professor ainda não montou a sua ficha.</div>
                 <div class="assinatura-impressao">Professor responsável</div>
             </div>
-        </div>
 
-        <div class="col-lg-5 ocultar-impressao">
-            <div class="panel-card mb-4">
+            <div class="panel-card mt-4 ocultar-impressao"
+                 th:with="pendentes=${mensalidades.?[situacao == 'PENDENTE' or situacao == 'ATRASADA' or situacao == 'EM_ANALISE']}, proxima=${pendentes.isEmpty() ? null : pendentes[0]}">
                 <h5 class="panel-title mb-3">Minhas Mensalidades</h5>
-                <div class="table-responsive tabela-scroll">
+                <div class="table-responsive tabela-scroll" th:if="${proxima != null}">
                     <table class="table table-custom">
-                        <thead><tr><th>Plano</th><th>Valor</th><th>Vencimento</th><th>Situação</th><th class="text-end"></th></tr></thead>
+                        <thead><tr><th>Próxima a pagar</th><th>Valor</th><th>Vencimento</th><th>Situação</th><th class="text-end"></th></tr></thead>
                         <tbody>
-                            <tr th:each="m : ${mensalidades}">
+                            <tr th:each="m : ${mensalidades}" th:if="${m == proxima}">
                                 <td th:text="${m.matricula.plano.nome}"></td>
                                 <td class="cel-valor" th:text="|R$ ${@fmt.dinheiro(m.valor)}|"></td>
                                 <td class="cel-venc" th:text="${m.vencimento != null ? #temporals.format(m.vencimento, 'dd/MM/yyyy') : ''}"></td>
@@ -90,10 +89,17 @@
                         </tbody>
                     </table>
                 </div>
+                <button type="button" class="btn-theme btn-sm mensalidades-abrir" th:if="${!#lists.isEmpty(mensalidades)}"
+                        data-bs-toggle="modal" data-bs-target="#modalTodasMensalidades">
+                    <i class="bi bi-list-ul"></i> Ver todas (<span th:text="${#lists.size(mensalidades)}">0</span>)
+                </button>
                 <div th:if="${#lists.isEmpty(mensalidades)}" class="vazio">Você ainda não tem mensalidades.</div>
             </div>
 
-            <div class="panel-card">
+        </div>
+
+        <div class="col-lg-5 ocultar-impressao">
+            <div class="panel-card ocultar-impressao">
                 <h5 class="panel-title mb-3">Minha Frequência</h5>
                 <div class="row g-2 mb-3">
                     <div class="col-6"><div class="mini-kpi"><div class="valor" th:text="${visitasSemana}">0</div><div class="rotulo">Esta semana</div></div></div>
@@ -134,15 +140,46 @@
                 </div>
                 <div th:if="${#lists.isEmpty(entradas)}" class="vazio">Nenhum acesso registrado ainda.</div>
             </div>
+        </div>
+    </div>
 
-            <div class="panel-card mt-4 meus-dados">
+            <div class="panel-card mt-4 meus-dados ocultar-impressao">
                 <div>
                     <div class="fw-semibold"><i class="bi bi-shield-check me-1 icone-destaque"></i>Seus dados</div>
                     <div class="small texto-apoio">Baixe tudo o que o GymSync guarda sobre você (LGPD).</div>
                 </div>
-                <div class="d-flex flex-wrap gap-2">
+                <div class="d-flex flex-wrap gap-2 meus-dados-botoes">
                     <a th:href="@{/aluno/meus-dados}" class="btn-theme btn-sm"><i class="bi bi-download"></i> Baixar meus dados</a>
                     <a th:href="@{/privacidade}" class="btn-theme btn-sm"><i class="bi bi-file-text"></i> Privacidade</a>
+                </div>
+            </div>
+
+    <!-- Todas as mensalidades do aluno, com abas por situação (filtro feito no gymsync.js) -->
+    <div class="modal fade" id="modalTodasMensalidades" tabindex="-1" aria-hidden="true" th:if="${!#lists.isEmpty(mensalidades)}">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title fw-bold">Minhas mensalidades</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button></div>
+                <div class="modal-body">
+                    <div class="abas-mensalidade" role="tablist">
+                        <button type="button" class="aba-mensalidade ativa" data-filtro="todas" role="tab">Todas <span class="contagem" th:text="${#lists.size(mensalidades)}">0</span></button>
+                        <button type="button" class="aba-mensalidade" data-filtro="pendentes" role="tab">Pendentes <span class="contagem" th:text="${#lists.size(mensalidades.?[situacao == 'PENDENTE' or situacao == 'EM_ANALISE'])}">0</span></button>
+                        <button type="button" class="aba-mensalidade" data-filtro="atrasadas" role="tab">Atrasadas <span class="contagem" th:text="${#lists.size(mensalidades.?[situacao == 'ATRASADA' or situacao == 'VENCIDA'])}">0</span></button>
+                        <button type="button" class="aba-mensalidade" data-filtro="pagas" role="tab">Pagas <span class="contagem" th:text="${#lists.size(mensalidades.?[situacao == 'PAGA'])}">0</span></button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-custom tabela-mensalidades">
+                            <thead><tr><th>Plano</th><th>Valor</th><th>Vencimento</th><th>Situação</th></tr></thead>
+                            <tbody>
+                                <tr th:each="m : ${mensalidades}" th:data-grupo="${(m.situacao == 'PAGA') ? 'pagas' : ((m.situacao == 'ATRASADA' or m.situacao == 'VENCIDA') ? 'atrasadas' : 'pendentes')}">
+                                    <td th:text="${m.matricula.plano.nome}"></td>
+                                    <td class="cel-valor" th:text="|R$ ${@fmt.dinheiro(m.valor)}|"></td>
+                                    <td class="cel-venc" th:text="${m.vencimento != null ? #temporals.format(m.vencimento, 'dd/MM/yyyy') : ''}"></td>
+                                    <td><span th:text="${@fmt.statusTexto(m.situacao)}" th:class="${@fmt.statusClasse(m.situacao)}"></span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="vazio mensalidades-filtro-vazio" hidden>Nenhuma mensalidade nesta aba.</div>
                 </div>
             </div>
         </div>
