@@ -787,3 +787,20 @@ document.addEventListener('show.bs.modal', (e) => {
     });
     window.addEventListener('hashchange', function () { piscar(location.hash); });
 })();
+
+/* ===== Progresso do aluno: abre o gráfico num modal (carregado do servidor) ===== */
+(function () {
+    document.addEventListener('click', function (e) {
+        const botao = e.target.closest('.btn-progresso');
+        if (!botao) return;
+        const alvo = document.getElementById('progressoConteudo');
+        const modalEl = document.getElementById('modalProgresso');
+        if (!alvo || !modalEl || !window.bootstrap) return;
+        alvo.innerHTML = '<div class="vazio">Carregando...</div>';
+        bootstrap.Modal.getOrCreateInstance(modalEl).show();
+        fetch(botao.dataset.url, { credentials: 'same-origin' })
+            .then(function (r) { return r.ok ? r.text() : Promise.reject(r.status); })
+            .then(function (html) { alvo.innerHTML = html; })
+            .catch(function () { alvo.innerHTML = '<div class="vazio">Não foi possível carregar o progresso.</div>'; });
+    });
+})();

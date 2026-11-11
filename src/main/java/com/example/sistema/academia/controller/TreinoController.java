@@ -24,12 +24,19 @@ public class TreinoController {
     @Autowired private ExclusaoService exclusaoService;
     @Autowired private FichaService fichaService;
     @Autowired private EmailService emailService;
+    @Autowired private com.example.sistema.academia.service.ProgressoService progressoService;
 
     private boolean podeEditar(HttpSession session, Professor dono) {
         String perfil = (String) session.getAttribute("perfil");
         if ("ADMIN".equals(perfil)) return true;
         Long usuarioId = (Long) session.getAttribute("usuarioId");
         return "PROFESSOR".equals(perfil) && usuarioId != null && dono != null && usuarioId.equals(dono.getId());
+    }
+
+    @org.springframework.web.bind.annotation.GetMapping("/treinos/progresso/{id}")
+    public String progressoAluno(@PathVariable Long id, org.springframework.ui.Model model) {
+        model.addAttribute("progresso", progressoService.montar(id).orElse(null));
+        return "fragments/progresso :: conteudo";
     }
 
     @PostMapping("/treinos/salvar")

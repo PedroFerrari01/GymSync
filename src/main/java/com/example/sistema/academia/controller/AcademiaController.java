@@ -49,6 +49,7 @@ public class AcademiaController {
     @Autowired private FrequenciaService frequenciaService;
     @Autowired private EvolucaoService evolucaoService;
     @Autowired private AcompanhamentoService acompanhamentoService;
+    @Autowired private com.example.sistema.academia.service.VisaoEquipeService visaoEquipeService;
     @Autowired private PasswordEncoder encoder;
     @Autowired private SenhaService senhaService;
     @Autowired private VisitanteService visitanteService;
@@ -183,6 +184,7 @@ public class AcademiaController {
         model.addAttribute("acompanhamento", acompanhamento(meusTreinos, todosExercicios, todasEntradas, todosRegistros,
                 (String) session.getAttribute("nomeUsuario"), professor));
         model.addAttribute("diasSumido", AcompanhamentoService.DIAS_SUMIDO);
+        model.addAttribute("painel", visaoEquipeService.montar(professor ? usuarioId : null, LocalDate.now()));
         aulaService.preencher(model, null);
 
         if (professor) {

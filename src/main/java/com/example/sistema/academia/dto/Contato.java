@@ -6,6 +6,7 @@ public class Contato {
     private final String detalhe;
     private final long naoLidas;
     private final String whatsapp;
+    private String ultima; // prévia da última mensagem da conversa (null = sem conversa)
 
     public Contato(Long id, String nome, String detalhe, long naoLidas, String whatsapp) {
         this.id = id;
@@ -20,4 +21,6 @@ public class Contato {
     public String getDetalhe() { return detalhe; }
     public long getNaoLidas() { return naoLidas; }
     public String getWhatsapp() { return whatsapp; }
+    public String getUltima() { return ultima; }
+    public void setUltima(String ultima) { this.ultima = ultima; }
 }

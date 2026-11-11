@@ -1,0 +1,31 @@
+<div th:fragment="conteudo">
+    <div th:if="${progresso == null}" class="vazio">Aluno não encontrado.</div>
+    <div th:if="${progresso != null}">
+        <h5 class="panel-title mb-1" th:text="${progresso.nome}"></h5>
+        <p class="small texto-apoio mb-3">Peso e cargas registradas. Cada barra é um registro; a mais alta é o maior valor.</p>
+
+        <div th:if="${#lists.isEmpty(progresso.peso) and #lists.isEmpty(progresso.cargas)}" class="vazio">Ainda não há avaliações nem cargas registradas para este aluno.</div>
+
+        <div th:each="s : ${progresso.peso}" class="mb-4">
+            <div class="fw-semibold small mb-2" th:text="${s.titulo}"></div>
+            <div class="prog-grafico">
+                <div th:each="b : ${s.barras}" class="prog-col">
+                    <span class="prog-valor" th:text="${b.valor}"></span>
+                    <div class="prog-barra" th:style="|height:${b.altura}%|"></div>
+                    <span class="prog-rotulo" th:text="${b.rotulo}"></span>
+                </div>
+            </div>
+        </div>
+
+        <div th:each="s : ${progresso.cargas}" class="mb-4">
+            <div class="fw-semibold small mb-2" th:text="|Carga: ${s.titulo}|"></div>
+            <div class="prog-grafico">
+                <div th:each="b : ${s.barras}" class="prog-col">
+                    <span class="prog-valor" th:text="${b.valor}"></span>
+                    <div class="prog-barra" th:style="|height:${b.altura}%|"></div>
+                    <span class="prog-rotulo" th:text="${b.rotulo}"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

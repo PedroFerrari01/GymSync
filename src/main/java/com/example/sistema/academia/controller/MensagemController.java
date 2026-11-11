@@ -59,14 +59,18 @@ public class MensagemController {
             Long professorId = aluno ? com : id;
             mensagens = mensagemRepository.findByAlunoIdAndProfessorIdOrderByDataHoraAscIdAsc(alunoId, professorId);
             String remetenteOposto = aluno ? "PROFESSOR" : "ALUNO";
+            boolean visitante = Boolean.TRUE.equals(session.getAttribute("visitante"));
             List<Mensagem> paraMarcar = new ArrayList<>();
-            for (Mensagem m : mensagens) {
-                if (!m.isLida() && remetenteOposto.equals(m.getRemetente())) {
-                    m.setLida(true);
-                    paraMarcar.add(m);
+            // visitante só olha: não marca nada como lido
+            if (!visitante) {
+                for (Mensagem m : mensagens) {
+                    if (!m.isLida() && remetenteOposto.equals(m.getRemetente())) {
+                        m.setLida(true);
+                        paraMarcar.add(m);
+                    }
                 }
+                mensagemRepository.saveAll(paraMarcar);
             }
-            mensagemRepository.saveAll(paraMarcar);
             selecionado = new Contato(selecionado.getId(), selecionado.getNome(), selecionado.getDetalhe(), 0, selecionado.getWhatsapp());
             final Long idSelecionado = selecionado.getId();
             contatos = contatos.stream()
@@ -74,6 +78,18 @@ public class MensagemController {
                     .toList();
         }
 
+        for (Contato c : contatos) {
+            List<Mensagem> conversa = aluno
+                    ? mensagemRepository.findByAlunoIdAndProfessorIdOrderByDataHoraAscIdAsc(id, c.getId())
+                    : mensagemRepository.findByAlunoIdAndProfessorIdOrderByDataHoraAscIdAsc(c.getId(), id);
+            if (conversa.isEmpty()) continue;
+            Mensagem ultima = conversa.get(conversa.size() - 1);
+            String meu = aluno ? "ALUNO" : "PROFESSOR";
+            String quem = meu.equals(ultima.getRemetente()) ? "Você: " : "";
+            String texto = ultima.getTexto() == null ? "" : ultima.getTexto();
+            if (texto.length() > 40) texto = texto.substring(0, 40) + "…";
+            c.setUltima(quem + texto + " · " + quando(ultima.getDataHora()));
+        }
         model.addAttribute("perfil", perfil);
         model.addAttribute("nomeUsuario", session.getAttribute("nomeUsuario"));
         model.addAttribute("contatos", contatos);
@@ -112,5 +128,12 @@ public class MensagemController {
         m.setLida(false);
         mensagemRepository.save(m);
         return "redirect:/mensagens?com=" + destinoId;
+    }
+    private static String quando(java.time.LocalDateTime dataHora) {
+        if (dataHora == null) return "";
+        long min = java.time.Duration.between(dataHora, java.time.LocalDateTime.now()).toMinutes();
+        if (min < 60) return "há " + Math.max(min, 1) + " min";
+        if (min < 24 * 60) return "há " + (min / 60) + " h";
+        return "há " + (min / (24 * 60)) + " dia(s)";
     }
 }

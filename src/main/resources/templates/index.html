@@ -508,13 +508,18 @@
                                         <option th:each="a : ${alunos}" th:value="${a.id}" th:text="${a.nome}"></option>
                                     </select>
                                 </div>
+                                <div class="mensalidades-resumo small mb-2" th:with="abertas=${mensalidades.?[situacao == 'PENDENTE' or situacao == 'ATRASADA']}, atrasadas=${mensalidades.?[situacao == 'ATRASADA']}">
+                                    <span><strong th:text="${#lists.size(abertas)}">0</strong> em aberto</span>
+                                    <span>A receber: <strong th:text="|R$ ${@fmt.dinheiro(#lists.isEmpty(abertas) ? T(java.math.BigDecimal).ZERO : #aggregates.sum(abertas.![valor]))}|">R$ 0</strong></span>
+                                    <span class="status-err"><strong th:text="${#lists.size(atrasadas)}">0</strong> atrasada(s)</span>
+                                </div>
                                 <div class="table-responsive tabela-scroll">
                                     <table class="table table-custom tabela-filtravel">
-                                        <thead><tr><th>Aluno</th><th>Plano</th><th>Valor</th><th>Vencimento</th><th>Status</th><th class="text-end">Ações</th></tr></thead>
+                                        <thead><tr><th>Aluno</th><th class="d-none d-md-table-cell">Plano</th><th>Valor</th><th>Vencimento</th><th>Status</th><th class="text-end">Ações</th></tr></thead>
                                         <tbody>
                                             <tr th:each="m : ${mensalidades}" th:attr="data-status=${m.situacao}" th:data-aluno="${m.matricula.aluno.id}" th:id="${'mensalidade-' + m.id}">
                                                 <td class="fw-semibold" th:text="${m.matricula.aluno.nome}"></td>
-                                                <td th:text="${m.matricula.plano.nome}"></td>
+                                                <td class="d-none d-md-table-cell" th:text="${m.matricula.plano.nome}"></td>
                                                 <td th:text="|R$ ${@fmt.dinheiro(m.valor)}|"></td>
                                                 <td th:text="${@fmt.data(m.vencimento)}"></td>
                                                 <td><span th:text="${@fmt.statusTexto(m.situacao)}" th:class="${@fmt.statusClasse(m.situacao)}"></span></td>
@@ -666,7 +671,7 @@
                                         <thead><tr><th>Aluno</th><th>Catraca</th><th>Feitos</th><th class="col-adesao">Adesão</th></tr></thead>
                                         <tbody>
                                             <tr th:each="l : ${acompanhamento}">
-                                                <td class="fw-semibold" th:text="${l.nome}"></td>
+                                                <td class="fw-semibold"><button type="button" class="btn btn-link p-0 text-start fw-semibold btn-progresso" th:data-url="@{/treinos/progresso/{id}(id=${l.alunoId})}" th:text="${l.nome}" title="Ver progresso"></button></td>
                                                 <td class="small" th:text="${l.entradasSemana == 1 ? '1 vez' : l.entradasSemana + ' vezes'}"></td>
                                                 <td class="small" th:text="${l.totalExercicios == 0 ? 'Ficha vazia' : l.feitosSemana + ' de ' + l.totalExercicios}"></td>
                                                 <td>
@@ -692,11 +697,11 @@
                         <p class="small mb-3 texto-apoio">Carga de cada professor e adesão média dos alunos dele.</p>
                         <div class="table-responsive">
                             <table class="table table-custom mb-0">
-                                <thead><tr><th>Professor</th><th>Especialidade</th><th>Fichas</th><th>Alunos</th><th>Sumidos</th><th class="col-adesao">Adesão média</th></tr></thead>
+                                <thead><tr><th>Professor</th><th class="d-none d-md-table-cell">Especialidade</th><th>Fichas</th><th>Alunos</th><th>Sumidos</th><th class="col-adesao">Adesão média</th></tr></thead>
                                 <tbody>
                                     <tr th:each="r : ${equipe}">
                                         <td class="fw-semibold" th:text="${r.nome}"></td>
-                                        <td class="small" th:text="${r.especialidade}"></td>
+                                        <td class="small d-none d-md-table-cell" th:text="${r.especialidade}"></td>
                                         <td th:text="${r.fichas}"></td>
                                         <td th:text="${r.alunos}"></td>
                                         <td><span th:if="${r.sumidos > 0}" class="status-wait" th:text="${r.sumidos}"></span><span th:unless="${r.sumidos > 0}">0</span></td>
@@ -709,6 +714,70 @@
                                     </tr>
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+
+                    <!-- Pendências da equipe: admin vê todos; professor vê só o que é dele -->
+                    <div class="row g-4 mb-4" th:if="${painel != null}">
+                        <div th:if="${perfil == 'ADMIN'}" class="col-lg-6">
+                            <div class="panel-card h-100">
+                                <h5 class="panel-title mb-1">Alunos sem ficha</h5>
+                                <p class="small mb-3 texto-apoio">Matriculados ativos que ainda não têm treino.</p>
+                                <ul class="lista-sumidos" th:unless="${#lists.isEmpty(painel.alunosSemFicha)}">
+                                    <li th:each="t : ${painel.alunosSemFicha}"><span class="small" th:text="${t}"></span></li>
+                                </ul>
+                                <div th:if="${#lists.isEmpty(painel.alunosSemFicha)}" class="vazio">Todo aluno ativo já tem ficha.</div>
+                            </div>
+                        </div>
+                        <div th:if="${perfil == 'ADMIN'}" class="col-lg-6">
+                            <div class="panel-card h-100">
+                                <h5 class="panel-title mb-1">Fichas sem professor</h5>
+                                <p class="small mb-3 texto-apoio">Fichas que ainda não têm professor responsável.</p>
+                                <ul class="lista-sumidos" th:unless="${#lists.isEmpty(painel.fichasSemProfessor)}">
+                                    <li th:each="t : ${painel.fichasSemProfessor}"><span class="small" th:text="${t}"></span></li>
+                                </ul>
+                                <div th:if="${#lists.isEmpty(painel.fichasSemProfessor)}" class="vazio">Todas as fichas têm professor.</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="panel-card h-100">
+                                <h5 class="panel-title mb-1">Avaliações atrasadas</h5>
+                                <p class="small mb-3 texto-apoio" th:text="|Alunos sem avaliação física há mais de 90 dias. Avaliações neste mês: ${painel.avaliacoesNoMes}.|"></p>
+                                <ul class="lista-sumidos" th:unless="${#lists.isEmpty(painel.avaliacoesAtrasadas)}">
+                                    <li th:each="t : ${painel.avaliacoesAtrasadas}"><span class="small" th:text="${t}"></span></li>
+                                </ul>
+                                <div th:if="${#lists.isEmpty(painel.avaliacoesAtrasadas)}" class="vazio">Nenhuma avaliação atrasada.</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="panel-card h-100">
+                                <h5 class="panel-title mb-1">Fichas vencidas</h5>
+                                <p class="small mb-3 texto-apoio">Fichas com mais de 60 dias sem troca.</p>
+                                <ul class="lista-sumidos" th:unless="${#lists.isEmpty(painel.fichasVencidas)}">
+                                    <li th:each="t : ${painel.fichasVencidas}"><span class="small" th:text="${t}"></span></li>
+                                </ul>
+                                <div th:if="${#lists.isEmpty(painel.fichasVencidas)}" class="vazio">Nenhuma ficha vencida.</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="panel-card h-100">
+                                <h5 class="panel-title mb-1">Mensagens à espera</h5>
+                                <p class="small mb-3 texto-apoio">Mensagens de alunos que ainda não foram lidas.</p>
+                                <ul class="lista-sumidos" th:unless="${#lists.isEmpty(painel.mensagensEspera)}">
+                                    <li th:each="t : ${painel.mensagensEspera}"><span class="small" th:text="${t}"></span></li>
+                                </ul>
+                                <div th:if="${#lists.isEmpty(painel.mensagensEspera)}" class="vazio">Nenhuma mensagem sem leitura.</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="panel-card h-100">
+                                <h5 class="panel-title mb-1">Aulas coletivas da semana</h5>
+                                <p class="small mb-3 texto-apoio">Próxima ocorrência de cada aula e vagas preenchidas.</p>
+                                <ul class="lista-sumidos" th:unless="${#lists.isEmpty(painel.aulasSemana)}">
+                                    <li th:each="t : ${painel.aulasSemana}"><span class="small" th:text="${t}"></span></li>
+                                </ul>
+                                <div th:if="${#lists.isEmpty(painel.aulasSemana)}" class="vazio">Nenhuma aula cadastrada.</div>
+                            </div>
                         </div>
                     </div>
 
@@ -910,15 +979,20 @@
                         <div class="col-lg-8">
                             <div class="panel-card">
                                 <h5 class="panel-title mb-3">Planos Disponíveis</h5>
+                                <div class="mensalidades-resumo small mb-3" th:with="abertas=${mensalidades.?[situacao == 'PENDENTE' or situacao == 'ATRASADA']}, atrasadas=${mensalidades.?[situacao == 'ATRASADA']}">
+                                    <span><strong th:text="${#lists.size(abertas)}">0</strong> mensalidades em aberto</span>
+                                    <span>A receber: <strong th:text="|R$ ${@fmt.dinheiro(#lists.isEmpty(abertas) ? T(java.math.BigDecimal).ZERO : #aggregates.sum(abertas.![valor]))}|">R$ 0</strong></span>
+                                    <span class="status-err"><strong th:text="${#lists.size(atrasadas)}">0</strong> atrasada(s)</span>
+                                </div>
                                 <div class="table-responsive">
                                     <table class="table table-custom tabela-filtravel">
-                                        <thead><tr><th>Plano</th><th>Duração</th><th>Valor total</th><th>Mensalidade</th><th class="text-end">Ações</th></tr></thead>
+                                        <thead><tr><th>Plano</th><th class="d-none d-md-table-cell">Duração</th><th>Valor total</th><th class="d-none d-md-table-cell">Mensalidade</th><th class="text-end">Ações</th></tr></thead>
                                         <tbody>
                                             <tr th:each="p : ${planos}">
                                                 <td class="fw-semibold" th:text="${p.nome}"></td>
-                                                <td th:text="|${p.duracaoMeses} ${p.duracaoMeses == 1 ? 'mês' : 'meses'}|"></td>
+                                                <td class="d-none d-md-table-cell" th:text="|${p.duracaoMeses} ${p.duracaoMeses == 1 ? 'mês' : 'meses'}|"></td>
                                                 <td class="fw-bold" style="color:var(--accent);" th:text="|R$ ${@fmt.dinheiro(p.valor)}|"></td>
-                                                <td th:text="|≈ R$ ${@fmt.dinheiro(p.valor / p.duracaoMeses)}|"></td>
+                                                <td class="d-none d-md-table-cell" th:text="|≈ R$ ${@fmt.dinheiro(p.valor / p.duracaoMeses)}|"></td>
                                                 <td class="text-end text-nowrap">
                                                     <button type="button" class="action-btn action-toggle me-1 btn-fill" title="Editar plano"
                                                             data-bs-toggle="modal" data-bs-target="#modalEditarPlano" data-form="formEditarPlano"
@@ -1226,6 +1300,18 @@
                         <button type="submit" class="btn-brand">Salvar Manutenção</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+</th:block>
+
+<!-- Progresso do aluno (admin e professor): o botão com o nome do aluno abre este modal -->
+<th:block th:if="${logado and (perfil == 'ADMIN' or perfil == 'PROFESSOR')}">
+    <div class="modal fade" id="modalProgresso" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">Progresso do aluno</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button></div>
+                <div class="modal-body" id="progressoConteudo"><div class="vazio">Carregando...</div></div>
             </div>
         </div>
     </div>

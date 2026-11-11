@@ -54,8 +54,11 @@
                                 <td th:text="|${aula.diaSemanaPt} ${#temporals.format(aula.horario, 'HH:mm')}|"></td>
                                 <td th:text="${#temporals.format(proximasDatas[aula.id], 'dd/MM')}"></td>
                                 <td>
-                                    <span th:text="|${vagasRestantes[aula.id]} de ${aula.vagas}|"
-                                          th:class="${vagasRestantes[aula.id] > 0 ? 'status-ok' : 'status-err'}"></span>
+                                    <div class="adesao" th:with="ocup=${aula.vagas > 0 ? (aula.vagas - vagasRestantes[aula.id]) * 100 / aula.vagas : 100}">
+                                        <div class="adesao-trilho"><div class="adesao-barra" th:style="|width:${ocup}%;background:${ocup >= 100 ? '#ef4444' : (ocup >= 50 ? '#f97316' : '#22c55e')}|"></div></div>
+                                        <span th:text="|${vagasRestantes[aula.id]} de ${aula.vagas}|" th:class="${vagasRestantes[aula.id] > 0 ? 'status-ok' : 'status-err'}"></span>
+                                        <div class="small" style="color:var(--text-secondary);" th:text="|${aula.vagas - vagasRestantes[aula.id]} inscrito(s) · ${#temporals.format(proximasDatas[aula.id], 'dd/MM')}|"></div>
+                                    </div>
                                 </td>
                                 <td th:if="${perfil != 'ALUNO'}" class="small" th:text="${nomesReservas[aula.id] != '' ? nomesReservas[aula.id] : '-'}"></td>
                                 <td class="text-end text-nowrap">

@@ -37,10 +37,10 @@
         <div class="panel-card">
             <h5 class="panel-title mb-3" th:text="${souAluno ? 'Professores' : 'Alunos'}">Contatos</h5>
             <a th:each="c : ${contatos}" th:href="@{/mensagens(com=${c.id})}" class="contato-item mb-1"
-               th:classappend="${selecionado != null and selecionado.id == c.id ? 'ativo' : ''}">
+               th:classappend="${(selecionado != null and selecionado.id == c.id ? 'ativo ' : '') + (c.naoLidas > 0 ? 'contato-pendente' : '')}">
                 <span>
                     <span class="d-block fw-semibold" th:text="${c.nome}"></span>
-                    <span class="d-block small" style="color:var(--text-secondary);" th:text="${c.detalhe}"></span>
+                    <span class="d-block small" style="color:var(--text-secondary);" th:text="${c.ultima != null ? c.ultima : c.detalhe}"></span>
                 </span>
                 <span th:if="${c.naoLidas > 0}" class="nav-badge" th:text="${c.naoLidas}"></span>
             </a>
