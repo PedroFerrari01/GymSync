@@ -18,6 +18,8 @@ public final class RegrasAcesso {
                 || caminho.equals("/manifest.json")
                 || caminho.equals("/sw.js")
                 || caminho.equals("/offline.html")
+                || caminho.equals("/robots.txt")
+                || caminho.equals("/sitemap.xml")
                 || caminho.equals("/privacidade")
                 || caminho.startsWith("/css/")
                 || caminho.startsWith("/js/")

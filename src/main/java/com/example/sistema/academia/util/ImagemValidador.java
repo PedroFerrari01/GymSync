@@ -15,7 +15,27 @@ public final class ImagemValidador {
     /** Maior lado guardado, em pixels: foto de celular grande vira uma imagem leve para a tela. */
     public static final int LADO_MAXIMO = 800;
 
+    /** Maior lado aceito no envio, em pixels: acima disso a imagem é recusada antes de ser aberta inteira na memória. */
+    public static final int LADO_LIMITE_ENVIO = 4000;
+
     private ImagemValidador() {}
+
+    /** Lê só o cabeçalho da imagem (sem decodificar) e confere se os dois lados cabem em LADO_LIMITE_ENVIO. */
+    public static boolean dimensoesAceitaveis(byte[] dados) {
+        try (javax.imageio.stream.ImageInputStream in = ImageIO.createImageInputStream(new ByteArrayInputStream(dados))) {
+            java.util.Iterator<javax.imageio.ImageReader> leitores = ImageIO.getImageReaders(in);
+            if (!leitores.hasNext()) return false;
+            javax.imageio.ImageReader leitor = leitores.next();
+            try {
+                leitor.setInput(in);
+                return leitor.getWidth(0) <= LADO_LIMITE_ENVIO && leitor.getHeight(0) <= LADO_LIMITE_ENVIO;
+            } finally {
+                leitor.dispose();
+            }
+        } catch (Exception | Error e) {
+            return false;
+        }
+    }
 
     /** Diminui a imagem se ela passar de LADO_MAXIMO; se algo falhar, devolve a original. */
     public static byte[] reduzir(byte[] dados, String tipo) {

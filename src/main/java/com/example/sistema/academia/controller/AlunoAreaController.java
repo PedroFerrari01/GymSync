@@ -28,6 +28,7 @@ public class AlunoAreaController {
     @Autowired private RegistroExercicioRepository registroExercicioRepository;
     @Autowired private FichaService fichaService;
     @Autowired private EmailService emailService;
+    @Autowired private com.example.sistema.academia.service.LimiteEnvioEmailService limiteEmail;
 
     @PostMapping("/aluno/mensalidades/informar/{id}")
     public String informarPagamento(@PathVariable Long id, HttpSession session, RedirectAttributes redirect) {
@@ -87,6 +88,8 @@ public class AlunoAreaController {
             redirect.addFlashAttribute("erro", "O envio de e-mail ainda não foi configurado. Use o botão do WhatsApp.");
         } else if (aluno.getEmail() == null || aluno.getEmail().isBlank()) {
             redirect.addFlashAttribute("erro", "Você não tem e-mail cadastrado.");
+        } else if (!limiteEmail.permitir("ALUNO:" + alunoId)) {
+            redirect.addFlashAttribute("erro", "Limite de 3 e-mails por hora atingido. Tente de novo mais tarde.");
         } else {
             try {
                 emailService.enviar(aluno.getEmail(), "GymSync - sua ficha de treino", fichaService.textoAluno(aluno) + "\nBom treino!\nGymSync");

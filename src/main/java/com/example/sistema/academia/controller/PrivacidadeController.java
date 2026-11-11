@@ -54,6 +54,33 @@ public class PrivacidadeController {
         return "redirect:/";
     }
 
+    /** Revogar o consentimento: o aceite some e a janela de aceite volta a aparecer até o aluno concordar de novo. */
+    @PostMapping("/aluno/privacidade/revogar")
+    public String revogar(HttpSession session, RedirectAttributes redirect) {
+        Long usuarioId = (Long) session.getAttribute("usuarioId");
+        Aluno aluno = usuarioId != null ? alunoRepository.findById(usuarioId).orElse(null) : null;
+        if (aluno != null) {
+            aluno.setAceitePrivacidade(null);
+            alunoRepository.save(aluno);
+            redirect.addFlashAttribute("sucesso", "Consentimento revogado. Sua área fica bloqueada até você aceitar a política de novo.");
+        }
+        return "redirect:/";
+    }
+
+    /**
+     * Pedido de exclusão dos dados: não apaga na hora (a exclusão em cascata é da administração).
+     * A mensagem de sucesso vai para o histórico de ações, que o administrador vê nos Relatórios.
+     */
+    @PostMapping("/aluno/privacidade/pedir-exclusao")
+    public String pedirExclusao(HttpSession session, RedirectAttributes redirect) {
+        Long usuarioId = (Long) session.getAttribute("usuarioId");
+        Aluno aluno = usuarioId != null ? alunoRepository.findById(usuarioId).orElse(null) : null;
+        if (aluno != null) {
+            redirect.addFlashAttribute("sucesso", "Pedido de exclusão de dados (LGPD) registrado pelo aluno " + aluno.getNome() + " (#" + aluno.getId() + ").");
+        }
+        return "redirect:/";
+    }
+
     private static String data(LocalDate d) { return d == null ? null : d.format(DATA); }
     private static String dataHora(LocalDateTime d) { return d == null ? null : d.format(DATA_HORA); }
 

@@ -107,6 +107,9 @@ public class EquipamentoController {
         if (ImagemValidador.tipo(imagem.getBytes()) == null) {
             return "Envie a imagem do aparelho em JPG ou PNG.";
         }
+        if (!ImagemValidador.dimensoesAceitaveis(imagem.getBytes())) {
+            return "A imagem é grande demais (máximo " + ImagemValidador.LADO_LIMITE_ENVIO + " px de largura ou altura).";
+        }
         return null;
     }
 

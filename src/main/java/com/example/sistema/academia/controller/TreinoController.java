@@ -24,6 +24,7 @@ public class TreinoController {
     @Autowired private ExclusaoService exclusaoService;
     @Autowired private FichaService fichaService;
     @Autowired private EmailService emailService;
+    @Autowired private com.example.sistema.academia.service.LimiteEnvioEmailService limiteEmail;
     @Autowired private com.example.sistema.academia.service.ProgressoService progressoService;
 
     private boolean podeEditar(HttpSession session, Professor dono) {
@@ -135,7 +136,7 @@ public class TreinoController {
     }
 
     @PostMapping("/treinos/enviar-email/{id}")
-    public String enviarFichaPorEmail(@PathVariable Long id, RedirectAttributes redirect) {
+    public String enviarFichaPorEmail(@PathVariable Long id, HttpSession session, RedirectAttributes redirect) {
         Treino t = treinoRepository.findById(id).orElse(null);
         if (t == null) {
             return "redirect:/";
@@ -145,6 +146,8 @@ public class TreinoController {
             redirect.addFlashAttribute("erro", "O envio de e-mail ainda não foi configurado no application.properties.");
         } else if (destino == null || destino.isBlank()) {
             redirect.addFlashAttribute("erro", "O aluno não tem e-mail cadastrado.");
+        } else if (!limiteEmail.permitir(session.getAttribute("perfil") + ":" + session.getAttribute("usuarioId"))) {
+            redirect.addFlashAttribute("erro", "Limite de 3 e-mails por hora atingido. Tente de novo mais tarde.");
         } else {
             try {
                 String texto = "Olá, " + t.getAluno().getNome() + "!\n\nSegue a sua ficha de treino:\n\n"

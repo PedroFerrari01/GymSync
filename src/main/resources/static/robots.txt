@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /$
+Allow: /privacidade
+Disallow: /
+
+Sitemap: https://gymsync-ucfj.onrender.com/sitemap.xml

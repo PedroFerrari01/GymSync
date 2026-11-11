@@ -68,4 +68,16 @@ class ImagemValidadorTest {
     void limiteDeTamanhoEDeDoisMegas() {
         assertEquals(2 * 1024 * 1024, ImagemValidador.TAMANHO_MAXIMO);
     }
+
+    @Test
+    void recusaImagemComLadoMaiorQue4000Pixels() throws Exception {
+        assertTrue(ImagemValidador.dimensoesAceitaveis(gerar(4000, 100, "png")));
+        assertFalse(ImagemValidador.dimensoesAceitaveis(gerar(4001, 100, "png")));
+        assertFalse(ImagemValidador.dimensoesAceitaveis(gerar(100, 4500, "jpg")));
+    }
+
+    @Test
+    void dimensoesDeArquivoQueNaoEImagemSaoRecusadas() {
+        assertFalse(ImagemValidador.dimensoesAceitaveis("texto qualquer".getBytes()));
+    }
 }

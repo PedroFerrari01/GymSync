@@ -17,7 +17,7 @@
     <a th:href="@{/}" class="btn-theme btn-sm mb-4 d-inline-flex"><i class="bi bi-arrow-left"></i>&nbsp;<span th:text="${logado ? 'Voltar ao sistema' : 'Voltar ao login'}">Voltar</span></a>
 
     <h1 class="fw-bold mb-1">Política de privacidade</h1>
-    <p class="texto-apoio mb-4">Última atualização: 30/10/2026</p>
+    <p class="texto-apoio mb-4">Última atualização: 11/11/2026</p>
 
     <div class="panel-card mb-4 aviso-academico">
         <i class="bi bi-mortarboard"></i>
@@ -25,6 +25,16 @@
             usa dados de exemplo. Esta política descreve como o sistema trata dados pessoais quando usado por uma academia,
             seguindo a Lei Geral de Proteção de Dados (Lei 13.709/2018).</div>
     </div>
+
+    <section>
+        <h2>Quem é o responsável pelos dados</h2>
+        <p><strong>Controlador:</strong> a academia que usa o GymSync decide para que os dados dos alunos são usados. Nesta versão de
+            demonstração, o responsável é o grupo que desenvolveu o trabalho acadêmico, que pode ser contatado pelo e-mail
+            <a href="mailto:suportegymsync@gmail.com">suportegymsync@gmail.com</a>.</p>
+        <p><strong>Encarregado pelo tratamento de dados (DPO):</strong> o canal para dúvidas, pedidos e reclamações sobre dados pessoais
+            é o mesmo e-mail, <a href="mailto:suportegymsync@gmail.com">suportegymsync@gmail.com</a>. Uma academia real deve indicar
+            aqui o nome e o contato da pessoa encarregada.</p>
+    </section>
 
     <section>
         <h2>1. Quais dados o GymSync guarda</h2>
@@ -54,7 +64,7 @@
     <section>
         <h2>3. Com quem os dados são compartilhados</h2>
         <ul>
-            <li><strong>Hospedagem:</strong> o site publicado roda no Render e o banco de dados na Aiven (servidores nos Estados Unidos).</li>
+            <li><strong>Hospedagem:</strong> o site publicado roda no Render e o banco de dados na Aiven (servidores nos Estados Unidos; veja o item 4).</li>
             <li><strong>E-mail:</strong> só quando a ficha de treino é enviada por e-mail (pelo aluno ou pelo professor) ou quando alguém pede a recuperação de senha, o endereço e a mensagem passam pelo provedor de envio (Brevo ou Gmail).</li>
             <li><strong>Fonte das letras:</strong> as páginas carregam a fonte Outfit do Google Fonts, então o Google recebe o endereço IP do seu aparelho ao abrir o sistema.</li>
             <li><strong>WhatsApp:</strong> os botões de WhatsApp só abrem o aplicativo no seu aparelho com o texto pronto; nada é enviado sem você confirmar.</li>
@@ -62,19 +72,36 @@
     </section>
 
     <section>
-        <h2>4. Por quanto tempo</h2>
+        <h2>4. Envio de dados para fora do Brasil</h2>
+        <p>Os servidores do Render (aplicação) e da Aiven (banco de dados) ficam nos Estados Unidos, e o e-mail pode passar pelo Brevo
+            ou pelo Gmail (Google). Por isso, os dados do cadastro e das avaliações físicas são enviados e guardados fora do Brasil.
+            Isso acontece só para o sistema funcionar, com base no seu consentimento e na execução do contrato com a academia
+            (LGPD, art. 33), e esses serviços usam conexão protegida (HTTPS). Se você não concorda, não use a área do aluno e peça
+            a exclusão dos seus dados.</p>
+    </section>
+
+    <section>
+        <h2>5. Por quanto tempo</h2>
         <p>Enquanto o aluno tiver vínculo com a academia. Depois, os dados de cobrança podem ser mantidos pelo prazo exigido por lei;
-            os demais podem ser excluídos a pedido. A exclusão de um aluno no sistema apaga junto as matrículas, mensalidades,
+            os demais são excluídos a pedido ou, se ninguém pedir, quando a academia encerrar o cadastro. A exclusão de um aluno no sistema apaga junto as matrículas, mensalidades,
             entradas, fichas, avaliações, reservas de aula e mensagens dele. O histórico de ações não é apagado junto.</p>
     </section>
 
     <section>
-        <h2>5. Seus direitos</h2>
+        <h2>6. Menores de 18 anos</h2>
+        <p>O cadastro de menor de 18 anos só deve ser feito com o consentimento específico de um dos pais ou do responsável legal
+            (LGPD, art. 14), que também pode pedir acesso, correção ou exclusão dos dados do menor. As avaliações físicas, por serem
+            dados de saúde, exigem esse cuidado. Se você é responsável por um menor e quer exercer esses direitos, escreva para
+            <a href="mailto:suportegymsync@gmail.com">suportegymsync@gmail.com</a>.</p>
+    </section>
+
+    <section>
+        <h2>7. Seus direitos</h2>
         <p>Pela LGPD (art. 18), você pode:</p>
         <ul>
             <li><strong>Acessar e levar seus dados:</strong> na Minha Área, use <em>Baixar meus dados</em> para receber um arquivo com tudo o que o sistema guarda sobre você.</li>
             <li><strong>Corrigir</strong> dados errados ou desatualizados.</li>
-            <li><strong>Pedir a exclusão</strong> dos dados ou <strong>revogar o consentimento</strong> das avaliações físicas.</li>
+            <li><strong>Pedir a exclusão</strong> dos dados ou <strong>revogar o consentimento</strong>: na Minha Área há os botões <em>Revogar consentimento</em> e <em>Pedir exclusão dos meus dados</em>. Revogar suspende o uso da sua área até você aceitar de novo; o pedido de exclusão fica registrado para a administração apagar o seu cadastro.</li>
             <li>Saber com quem os dados foram compartilhados.</li>
         </ul>
         <p>Para correção, exclusão ou dúvidas, fale com a recepção da academia ou escreva para
@@ -82,14 +109,14 @@
     </section>
 
     <section>
-        <h2>6. Cookies e armazenamento no navegador</h2>
+        <h2>8. Cookies e armazenamento no navegador</h2>
         <p>O GymSync usa apenas o cookie de sessão, necessário para manter o login, e guarda no seu navegador preferências como
             o tema claro ou escuro e, se você instalar o app no celular, arquivos visuais para ele abrir sem internet (sem dados pessoais). Não há cookies de propaganda nem de rastreamento. O vídeo de apresentação do YouTube só é
             carregado se você clicar para assistir.</p>
     </section>
 
     <section>
-        <h2>7. Segurança</h2>
+        <h2>9. Segurança</h2>
         <p>Acesso separado por perfil (aluno, professor e administração), senhas criptografadas, conexão HTTPS no site publicado,
             bloqueio após tentativas de login erradas e histórico das ações feitas no sistema.</p>
     </section>

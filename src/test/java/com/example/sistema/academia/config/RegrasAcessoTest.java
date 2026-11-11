@@ -27,11 +27,18 @@ class RegrasAcessoTest {
         assertTrue(RegrasAcesso.permitido(null, "/manifest.json"));
         assertTrue(RegrasAcesso.permitido(null, "/sw.js"));
         assertTrue(RegrasAcesso.permitido(null, "/offline.html"));
+        // Buscadores leem estes dois arquivos sem login
+        assertTrue(RegrasAcesso.permitido(null, "/robots.txt"));
+        assertTrue(RegrasAcesso.permitido(null, "/sitemap.xml"));
         // LGPD: a política é pública; aceite e "baixar meus dados" são só do aluno logado
         assertTrue(RegrasAcesso.permitido(null, "/privacidade"));
         assertFalse(RegrasAcesso.permitido(null, "/aluno/meus-dados"));
         assertTrue(RegrasAcesso.permitido("ALUNO", "/aluno/meus-dados"));
         assertTrue(RegrasAcesso.permitido("ALUNO", "/aluno/aceitar-privacidade"));
+        assertTrue(RegrasAcesso.permitido("ALUNO", "/aluno/privacidade/revogar"));
+        assertTrue(RegrasAcesso.permitido("ALUNO", "/aluno/privacidade/pedir-exclusao"));
+        assertFalse(RegrasAcesso.permitido("PROFESSOR", "/aluno/privacidade/pedir-exclusao"));
+        assertFalse(RegrasAcesso.visitantePode("POST", "/aluno/privacidade/pedir-exclusao"));
         assertFalse(RegrasAcesso.permitido("PROFESSOR", "/aluno/meus-dados"));
         assertFalse(RegrasAcesso.permitido("ADMIN", "/aluno/meus-dados"));
         assertFalse(RegrasAcesso.permitido(null, "/alunos/salvar"));
