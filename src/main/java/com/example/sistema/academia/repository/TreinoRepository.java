@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface TreinoRepository extends JpaRepository<Treino, Long> {
     List<Treino> findByAlunoId(Long alunoId);
     List<Treino> findByProfessorId(Long professorId);
+    boolean existsByProfessorIdAndAlunoId(Long professorId, Long alunoId);
 }

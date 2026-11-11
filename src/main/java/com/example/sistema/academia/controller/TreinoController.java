@@ -34,8 +34,9 @@ public class TreinoController {
     }
 
     @org.springframework.web.bind.annotation.GetMapping("/treinos/progresso/{id}")
-    public String progressoAluno(@PathVariable Long id, org.springframework.ui.Model model) {
-        model.addAttribute("progresso", progressoService.montar(id).orElse(null));
+    public String progressoAluno(@PathVariable Long id, HttpSession session, org.springframework.ui.Model model) {
+        boolean pode = progressoService.podeVer((String) session.getAttribute("perfil"), (Long) session.getAttribute("usuarioId"), id);
+        model.addAttribute("progresso", pode ? progressoService.montar(id).orElse(null) : null);
         return "fragments/progresso :: conteudo";
     }
 

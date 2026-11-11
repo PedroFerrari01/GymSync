@@ -29,6 +29,14 @@ public class ProgressoService {
     @Autowired private AlunoRepository alunoRepository;
     @Autowired private AvaliacaoFisicaRepository avaliacaoFisicaRepository;
     @Autowired private RegistroExercicioRepository registroExercicioRepository;
+    @Autowired private com.example.sistema.academia.repository.TreinoRepository treinoRepository;
+
+    /** Admin vê todos; professor só alunos que tenham ficha dele; qualquer outro perfil não vê. */
+    public boolean podeVer(String perfil, Long usuarioId, Long alunoId) {
+        if ("ADMIN".equals(perfil)) return true;
+        return "PROFESSOR".equals(perfil) && usuarioId != null && alunoId != null
+                && treinoRepository.existsByProfessorIdAndAlunoId(usuarioId, alunoId);
+    }
 
     public Optional<ProgressoAluno> montar(Long alunoId) {
         Optional<Aluno> aluno = alunoRepository.findById(alunoId);
