@@ -10,9 +10,11 @@ public class MedidaCorpo {
     private final Double ultimaNumero;
     private final String diferenca;
     private final String classe;
+    private final double intensidade;
 
     public MedidaCorpo(String chave, String rotulo, String primeira, String ultima,
-                       Double primeiraNumero, Double ultimaNumero, String diferenca, String classe) {
+                       Double primeiraNumero, Double ultimaNumero, String diferenca, String classe,
+                       double intensidade) {
         this.chave = chave;
         this.rotulo = rotulo;
         this.primeira = primeira;
@@ -21,6 +23,7 @@ public class MedidaCorpo {
         this.ultimaNumero = ultimaNumero;
         this.diferenca = diferenca;
         this.classe = classe;
+        this.intensidade = intensidade;
     }
 
     public String getChave() { return chave; }
@@ -32,4 +35,6 @@ public class MedidaCorpo {
     /** Nulo quando a medida só foi feita uma vez. */
     public String getDiferenca() { return diferenca; }
     public String getClasse() { return classe; }
+    /** Força da cor no mapa (0 a 1): variação em % sobre o teto gymsync.heatmap.teto-intensidade. */
+    public double getIntensidade() { return intensidade; }
 }

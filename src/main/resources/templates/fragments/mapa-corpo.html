@@ -39,8 +39,13 @@
                 <svg class="mapa-silhueta" role="img" aria-label="Mapa dos músculos com a cor de cada medida"></svg>
                 <canvas class="mapa-canvas" tabindex="0" role="img" aria-label="Corpo em 3D com as regiões medidas. Arraste ou use as setas para girar."></canvas>
                 <span class="mapa-dica"><i class="ph ph-arrows-horizontal"></i> arraste para girar</span>
+                <span class="mapa-figura-nome">Frente</span>
             </div>
             <ul class="mapa-rotulos mapa-dir" aria-label="Medidas por região"></ul>
+            <div class="mapa-figura-costas">
+                <svg class="mapa-silhueta-costas" role="img" aria-label="Mapa dos músculos, costas, com a cor de cada medida"></svg>
+                <span class="mapa-figura-nome">Costas</span>
+            </div>
             <svg class="mapa-linhas" aria-hidden="true"></svg>
         </div>
         </div>
@@ -50,7 +55,7 @@
             <p class="small mb-0 texto-apoio mapa-periodo"></p>
             <!-- Preenchida pelo mapa-corpo.js com as medidas do aluno: cada uma aparece num status só -->
             <ul class="mapa-legenda small"></ul>
-            <p class="small mb-0 texto-apoio mapa-regra">Peito, braço e coxa: aumentar é bom. Cintura, quadril e gordura: diminuir é bom. Peso e IMC ficam sem cor.</p>
+            <p class="small mb-0 texto-apoio mapa-regra">Subir é bom em peito, braço e coxa; descer, em cintura, quadril e gordura. Quanto maior a variação, mais forte a cor.</p>
             <p class="small mb-0 texto-apoio mapa-nota-3d">Figura ilustrativa: as proporções acompanham as medidas, mas não são um retrato do corpo.</p>
             <p class="small mb-0 texto-apoio mapa-nota-2d">Desenho dos músculos: <a href="https://github.com/GV79/react-body-highlighter" target="_blank" rel="noopener">react-body-highlighter</a> (licença MIT).</p>
         </div>
@@ -62,7 +67,7 @@
             <span th:each="md : ${mp.medidas}" th:data-chave="${md.chave}" th:data-rotulo="${md.rotulo}"
                   th:data-primeira="${md.primeira}" th:data-ultima="${md.ultima}"
                   th:data-primeira-numero="${md.primeiraNumero}" th:data-ultima-numero="${md.ultimaNumero}"
-                  th:data-diferenca="${md.diferenca}" th:data-classe="${md.classe}"></span>
+                  th:data-diferenca="${md.diferenca}" th:data-classe="${md.classe}" th:data-intensidade="${md.intensidade}"></span>
         </div>
     </div>
 </div>

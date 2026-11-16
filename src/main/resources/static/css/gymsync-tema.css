@@ -1338,11 +1338,25 @@ html:has(.sobre) { scroll-behavior: smooth; }
 .mapa-em-3d .mapa-canvas { visibility: visible; }
 .mapa-em-3d .mapa-silhueta { visibility: hidden; }
 /* Mapa dos músculos (2D): cor base, e a cor da medida nos músculos ligados a ela */
-.mapa-musculo { fill: var(--mapa-pele); opacity: 0.55; stroke: var(--bg-card); stroke-width: 0.35; stroke-linejoin: round; transition: opacity 200ms, stroke 200ms; }
-.mapa-musculo.medido { opacity: 0.9; }
+/* Contorno de 1,5px na cor do cartão separa os músculos (cabeça e mãos também); a força da cor vem do fill-opacity (intensidade) */
+.mapa-musculo { fill: var(--mapa-pele); fill-opacity: 0.55; stroke: var(--bg-card); stroke-width: 1.5px; vector-effect: non-scaling-stroke; stroke-linejoin: round; transition: fill-opacity 200ms, stroke 200ms; }
+.mapa-musculo.medido { fill-opacity: 0.9; }
 .mapa-musculo.melhorou { fill: var(--mapa-melhorou); }
 .mapa-musculo.piorou { fill: var(--mapa-piorou); }
-.mapa-musculo.ativo { opacity: 1; stroke: var(--accent); stroke-width: 0.9; }
+.mapa-musculo.ativo { stroke: var(--accent); stroke-width: 2.5px; }
+.mapa-nota-2d a { color: var(--text-secondary); text-decoration: none; }
+.mapa-nota-2d a:hover, .mapa-nota-2d a:focus-visible { text-decoration: underline; }
+/* Costas ao lado da frente só em tela larga (>= 992px) e no 2D; aí o botão Frente/Costas some */
+.mapa-figura-costas, .mapa-figura-nome { display: none; }
+.mapa-figura-costas { position: relative; min-width: 0; }
+.mapa-silhueta-costas { position: absolute; inset: 0 0 26px; width: 100%; height: calc(100% - 26px); display: block; }
+@media (min-width: 992px) {
+    .mapa-corpo:not(.mapa-em-3d) .mapa-palco { grid-template-columns: minmax(0, 1fr) minmax(190px, 250px) minmax(0, 1fr) minmax(150px, 210px); max-width: 960px; }
+    .mapa-corpo:not(.mapa-em-3d) .mapa-figura-costas { display: block; }
+    .mapa-corpo:not(.mapa-em-3d) .mapa-figura-nome { display: block; position: absolute; left: 0; right: 0; bottom: 0; text-align: center; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-secondary); user-select: none; }
+    .mapa-corpo:not(.mapa-em-3d) .mapa-silhueta { inset: 0 0 26px; height: calc(100% - 26px); }
+    .mapa-vista { display: none; }
+}
 .mapa-rotulo.fora-da-vista { opacity: 0.5; }
 .mapa-comparando { color: var(--text-secondary); white-space: nowrap; user-select: none; }
 .mapa-comparando:empty { display: none; }

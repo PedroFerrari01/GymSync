@@ -154,6 +154,34 @@ class EvolucaoServiceTest {
     }
 
     @Test
+    void intensidadeUsaTetoFixoDeOitoPorCento() {
+        // 8% ou mais: cor cheia; 4%: metade (a escala não depende do maior valor do aluno)
+        assertEquals(1.0, service.intensidade("melhorou", 100, 92));
+        assertEquals(1.0, service.intensidade("piorou", 100, 120));
+        assertEquals(0.5, service.intensidade("melhorou", 50, 52));
+        assertEquals(0.5, service.intensidade("piorou", 100, 96));
+        // Estável (sem diferença) e neutro (peso, IMC): sem cor, intensidade 0
+        assertEquals(0.0, service.intensidade(EvolucaoService.classe(EvolucaoService.Direcao.MENOR_EH_MELHOR, 0), 90, 90));
+        assertEquals(0.0, service.intensidade("neutro", 80, 90));
+        // O teto vem da configuração
+        assertEquals(1.0, new EvolucaoService(4).intensidade("melhorou", 100, 96));
+    }
+
+    @Test
+    void mapaLevaAIntensidadeDeCadaMedida() {
+        // Cintura 76 → 71 (−6,6%) pinta mais forte que coxa 55 → 56 (+1,8%); peso fica em 0
+        AvaliacaoFisica antes = avaliacao(LocalDate.of(2026, 8, 18), 68.0, null, 76.0, null);
+        antes.setCoxa(55.0);
+        AvaliacaoFisica depois = avaliacao(LocalDate.of(2026, 11, 11), 65.1, null, 71.0, null);
+        depois.setCoxa(56.0);
+        MapaCorpo mapa = service.mapaCorpo(1L, "Ana", List.of(antes, depois));
+        assertEquals(0.82, medida(mapa, "cintura").getIntensidade());
+        assertEquals(0.23, medida(mapa, "coxa").getIntensidade());
+        assertEquals(0.0, medida(mapa, "peso").getIntensidade());
+        assertTrue(medida(mapa, "cintura").getIntensidade() > medida(mapa, "coxa").getIntensidade());
+    }
+
+    @Test
     void precisaDeDuasMedidas() {
         List<AvaliacaoFisica> uma = List.of(avaliacao(LocalDate.of(2026, 7, 1), 82.0, 24.0, null, null));
         assertTrue(service.comparacao(uma).isEmpty());

@@ -152,7 +152,8 @@ function lerAlunos() {
             medidas[d.chave] = {
                 chave: d.chave, rotulo: d.rotulo, primeira: d.primeira, ultima: d.ultima,
                 primeiraNumero: parseFloat(d.primeiraNumero), ultimaNumero: parseFloat(d.ultimaNumero),
-                diferenca: d.diferenca || null, classe: d.classe || 'neutro'
+                diferenca: d.diferenca || null, classe: d.classe || 'neutro',
+                intensidade: parseFloat(d.intensidade) || 0
             };
         });
         alunos.set(bloco.dataset.aluno, {
@@ -207,18 +208,22 @@ function centrosDe(vista, chave) {
     return centros;
 }
 
-function criarSilhueta(svg) {
+function criarSilhueta(svg, vistaInicial = 'frente') {
     svg.setAttribute('viewBox', `0 0 ${VISTA.largura} ${VISTA.altura}`);
-    let vista = 'frente';
+    let vista = vistaInicial;
 
-    function desenhar(regioes) {
+    /** regioes = { chave: classe }; forca = { chave: intensidade de 0 a 1 } (cor mais forte quanto maior a variação). */
+    function desenhar(regioes, forca = {}) {
         svg.replaceChildren();
         for (const item of DESENHOS[vista]) {
             const chave = CHAVE_DO_MUSCULO[vista][item.muscle];
             const classe = chave && regioes[chave] ? ` medido ${regioes[chave]}` : '';
             for (const texto of item.svgPoints) {
                 const el = noSvg('polygon', { points: texto.trim(), class: `mapa-musculo${classe}` });
-                if (classe) el.dataset.chave = chave;
+                if (classe) {
+                    el.dataset.chave = chave;
+                    if (regioes[chave] !== 'neutro') el.style.fillOpacity = (0.45 + 0.55 * (forca[chave] || 0)).toFixed(2); // vence o CSS (atributo não venceria)
+                }
                 svg.appendChild(el);
             }
         }
@@ -599,6 +604,10 @@ function iniciar() {
     const comparando = raiz.querySelector('.mapa-comparando');
     const legenda = raiz.querySelector('.mapa-legenda');
     const silhueta = criarSilhueta(raiz.querySelector('.mapa-silhueta'));
+    // Em tela larga (>= 992px) as costas ficam ao lado da frente; os traços só ligam à frente
+    const costasAoLado = criarSilhueta(raiz.querySelector('.mapa-silhueta-costas'), 'costas');
+    const telaLarga = window.matchMedia('(min-width: 992px)');
+    let vistaEscolhida = 'frente';
 
     let alunoAtual = seletor ? seletor.value : alunos.keys().next().value;
     let momento = 'ultima';
@@ -644,6 +653,7 @@ function iniciar() {
             r.bolinha.classList.toggle('ativo', ligado);
         });
         silhueta.destacar(ativa);
+        costasAoLado.destacar(ativa);
         if (cena3d) cena3d.destacar(ativa);
     }
 
@@ -692,7 +702,7 @@ function iniciar() {
         if (a.avaliacoes <= 1) {
             periodo.textContent = `1 avaliação${a.dataUltima ? ' em ' + a.dataUltima : ''}. Com a segunda, a evolução aparece aqui.`;
         } else {
-            periodo.textContent = `${a.avaliacoes} avaliações, de ${a.dataPrimeira} a ${a.dataUltima}. A diferença compara a primeira com a última medida.`;
+            periodo.textContent = `${a.avaliacoes} avaliações, de ${a.dataPrimeira} a ${a.dataUltima}.`;
         }
 
         // O que está sendo comparado, ao lado do Primeira/Última
@@ -773,6 +783,20 @@ function iniciar() {
         }
     }
 
+    function intensidades() {
+        const a = aluno();
+        const forca = {};
+        if (a) for (const chave of CHAVES_REGIAO) if (a.medidas[chave]) forca[chave] = a.medidas[chave].intensidade;
+        return forca;
+    }
+
+    // Lado a lado: a figura principal mostra a frente e a segunda as costas; senão, vale o botão Frente/Costas
+    function desenhar2d() {
+        silhueta.trocarVista(telaLarga.matches ? 'frente' : vistaEscolhida);
+        silhueta.desenhar(regioesComClasse(), intensidades());
+        if (telaLarga.matches) costasAoLado.desenhar(regioesComClasse(), intensidades());
+    }
+
     function regioesComClasse() {
         const a = aluno();
         const regioes = {};
@@ -783,7 +807,7 @@ function iniciar() {
     function atualizarFigura(semAnimar) {
         const a = aluno();
         const fatores = a ? fatoresDe(a, momento) : { ...FATOR_NEUTRO };
-        silhueta.desenhar(regioesComClasse());
+        desenhar2d();
         if (cena3d) cena3d.mostrar(fatores, regioesComClasse(), semAnimar);
         destacar(null);
         atualizarTracos();
@@ -863,16 +887,22 @@ function iniciar() {
         carregar3d();
     }));
     botoesVista.forEach(botao => botao.addEventListener('click', () => {
-        silhueta.trocarVista(botao.dataset.vista);
+        vistaEscolhida = botao.dataset.vista;
         botoesVista.forEach(b => {
             b.classList.toggle('active', b === botao);
             b.setAttribute('aria-pressed', b === botao);
         });
-        silhueta.desenhar(regioesComClasse());
+        desenhar2d();
         posicionarRotulos();
         destacar(null);
         atualizarTracos();
     }));
+    telaLarga.addEventListener('change', () => {
+        desenhar2d();
+        posicionarRotulos();
+        destacar(null);
+        atualizarTracos();
+    });
     canvas.addEventListener('pointerdown', () => raiz.classList.add('mapa-ja-girou'), { once: true });
 
     // Tema claro/escuro: as cores do 3D vêm das variáveis CSS

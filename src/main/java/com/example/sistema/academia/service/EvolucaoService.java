@@ -5,6 +5,8 @@ import com.example.sistema.academia.dto.Comparacao;
 import com.example.sistema.academia.dto.MapaCorpo;
 import com.example.sistema.academia.dto.MedidaCorpo;
 import com.example.sistema.academia.model.AvaliacaoFisica;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.text.NumberFormat;
 import java.time.LocalDate;
@@ -18,6 +20,19 @@ public class EvolucaoService {
 
     private static final Locale BR = Locale.of("pt", "BR");
     private static final DateTimeFormatter DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final double TETO_PADRAO = 8;
+
+    /** Variação (em %) que já pinta o músculo com a cor cheia no mapa do corpo. Escala fixa, igual para todos os alunos. */
+    private final double tetoIntensidade;
+
+    @Autowired
+    public EvolucaoService(@Value("${gymsync.heatmap.teto-intensidade:8}") double tetoIntensidade) {
+        this.tetoIntensidade = tetoIntensidade > 0 ? tetoIntensidade : TETO_PADRAO;
+    }
+
+    public EvolucaoService() {
+        this(TETO_PADRAO);
+    }
 
     /** Sentido bom de cada medida: diminuir, aumentar ou nenhum (sem cor). */
     enum Direcao { MENOR_EH_MELHOR, MAIOR_EH_MELHOR, NEUTRA }
@@ -59,6 +74,16 @@ public class EvolucaoService {
         return classe(m.direcao(), diferenca);
     }
 
+    /**
+     * Força da cor no mapa do corpo, de 0 a 1: a variação em % dividida pelo teto (8% = cor cheia).
+     * Medida sem cor (estável ou neutra) fica em 0.
+     */
+    double intensidade(String classe, double primeira, double ultima) {
+        if ("neutro".equals(classe) || primeira == 0) return 0;
+        double variacao = Math.abs((ultima - primeira) / primeira * 100);
+        return Math.round(Math.min(variacao / tetoIntensidade, 1.0) * 100) / 100.0;
+    }
+
     private String comSinal(double diferenca, String unidade) {
         return (diferenca > 0 ? "+" : "") + numero(diferenca) + unidade;
     }
@@ -93,13 +118,15 @@ public class EvolucaoService {
             double ultima = valores.get(valores.size() - 1);
             String texto = null;
             String classe = "neutro";
+            double intensidade = 0;
             if (valores.size() >= 2) {
                 double diferenca = diferenca(primeira, ultima);
                 texto = comSinal(diferenca, m.unidade());
                 classe = classe(m, diferenca);
+                intensidade = intensidade(classe, primeira, ultima);
             }
             medidas.add(new MedidaCorpo(m.chave(), m.rotulo(), numero(primeira) + m.unidade(), numero(ultima) + m.unidade(),
-                    primeira, ultima, texto, classe));
+                    primeira, ultima, texto, classe, intensidade));
         }
         List<LocalDate> datas = avaliacoes.stream().map(AvaliacaoFisica::getDataAvaliacao).filter(Objects::nonNull).toList();
         Double alturaCm = avaliacoes.stream().map(AvaliacaoFisica::getAltura).filter(a -> a != null && a > 0)
