@@ -170,6 +170,13 @@ public class VisitanteService {
 
         Aluno ana = aluno("Ana Souza", EMAIL_ALUNO, LocalDate.of(1998, 4, 12), "ATIVO", 3);
         Aluno bruno = aluno("Bruno Lima", "bruno.lima@exemplo.gymsync", LocalDate.of(1995, 9, 3), "ATIVO", 4);
+        // Altura e silhueta do mapa do corpo (opcionais no cadastro)
+        ana.setAlturaCm(165);
+        ana.setSilhueta(Aluno.SILHUETA_FEMININA);
+        ana = alunoRepository.save(ana);
+        bruno.setAlturaCm(178);
+        bruno.setSilhueta(Aluno.SILHUETA_MASCULINA);
+        bruno = alunoRepository.save(bruno);
         Aluno carlaDias = aluno("Carla Dias", "carla.dias@exemplo.gymsync", LocalDate.of(2001, 1, 22), "INATIVO", 5);
         Aluno diego = aluno("Diego Alves", "diego.alves@exemplo.gymsync", LocalDate.of(1990, 6, 30), "ATIVO", 6);
         Aluno elisa = aluno("Elisa Rocha", "elisa.rocha@exemplo.gymsync", LocalDate.of(2003, 11, 8), "ATIVO", 7);

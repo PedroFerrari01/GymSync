@@ -1348,8 +1348,8 @@ html:has(.sobre) { scroll-behavior: smooth; }
 .mapa-musculo.piorou { fill: var(--mapa-piorou); }
 .mapa-musculo.medido { cursor: pointer; }
 .mapa-musculo.ativo { stroke: var(--mapa-destaque); stroke-width: 2.5px; }
-.mapa-nota-2d a { color: var(--text-secondary); text-decoration: none; }
-.mapa-nota-2d a:hover, .mapa-nota-2d a:focus-visible { text-decoration: underline; }
+/* Mãos e pés: só contorno do corpo, sempre no tom neutro (não têm medida) */
+.mapa-musculo.mapa-extremidade { fill-opacity: 0.4; pointer-events: none; }
 /* Troca Frente/Costas: some e volta em 200 ms no total */
 .mapa-silhueta, .mapa-linhas { transition: opacity 100ms ease; }
 .mapa-trocando .mapa-silhueta, .mapa-trocando .mapa-linhas { opacity: 0; }
@@ -1366,7 +1366,7 @@ html:has(.sobre) { scroll-behavior: smooth; }
 .mapa-rotulo.fora-da-vista { opacity: 0.5; }
 .mapa-comparando { color: var(--text-secondary); white-space: nowrap; user-select: none; }
 .mapa-comparando:empty { display: none; }
-.mapa-em-3d .mapa-nota-2d, .mapa-corpo:not(.mapa-em-3d) .mapa-nota-3d { display: none; }
+.mapa-corpo:not(.mapa-em-3d) .mapa-nota-3d { display: none; }
 .mapa-rotulos, .mapa-legenda, .mapa-resumo, .mapa-alternar { user-select: none; -webkit-user-select: none; }
 .mapa-dica {
     position: absolute;
@@ -1410,7 +1410,9 @@ html:has(.sobre) { scroll-behavior: smooth; }
     text-transform: uppercase;
     color: var(--text-secondary);
 }
+.mapa-rotulo-tipo { margin-left: 1px; font-weight: 500; letter-spacing: 0.2px; text-transform: none; opacity: 0.8; }
 .mapa-rotulo-valor { font-weight: 700; font-size: 1.02rem; color: var(--text-primary); white-space: nowrap; }
+.mapa-rotulo .evo-dif { white-space: nowrap; }
 .mapa-rotulo .evo-dif, .mapa-resumo-item .evo-dif { font-size: 0.85rem; }
 .mapa-rotulo .evo-dif.neutro, .mapa-resumo-item .evo-dif.neutro { color: var(--text-secondary); }
 

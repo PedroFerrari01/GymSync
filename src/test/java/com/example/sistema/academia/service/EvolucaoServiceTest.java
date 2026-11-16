@@ -144,6 +144,29 @@ class EvolucaoServiceTest {
     }
 
     @Test
+    void alturaDoCadastroValeAntesDaAvaliacaoESilhuetaVemDoAluno() {
+        Aluno aluno = new Aluno();
+        aluno.setId(3L);
+        aluno.setNome("Ana");
+        AvaliacaoFisica a = completa(LocalDate.of(2026, 11, 11), 0); // altura 1,75 m na avaliação
+        a.setAluno(aluno);
+        // Sem altura no cadastro: vale a da avaliação; silhueta padrão "não informada"
+        MapaCorpo semCadastro = service.mapaCorpo(3L, "Ana", List.of(a));
+        assertEquals(175.0, semCadastro.getAlturaCm());
+        assertEquals(Aluno.SILHUETA_NAO_INFORMADA, semCadastro.getSilhueta());
+        // Com altura e silhueta no cadastro: valem as do cadastro
+        aluno.setAlturaCm(165);
+        aluno.setSilhueta(Aluno.SILHUETA_FEMININA);
+        MapaCorpo comCadastro = service.mapaCorpo(3L, "Ana", List.of(a));
+        assertEquals(165.0, comCadastro.getAlturaCm());
+        assertEquals("FEMININA", comCadastro.getSilhueta());
+        // Sem altura em lugar nenhum: nula (o mapa usa a altura padrão e avisa)
+        aluno.setAlturaCm(null);
+        a.setAltura(null);
+        assertNull(service.mapaCorpo(3L, "Ana", List.of(a)).getAlturaCm());
+    }
+
+    @Test
     void medidaNovaNulaNaoEntraNoMapaNemNaComparacao() {
         // Avaliações antigas não têm ombro, antebraço nem panturrilha
         AvaliacaoFisica antiga = completa(LocalDate.of(2026, 8, 18), 0);

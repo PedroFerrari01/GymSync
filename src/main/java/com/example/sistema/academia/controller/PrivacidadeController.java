@@ -100,6 +100,8 @@ public class PrivacidadeController {
         cadastro.put("cpf", a.getCpf());
         cadastro.put("email", a.getEmail());
         cadastro.put("telefone", a.getContato());
+        cadastro.put("alturaCm", a.getAlturaCm());
+        cadastro.put("silhuetaDoMapa", a.getSilhueta());
         cadastro.put("nascimento", data(a.getDataNascimento()));
         cadastro.put("situacao", a.getSituacao());
         cadastro.put("aceitePrivacidade", dataHora(a.getAceitePrivacidade()));

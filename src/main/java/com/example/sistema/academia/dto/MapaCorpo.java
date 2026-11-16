@@ -11,9 +11,15 @@ public class MapaCorpo {
     private final String dataUltima;
     private final Double alturaCm;
     private final List<MedidaCorpo> medidas;
+    private final String silhueta;
 
     public MapaCorpo(Long alunoId, String nome, int avaliacoes, String dataPrimeira, String dataUltima,
                      Double alturaCm, List<MedidaCorpo> medidas) {
+        this(alunoId, nome, avaliacoes, dataPrimeira, dataUltima, alturaCm, medidas, "NAO_INFORMADA");
+    }
+
+    public MapaCorpo(Long alunoId, String nome, int avaliacoes, String dataPrimeira, String dataUltima,
+                     Double alturaCm, List<MedidaCorpo> medidas, String silhueta) {
         this.alunoId = alunoId;
         this.nome = nome;
         this.avaliacoes = avaliacoes;
@@ -21,7 +27,11 @@ public class MapaCorpo {
         this.dataUltima = dataUltima;
         this.alturaCm = alturaCm;
         this.medidas = medidas;
+        this.silhueta = silhueta;
     }
+
+    /** MASCULINA, FEMININA ou NAO_INFORMADA: o desenho-base do mapa 2D. */
+    public String getSilhueta() { return silhueta; }
 
     public Long getAlunoId() { return alunoId; }
     public String getNome() { return nome; }

@@ -1,4 +1,8 @@
-/* Mapa do corpo (aba Avaliações Físicas): manequim 3D que gira, com uma fita em cada região medida
+/* Créditos: o desenho dos músculos do mapa 2D vem do react-body-highlighter (https://github.com/GV79/react-body-highlighter),
+   licença MIT (texto em static/vendor/react-body-highlighter/LICENSE e static/vendor/CREDITS.md).
+   Mãos, pés e o ajuste da silhueta são feitos aqui.
+
+   Mapa do corpo (aba Avaliações Físicas): manequim 3D que gira, com uma fita em cada região medida
    (peito, braço, cintura, quadril, coxa, ombro, antebraço e panturrilha; as três últimas só no 2D) e a diferença entre a primeira e a última avaliação.
    - O manequim é feito aqui mesmo, em código (nenhum modelo de terceiros). As proporções são ilustrativas:
      cada região engrossa ou afina um pouco conforme a medida do aluno.
@@ -88,6 +92,8 @@ const SO_2D = {
 };
 const CHAVES_ROTULO = [...CHAVES_REGIAO, ...Object.keys(SO_2D)];
 const ladoDe = chave => (REGIOES[chave] || SO_2D[chave]).lado;
+/** "(aumentou)", "(diminuiu)" ou "(igual)", a partir da diferença já formatada ("+2,0 cm", "-5,0 cm", "0,0 cm"). */
+const sentido = diferenca => (/^\+/.test(diferenca) ? '(aumentou)' : /^[-−]/.test(diferenca) ? '(diminuiu)' : '(igual)');
 const FATOR_NEUTRO = Object.fromEntries(CHAVES_REGIAO.map(c => [c, 1]));
 
 const limitar = (v, min, max) => Math.max(min, Math.min(max, v));
@@ -169,7 +175,7 @@ function lerAlunos() {
         alunos.set(bloco.dataset.aluno, {
             nome: bloco.dataset.nome || '', avaliacoes: parseInt(bloco.dataset.avaliacoes || '0', 10),
             dataPrimeira: bloco.dataset.primeira || null, dataUltima: bloco.dataset.ultima || null,
-            altura: parseFloat(bloco.dataset.altura) || null, medidas
+            altura: parseFloat(bloco.dataset.altura) || null, silhueta: bloco.dataset.silhueta || 'NAO_INFORMADA', medidas
         });
     });
     return alunos;
@@ -180,8 +186,133 @@ function lerAlunos() {
    Cada músculo ligado a uma medida recebe a cor dela; os outros ficam na cor base. */
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
-const VISTA = { largura: 100, altura: 200 };
+// Área de cada vista (viewBox): maior que a do pacote para caber mãos, pés e o ajuste da silhueta
+const VISTAS = {
+    frente: { x: -8, y: -6, largura: 116, altura: 216 },
+    costas: { x: -8, y: -6, largura: 116, altura: 236 }
+};
 const DESENHOS = { frente: anteriorData, costas: posteriorData };
+const ALTURA_PADRAO_CM = 170;
+
+/* ---------- Silhueta ajustada a cada aluno (só o 2D) ----------
+   O desenho-base é sempre o mesmo; a largura de cada faixa do corpo muda conforme a silhueta escolhida no cadastro
+   (masculina, feminina ou não informada), a altura, o peso, a cintura e o quadril do aluno. Proporções ilustrativas. */
+
+// Desenho-base de cada silhueta: largura relativa dos ombros, peito, cintura, quadril e coxas
+const BASES_SILHUETA = {
+    MASCULINA: { ombro: 1.05, peito: 1.03, cintura: 0.98, quadril: 0.95, coxa: 0.97 },
+    FEMININA: { ombro: 0.92, peito: 0.95, cintura: 0.90, quadril: 1.07, coxa: 1.04 },
+    NAO_INFORMADA: { ombro: 1, peito: 1, cintura: 1, quadril: 1, coxa: 1 }
+};
+// Perímetro de referência dividido pela altura (o "normal" de cada silhueta, que não mexe no desenho)
+const REFERENCIA_SILHUETA = {
+    MASCULINA: { cintura: 0.48, quadril: 0.55 },
+    FEMININA: { cintura: 0.43, quadril: 0.60 },
+    NAO_INFORMADA: { cintura: 0.455, quadril: 0.575 }
+};
+// Altura (y do desenho) de cada faixa do corpo em cada vista; a largura é interpolada entre elas
+const FAIXAS = {
+    frente: [[0, 'cabeca'], [25, 'cabeca'], [38, 'ombro'], [50, 'peito'], [80, 'cintura'], [100, 'quadril'],
+        [120, 'coxa'], [148, 'joelho'], [175, 'panturrilha'], [215, 'panturrilha']],
+    costas: [[0, 'cabeca'], [22, 'cabeca'], [40, 'ombro'], [55, 'peito'], [88, 'cintura'], [112, 'quadril'],
+        [135, 'coxa'], [160, 'joelho'], [185, 'panturrilha'], [235, 'panturrilha']]
+};
+const BASE_DOS_PES = { frente: 196, costas: 220 };
+const MUSCULOS_DO_BRACO = ['biceps', 'triceps', 'forearm', 'front-deltoids', 'back-deltoids'];
+
+/** Larguras de cada faixa para um aluno (1 = desenho original). */
+function perfilDe(aluno, momento) {
+    const tipo = BASES_SILHUETA[aluno && aluno.silhueta] ? aluno.silhueta : 'NAO_INFORMADA';
+    const base = BASES_SILHUETA[tipo];
+    const ref = REFERENCIA_SILHUETA[tipo];
+    const altura = (aluno && aluno.altura) || ALTURA_PADRAO_CM;
+    const valor = chave => {
+        const m = aluno && aluno.medidas[chave];
+        const v = m && (momento === 'primeira' ? m.primeiraNumero : m.ultimaNumero);
+        return Number.isFinite(v) && v > 0 ? v : null;
+    };
+    const peso = valor('peso');
+    const imc = peso ? peso / ((altura / 100) ** 2) : 23;
+    const geral = limitar(1 + (imc - 23) * 0.025, 0.86, 1.22);
+    const razao = (chave, referencia) => {
+        const v = valor(chave);
+        return v ? limitar(1 + (v / altura / referencia - 1) * 0.9, 0.82, 1.28) : geral;
+    };
+    const cintura = razao('cintura', ref.cintura);
+    const quadril = razao('quadril', ref.quadril);
+    const faixa = (v, min = 0.78, max = 1.3) => limitar(v, min, max);
+    return {
+        cabeca: 1,
+        ombro: faixa(base.ombro * Math.sqrt(geral)),
+        peito: faixa(base.peito * geral),
+        cintura: faixa(base.cintura * cintura),
+        quadril: faixa(base.quadril * quadril),
+        coxa: faixa(base.coxa * (quadril + geral) / 2),
+        joelho: faixa(geral ** 0.4),
+        panturrilha: faixa(geral ** 0.6),
+        escala: limitar(altura / 172, 0.92, 1.06),
+        alturaPadrao: !(aluno && aluno.altura)
+    };
+}
+
+function larguraEm(vista, y, perfil) {
+    const faixas = FAIXAS[vista];
+    if (y <= faixas[0][0]) return perfil[faixas[0][1]];
+    for (let i = 1; i < faixas.length; i++) {
+        const [y1, f1] = faixas[i];
+        if (y <= y1) {
+            const [y0, f0] = faixas[i - 1];
+            const t = (y - y0) / (y1 - y0);
+            return perfil[f0] + (perfil[f1] - perfil[f0]) * t;
+        }
+    }
+    return perfil[faixas[faixas.length - 1][1]];
+}
+
+/** Desenho de uma vista com a silhueta do aluno, mais mãos e pés (em tom neutro, sem medida). */
+function formaDe(vista, perfil) {
+    const baseY = BASE_DOS_PES[vista];
+    // Os braços não afinam com a cintura: andam junto com a borda do peito
+    const desvioBraco = 23 * (larguraEm(vista, 48, perfil) - 1);
+    const ponto = (x, y, braco) => {
+        let nx = braco ? x + Math.sign(x - 50) * desvioBraco : 50 + (x - 50) * larguraEm(vista, y, perfil);
+        nx = 50 + (nx - 50) * perfil.escala;
+        return { x: nx, y: baseY - (baseY - y) * perfil.escala };
+    };
+    const forma = DESENHOS[vista].map(item => {
+        const braco = MUSCULOS_DO_BRACO.includes(item.muscle);
+        return {
+            muscle: item.muscle,
+            pontos: item.svgPoints.map(texto => pontosDe(texto).map(p => ponto(p.x, p.y, braco)))
+        };
+    });
+    return forma.concat(extremidades(vista, forma));
+}
+
+// Formas da mão e do pé (origem no meio da ponta do antebraço ou da perna; x espelhado para o lado esquerdo)
+const FORMA_MAO = [[-3.2, 0], [3.2, 0], [4.3, 4.5], [3.8, 9.5], [1.2, 12.8], [-1.8, 12.4], [-3.9, 8.6], [-4.3, 3.6]];
+const PE_FRENTE = [[-3.6, 0], [3.6, 0], [4.4, 3.8], [6.6, 7.2], [5.8, 9], [-4.2, 9], [-5, 7], [-4.4, 3.6]];
+const PE_COSTAS = [[-3.4, 0], [3.4, 0], [4, 2.8], [3, 5.6], [-3, 5.6], [-4, 2.8]];
+
+function extremidades(vista, forma) {
+    const pontasDe = (musculos, lado) => {
+        const pts = forma.filter(f => musculos.includes(f.muscle)).flatMap(f => f.pontos.flat())
+            .filter(p => Math.sign(p.x - 50) === lado);
+        if (!pts.length) return null;
+        const fundo = Math.max(...pts.map(p => p.y));
+        const embaixo = pts.filter(p => p.y > fundo - 2.5);
+        return { x: embaixo.reduce((s, p) => s + p.x, 0) / embaixo.length, y: fundo - 1.2 };
+    };
+    const pecas = [];
+    for (const lado of [-1, 1]) {
+        const mao = pontasDe(['forearm'], lado);
+        if (mao) pecas.push({ muscle: "mao", pontos: [FORMA_MAO.map(([x, y]) => ({ x: mao.x + lado * (x + 0.22 * y), y: mao.y + y }))] });
+        const pe = pontasDe(vista === 'frente' ? ['calves'] : ['left-soleus', 'right-soleus', 'calves'], lado);
+        const formaPe = vista === 'frente' ? PE_FRENTE : PE_COSTAS;
+        if (pe) pecas.push({ muscle: 'pe', pontos: [formaPe.map(([x, y]) => ({ x: pe.x + lado * x, y: pe.y + y }))] });
+    }
+    return pecas;
+}
 
 // Medida → músculos de cada lado do corpo (só as medidas que a avaliação física tem)
 const MUSCULOS = {
@@ -213,32 +344,45 @@ function pontosDe(texto) {
     return pontos;
 }
 
-/** Centro de cada polígono dos músculos de uma medida, numa vista (coordenadas do desenho). */
-function centrosDe(vista, chave) {
+/** Centro de cada polígono dos músculos de uma medida, numa forma já ajustada (coordenadas do desenho). */
+function centrosDe(vista, chave, forma) {
     const nomes = MUSCULOS[vista][chave] || [];
     const centros = [];
-    for (const item of DESENHOS[vista]) {
+    for (const item of forma) {
         if (!nomes.includes(item.muscle)) continue;
-        for (const texto of item.svgPoints) {
-            const pts = pontosDe(texto);
+        for (const pts of item.pontos) {
             centros.push({ x: pts.reduce((s, p) => s + p.x, 0) / pts.length, y: pts.reduce((s, p) => s + p.y, 0) / pts.length });
         }
     }
     return centros;
 }
 
+const PERFIL_NEUTRO = perfilDe(null, 'ultima');
+
 function criarSilhueta(svg) {
-    svg.setAttribute('viewBox', `0 0 ${VISTA.largura} ${VISTA.altura}`);
     let vista = 'frente';
+    let formas = { frente: formaDe('frente', PERFIL_NEUTRO), costas: formaDe('costas', PERFIL_NEUTRO) };
+    const area = () => VISTAS[vista];
+    const usarArea = () => { const v = area(); svg.setAttribute('viewBox', `${v.x} ${v.y} ${v.largura} ${v.altura}`); };
+    usarArea();
+    const centros = (v, chave) => centrosDe(v, chave, formas[v]);
+
+    /** Ajusta as duas vistas à silhueta do aluno (perfil vindo de perfilDe). */
+    function ajustar(perfil) {
+        formas = { frente: formaDe('frente', perfil), costas: formaDe('costas', perfil) };
+    }
 
     /** regioes = { chave: classe }; forca = { chave: intensidade de 0 a 1 } (cor mais forte quanto maior a variação). */
     function desenhar(regioes, forca = {}) {
         svg.replaceChildren();
-        for (const item of DESENHOS[vista]) {
+        usarArea();
+        for (const item of formas[vista]) {
             const chave = CHAVE_DO_MUSCULO[vista][item.muscle];
             const classe = chave && regioes[chave] ? ` medido ${regioes[chave]}` : '';
-            for (const texto of item.svgPoints) {
-                const el = noSvg('polygon', { points: texto.trim(), class: `mapa-musculo${classe}` });
+            const extra = item.muscle === 'mao' || item.muscle === 'pe' ? ' mapa-extremidade' : '';
+            for (const pts of item.pontos) {
+                const texto = pts.map(p => `${p.x.toFixed(2)} ${p.y.toFixed(2)}`).join(' ');
+                const el = noSvg('polygon', { points: texto, class: `mapa-musculo${extra}${classe}` });
                 if (classe) {
                     el.dataset.chave = chave;
                     if (regioes[chave] !== 'neutro') el.style.fillOpacity = (0.45 + 0.55 * (forca[chave] || 0)).toFixed(2); // vence o CSS (atributo não venceria)
@@ -252,25 +396,26 @@ function criarSilhueta(svg) {
     function emPixels(pt) {
         const caixa = svg.getBoundingClientRect();
         if (!caixa.width) return null;
-        const escala = Math.min(caixa.width / VISTA.largura, caixa.height / VISTA.altura);
+        const v = area();
+        const escala = Math.min(caixa.width / v.largura, caixa.height / v.altura);
         return {
-            x: (caixa.width - VISTA.largura * escala) / 2 + pt.x * escala,
-            y: (caixa.height - VISTA.altura * escala) / 2 + pt.y * escala
+            x: (caixa.width - v.largura * escala) / 2 + (pt.x - v.x) * escala,
+            y: (caixa.height - v.altura * escala) / 2 + (pt.y - v.y) * escala
         };
     }
 
     /** Centro do músculo da medida mais para o lado pedido; sem músculo nesta vista, null. */
     function ancora(chave, lado) {
         let melhor = null;
-        for (const c of centrosDe(vista, chave)) if (!melhor || lado * c.x > lado * melhor.x) melhor = c;
+        for (const c of centros(vista, chave)) if (!melhor || lado * c.x > lado * melhor.x) melhor = c;
         return melhor && emPixels(melhor);
     }
 
     /** Altura (em pixels) da medida para alinhar o rótulo; usa a frente quando a vista não tem o músculo. */
     function alturaRotulo(chave) {
-        const centros = centrosDe(vista, chave).length ? centrosDe(vista, chave) : centrosDe('frente', chave);
-        if (!centros.length) return null;
-        const p = emPixels({ x: 0, y: centros.reduce((s, c) => s + c.y, 0) / centros.length });
+        const lista = centros(vista, chave).length ? centros(vista, chave) : centros('frente', chave);
+        if (!lista.length) return null;
+        const p = emPixels({ x: 0, y: lista.reduce((s, c) => s + c.y, 0) / lista.length });
         return p && p.y;
     }
 
@@ -287,7 +432,7 @@ function criarSilhueta(svg) {
     }
 
     return {
-        desenhar, ancora, alturaRotulo, destacar, aoApontar,
+        desenhar, ajustar, ancora, alturaRotulo, destacar, aoApontar,
         vista: () => vista,
         trocarVista(nova) { vista = nova; }
     };
@@ -623,6 +768,7 @@ function iniciar() {
     const resumo = raiz.querySelector('.mapa-resumo');
     const periodo = raiz.querySelector('.mapa-periodo');
     const semMedidas = raiz.querySelector('.mapa-sem-medidas');
+    const avisoAltura = raiz.querySelector('.mapa-aviso-altura');
     const seletor = raiz.querySelector('.mapa-aluno');
     const botoesMomento = raiz.querySelectorAll('[data-momento]');
     const botoesModo = raiz.querySelectorAll('[data-modo]');
@@ -698,8 +844,11 @@ function iniciar() {
             const lado = ladoDe(chave);
             const li = elemento('li', `mapa-rotulo ${m.classe}`);
             li.tabIndex = 0;
-            li.append(elemento('span', 'mapa-rotulo-nome', m.rotulo), elemento('span', 'mapa-rotulo-valor', valor(m)));
-            if (m.diferenca) li.append(elemento('span', `evo-dif ${m.classe}`, m.diferenca));
+            // Fita métrica mede o perímetro da região: o texto diz isso, sem falar em ganho ou perda de músculo
+            const nome = elemento('span', 'mapa-rotulo-nome', m.rotulo);
+            nome.append(' ', elemento('span', 'mapa-rotulo-tipo', 'perímetro')); // o espaço deixa quebrar a linha em tela estreita
+            li.append(nome, elemento('span', 'mapa-rotulo-valor', valor(m)));
+            if (m.diferenca) li.append(elemento('span', `evo-dif ${m.classe}`, `${m.diferenca} ${sentido(m.diferenca)}`));
             li.addEventListener('mouseenter', () => destacar(chave));
             li.addEventListener('mouseleave', () => destacar(null));
             li.addEventListener('focus', () => destacar(chave));
@@ -822,7 +971,11 @@ function iniciar() {
     }
 
     function desenhar2d() {
+        const a = aluno();
+        const perfil = perfilDe(a, momento);
+        avisoAltura.hidden = !a || !perfil.alturaPadrao;
         silhueta.trocarVista(vistaEscolhida);
+        silhueta.ajustar(perfil);
         silhueta.desenhar(regioesComClasse(), intensidades());
     }
 
@@ -854,7 +1007,8 @@ function iniciar() {
         const m = chave && a && a.medidas[chave];
         if (!m || !e) { dica.hidden = true; return; }
         const valorAtual = momento === 'primeira' ? m.primeira : m.ultima;
-        dica.textContent = [m.rotulo, valorAtual, m.diferenca].filter(Boolean).join(' · ');
+        const regiao = CHAVES_ROTULO.includes(chave) ? `${m.rotulo} (perímetro)` : m.rotulo;
+        dica.textContent = [regiao, valorAtual, m.diferenca && `${m.diferenca} ${sentido(m.diferenca)}`].filter(Boolean).join(' · ');
         dica.className = `mapa-dica-musculo ${m.classe}`;
         dica.hidden = false;
         const caixa = figura.getBoundingClientRect();

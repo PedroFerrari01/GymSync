@@ -579,6 +579,17 @@
                                     <input type="date" name="dataNascimento" class="form-control mb-2 campo-data-4digitos" min="1900-01-01" required>
                                     <label class="form-label">Telefone</label>
                                     <input type="text" name="contato" class="form-control mb-2 mascara-telefone" minlength="14" maxlength="15" required>
+                                    <div class="row g-2">
+                                        <div class="col-5"><label class="form-label">Altura (cm)</label><input type="number" name="alturaCm" min="100" max="250" step="1" class="form-control" placeholder="Opcional"></div>
+                                        <div class="col-7"><label class="form-label">Silhueta do mapa</label>
+                                            <select name="silhueta" class="form-select">
+                                                <option value="NAO_INFORMADA" selected>Prefiro não informar</option>
+                                                <option value="FEMININA">Feminina</option>
+                                                <option value="MASCULINA">Masculina</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <p class="small texto-apoio mt-1 mb-2">Opcionais. Servem só para desenhar o mapa do corpo na proporção certa; não são usados para mais nada e podem ficar em branco.</p>
                                     <label class="form-label">Senha Inicial</label>
                                     <div class="pass-group mb-3">
                                         <input type="password" name="senha" id="senhaCadAluno" class="form-control pe-5" th:value="${senhasFortes ? '' : '123'}" th:required="${!senhasFortes}" th:placeholder="${senhasFortes ? 'Em branco: o sistema gera uma provisória' : null}">
@@ -605,7 +616,8 @@
                                                 <td class="text-end text-nowrap">
                                                     <button type="button" class="action-btn action-toggle me-1 btn-fill" title="Editar dados"
                                                             data-bs-toggle="modal" data-bs-target="#modalEditarAluno" data-form="formEditarAluno"
-                                                            th:attr="data-campo-id=${a.id},data-campo-nome=${a.nome},data-campo-email=${a.email},data-campo-contato=${a.contato},data-campo-data-nascimento=${a.dataNascimento}"><i class="bi bi-pencil"></i></button>
+                                                            th:attr="data-campo-id=${a.id},data-campo-nome=${a.nome},data-campo-email=${a.email},data-campo-contato=${a.contato},data-campo-data-nascimento=${a.dataNascimento}"
+                                                            th:data-campo-altura-cm="${a.alturaCm != null ? a.alturaCm : ''}" th:data-campo-silhueta="${a.silhueta}"><i class="bi bi-pencil"></i></button>
                                                     <form th:action="@{/alunos/redefinir-senha/{id}(id=${a.id})}" method="post" class="d-inline" data-confirm="Redefinir a senha deste aluno para 123?">
                                                         <button type="submit" class="action-btn action-toggle me-1" title="Redefinir senha"><i class="bi bi-key"></i></button>
                                                     </form>
@@ -1189,7 +1201,18 @@
                         <label class="form-label">Data de Nascimento</label>
                         <input type="date" name="dataNascimento" class="form-control mb-2 campo-data-4digitos" min="1900-01-01" required>
                         <label class="form-label">Telefone</label>
-                        <input type="text" name="contato" class="form-control mb-1 mascara-telefone" minlength="14" maxlength="15" required>
+                        <input type="text" name="contato" class="form-control mb-2 mascara-telefone" minlength="14" maxlength="15" required>
+                        <div class="row g-2">
+                            <div class="col-5"><label class="form-label">Altura (cm)</label><input type="number" name="alturaCm" min="100" max="250" step="1" class="form-control" placeholder="Opcional"></div>
+                            <div class="col-7"><label class="form-label">Silhueta do mapa</label>
+                                <select name="silhueta" class="form-select">
+                                    <option value="NAO_INFORMADA">Prefiro não informar</option>
+                                    <option value="FEMININA">Feminina</option>
+                                    <option value="MASCULINA">Masculina</option>
+                                </select>
+                            </div>
+                        </div>
+                        <p class="small texto-apoio mt-1 mb-2">Opcionais. Servem só para desenhar o mapa do corpo na proporção certa; não são usados para mais nada e podem ficar em branco.</p>
                         <div class="small" style="color:var(--text-secondary);">O CPF não pode ser alterado.</div>
                     </div>
                     <div class="modal-footer">

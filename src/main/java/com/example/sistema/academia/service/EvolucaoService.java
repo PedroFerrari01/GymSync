@@ -4,6 +4,7 @@ import com.example.sistema.academia.dto.Barra;
 import com.example.sistema.academia.dto.Comparacao;
 import com.example.sistema.academia.dto.MapaCorpo;
 import com.example.sistema.academia.dto.MedidaCorpo;
+import com.example.sistema.academia.model.Aluno;
 import com.example.sistema.academia.model.AvaliacaoFisica;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -132,12 +133,22 @@ public class EvolucaoService {
                     primeira, ultima, texto, classe, intensidade));
         }
         List<LocalDate> datas = avaliacoes.stream().map(AvaliacaoFisica::getDataAvaliacao).filter(Objects::nonNull).toList();
-        Double alturaCm = avaliacoes.stream().map(AvaliacaoFisica::getAltura).filter(a -> a != null && a > 0)
-                .reduce((antiga, nova) -> nova).map(a -> Math.round(a * 1000) / 10.0).orElse(null);
+        Aluno aluno = avaliacoes.stream().map(AvaliacaoFisica::getAluno).filter(Objects::nonNull).findFirst().orElse(null);
         return new MapaCorpo(alunoId, nome, avaliacoes.size(),
                 datas.isEmpty() ? null : datas.get(0).format(DATA),
                 datas.isEmpty() ? null : datas.get(datas.size() - 1).format(DATA),
-                alturaCm, medidas);
+                alturaCm(aluno, avaliacoes), medidas,
+                aluno == null ? Aluno.SILHUETA_NAO_INFORMADA : aluno.getSilhueta());
+    }
+
+    /**
+     * Altura usada para desenhar o mapa, em cm: a do cadastro do aluno vale primeiro; sem ela, a da última avaliação.
+     * Nula quando nenhuma das duas existe (o mapa usa então uma altura padrão e avisa na tela).
+     */
+    static Double alturaCm(Aluno aluno, List<AvaliacaoFisica> avaliacoes) {
+        if (aluno != null && aluno.getAlturaCm() != null && aluno.getAlturaCm() > 0) return aluno.getAlturaCm().doubleValue();
+        return avaliacoes.stream().map(AvaliacaoFisica::getAltura).filter(a -> a != null && a > 0)
+                .reduce((antiga, nova) -> nova).map(a -> Math.round(a * 1000) / 10.0).orElse(null);
     }
 
     /** Um mapa por aluno que tem avaliação (para o administrador e o professor), em ordem de nome. */
