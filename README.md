@@ -6,9 +6,11 @@ Desenvolvi este sistema para um trabalho acadêmico do curso de Análise e Desen
 
 **Experimente agora:** [gymsync-ucfj.onrender.com](https://gymsync-ucfj.onrender.com), com o botão "Testar como visitante" (dados de exemplo, só leitura). O site roda em plano gratuito e dorme sem uso, então a primeira visita pode levar cerca de um minuto para abrir.
 
-[![Vídeo de apresentação do GymSync, cerca de 2 minutos](docs/img/video-capa.jpg)](https://gymsync-ucfj.onrender.com/#video)
+[![Vídeo de apresentação do GymSync, cerca de 1 minuto e 15 segundos](docs/img/video-capa.jpg)](https://gymsync-ucfj.onrender.com/#video)
 
-**Vídeo de apresentação (2 min):** matrícula, mensalidade com Pix, catraca, ficha de treino e relatórios, com narração. Ele toca no próprio site, no fim do "Quem somos" (clique na imagem); o arquivo também está no repositório, em [`static/video/gymsync.mp4`](src/main/resources/static/video/gymsync.mp4).
+**Vídeo de apresentação (1 min 15 s):** matrícula, mensalidade com Pix, catraca, ficha de treino e relatórios, com narração. Ele toca no próprio site, no fim do "Quem somos" (clique na imagem).
+
+**Outros vídeos:** tour pelo sistema real, versão narrada, edição de impacto e apresentação da faculdade. Todos estão na [release `videos-gymsync`](https://github.com/PedroFerrari01/GymSync/releases/tag/videos-gymsync).
 
 ![Tela de login do GymSync](docs/img/login.jpg)
 
