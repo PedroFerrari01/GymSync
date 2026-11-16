@@ -181,6 +181,9 @@ const MUSCULOS = {
 const CHAVE_DO_MUSCULO = Object.fromEntries(Object.entries(MUSCULOS).map(([vista, mapa]) =>
     [vista, Object.fromEntries(Object.entries(mapa).flatMap(([chave, nomes]) => nomes.map(n => [n, chave])))]));
 
+// Ao clicar na pílula, a região que aparece melhor de um lado só leva a figura para esse lado
+const VISTA_PREFERIDA = { peito: 'frente', quadril: 'costas' };
+
 function noSvg(nome, atributos) {
     const el = document.createElementNS(SVG_NS, nome);
     for (const a in atributos) el.setAttribute(a, atributos[a]);
@@ -208,9 +211,9 @@ function centrosDe(vista, chave) {
     return centros;
 }
 
-function criarSilhueta(svg, vistaInicial = 'frente') {
+function criarSilhueta(svg) {
     svg.setAttribute('viewBox', `0 0 ${VISTA.largura} ${VISTA.altura}`);
-    let vista = vistaInicial;
+    let vista = 'frente';
 
     /** regioes = { chave: classe }; forca = { chave: intensidade de 0 a 1 } (cor mais forte quanto maior a variação). */
     function desenhar(regioes, forca = {}) {
@@ -259,8 +262,16 @@ function criarSilhueta(svg, vistaInicial = 'frente') {
         svg.querySelectorAll('.mapa-musculo.medido').forEach(el => el.classList.toggle('ativo', el.dataset.chave === chave));
     }
 
+    /** Ponteiro sobre um músculo medido: f(chave ou null, evento). Clique: g(chave). Vale nas duas vistas. */
+    function aoApontar(f, g) {
+        const chaveDe = e => (e.target.closest && e.target.closest('.mapa-musculo.medido') || {}).dataset?.chave || null;
+        svg.addEventListener('pointermove', e => f(chaveDe(e), e));
+        svg.addEventListener('pointerleave', e => f(null, e));
+        svg.addEventListener('click', e => { const c = chaveDe(e); if (c) g(c); });
+    }
+
     return {
-        desenhar, ancora, alturaRotulo, destacar,
+        desenhar, ancora, alturaRotulo, destacar, aoApontar,
         vista: () => vista,
         trocarVista(nova) { vista = nova; }
     };
@@ -604,10 +615,9 @@ function iniciar() {
     const comparando = raiz.querySelector('.mapa-comparando');
     const legenda = raiz.querySelector('.mapa-legenda');
     const silhueta = criarSilhueta(raiz.querySelector('.mapa-silhueta'));
-    // Em tela larga (>= 992px) as costas ficam ao lado da frente; os traços só ligam à frente
-    const costasAoLado = criarSilhueta(raiz.querySelector('.mapa-silhueta-costas'), 'costas');
-    const telaLarga = window.matchMedia('(min-width: 992px)');
+    const dica = raiz.querySelector('.mapa-dica-musculo');
     let vistaEscolhida = 'frente';
+    let trocaVista = 0;
 
     let alunoAtual = seletor ? seletor.value : alunos.keys().next().value;
     let momento = 'ultima';
@@ -653,7 +663,6 @@ function iniciar() {
             r.bolinha.classList.toggle('ativo', ligado);
         });
         silhueta.destacar(ativa);
-        costasAoLado.destacar(ativa);
         if (cena3d) cena3d.destacar(ativa);
     }
 
@@ -679,7 +688,12 @@ function iniciar() {
             li.addEventListener('mouseleave', () => destacar(null));
             li.addEventListener('focus', () => destacar(chave));
             li.addEventListener('blur', () => destacar(null));
-            li.addEventListener('click', () => { fixado = fixado === chave ? null : chave; destacar(null); });
+            li.addEventListener('click', () => {
+                fixado = fixado === chave ? null : chave;
+                destacar(null);
+                const preferida = VISTA_PREFERIDA[chave];
+                if (fixado && preferida && !usando3d()) mudarVista(preferida);
+            });
             colunas[lado].append(li);
             const traco = noSvg('path', { class: `mapa-traco ${m.classe}` });
             const bolinha = noSvg('circle', { r: 3.5, class: `mapa-bolinha ${m.classe}` });
@@ -790,11 +804,46 @@ function iniciar() {
         return forca;
     }
 
-    // Lado a lado: a figura principal mostra a frente e a segunda as costas; senão, vale o botão Frente/Costas
     function desenhar2d() {
-        silhueta.trocarVista(telaLarga.matches ? 'frente' : vistaEscolhida);
+        silhueta.trocarVista(vistaEscolhida);
         silhueta.desenhar(regioesComClasse(), intensidades());
-        if (telaLarga.matches) costasAoLado.desenhar(regioesComClasse(), intensidades());
+    }
+
+    /** Troca Frente/Costas com um fade curto (100 ms some, 100 ms volta; sem animação se o sistema pedir). */
+    function mudarVista(vista) {
+        botoesVista.forEach(b => {
+            b.classList.toggle('active', b.dataset.vista === vista);
+            b.setAttribute('aria-pressed', b.dataset.vista === vista);
+        });
+        if (vista === vistaEscolhida) return;
+        vistaEscolhida = vista;
+        mostrarDica(null);
+        const aplicar = () => {
+            desenhar2d();
+            posicionarRotulos();
+            destacar(null);
+            atualizarTracos();
+            raiz.classList.remove('mapa-trocando');
+        };
+        clearTimeout(trocaVista);
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { aplicar(); return; }
+        raiz.classList.add('mapa-trocando');
+        trocaVista = setTimeout(aplicar, 100);
+    }
+
+    /** Dica sobre o músculo: nome, valor e diferença da medida, perto do ponteiro. */
+    function mostrarDica(chave, e) {
+        const a = aluno();
+        const m = chave && a && a.medidas[chave];
+        if (!m || !e) { dica.hidden = true; return; }
+        const valorAtual = momento === 'primeira' ? m.primeira : m.ultima;
+        dica.textContent = [m.rotulo, valorAtual, m.diferenca].filter(Boolean).join(' · ');
+        dica.className = `mapa-dica-musculo ${m.classe}`;
+        dica.hidden = false;
+        const caixa = figura.getBoundingClientRect();
+        const x = limitar(e.clientX - caixa.left, 8, caixa.width - dica.offsetWidth - 8);
+        dica.style.left = `${Math.round(x)}px`;
+        dica.style.top = `${Math.round(Math.max(0, e.clientY - caixa.top - dica.offsetHeight - 14))}px`;
     }
 
     function regioesComClasse() {
@@ -887,21 +936,15 @@ function iniciar() {
         carregar3d();
     }));
     botoesVista.forEach(botao => botao.addEventListener('click', () => {
-        vistaEscolhida = botao.dataset.vista;
-        botoesVista.forEach(b => {
-            b.classList.toggle('active', b === botao);
-            b.setAttribute('aria-pressed', b === botao);
-        });
-        desenhar2d();
-        posicionarRotulos();
-        destacar(null);
-        atualizarTracos();
+        mudarVista(botao.dataset.vista);
     }));
-    telaLarga.addEventListener('change', () => {
-        desenhar2d();
-        posicionarRotulos();
+    // Músculos interativos nas duas vistas: passar o mouse destaca a pílula e mostra a dica; clicar fixa, como na pílula
+    silhueta.aoApontar((chave, e) => {
+        mostrarDica(chave, e);
+        destacar(chave);
+    }, chave => {
+        fixado = fixado === chave ? null : chave;
         destacar(null);
-        atualizarTracos();
     });
     canvas.addEventListener('pointerdown', () => raiz.classList.add('mapa-ja-girou'), { once: true });
 
