@@ -235,13 +235,13 @@ public class VisitanteService {
         }
 
         // Avaliações da Ana: o peso e o percentual de gordura caem aos poucos
-        // Medidas: cintura, quadril, peito, braço e coxa (aparecem no mapa do corpo)
-        avaliacao(ana, marcos, hoje.minusDays(90), 1.65, 68.0, 27.5, 76.0, 100.0, 91.0, 27.5, 55.0);
-        avaliacao(ana, marcos, hoje.minusDays(45), 1.65, 66.4, 25.8, 73.5, 98.5, 90.0, 28.0, 55.5);
-        avaliacao(ana, marcos, hoje.minusDays(5), 1.65, 65.1, 24.2, 71.0, 97.0, 89.5, 28.5, 56.0);
-        // Bruno parou de treinar: a cintura e a gordura subiram
-        avaliacao(bruno, marcos, hoje.minusDays(75), 1.78, 84.0, 21.0, 88.0, 101.0, 102.0, 35.0, 58.0);
-        avaliacao(bruno, marcos, hoje.minusDays(14), 1.78, 86.5, 23.4, 91.5, 102.0, 101.0, 34.5, 57.5);
+        // Medidas: cintura, quadril, peito, braço, coxa, ombro, antebraço e panturrilha (aparecem no mapa do corpo)
+        avaliacao(ana, marcos, hoje.minusDays(90), 1.65, 68.0, 27.5, 76.0, 100.0, 91.0, 27.5, 55.0, 104.0, 24.5, 35.0);
+        avaliacao(ana, marcos, hoje.minusDays(45), 1.65, 66.4, 25.8, 73.5, 98.5, 90.0, 28.0, 55.5, 105.0, 25.0, 35.5);
+        avaliacao(ana, marcos, hoje.minusDays(5), 1.65, 65.1, 24.2, 71.0, 97.0, 89.5, 28.5, 56.0, 106.0, 25.5, 36.0);
+        // Bruno parou de treinar: a cintura e a gordura subiram, ombro, antebraço e panturrilha perderam um pouco
+        avaliacao(bruno, marcos, hoje.minusDays(75), 1.78, 84.0, 21.0, 88.0, 101.0, 102.0, 35.0, 58.0, 116.0, 29.5, 38.5);
+        avaliacao(bruno, marcos, hoje.minusDays(14), 1.78, 86.5, 23.4, 91.5, 102.0, 101.0, 34.5, 57.5, 114.5, 29.0, 38.0);
 
         aula("Spinning", carla, DayOfWeek.MONDAY, LocalTime.of(18, 0), 12);
         aula("Funcional", carla, DayOfWeek.WEDNESDAY, LocalTime.of(7, 0), 10);
@@ -340,7 +340,8 @@ public class VisitanteService {
     }
 
     private void avaliacao(Aluno aluno, Professor professor, LocalDate data, double altura, double peso, double gordura,
-                           double cintura, double quadril, double peito, double braco, double coxa) {
+                           double cintura, double quadril, double peito, double braco, double coxa,
+                           double ombro, double antebraco, double panturrilha) {
         AvaliacaoFisica a = new AvaliacaoFisica();
         a.setAluno(aluno);
         a.setProfessorId(professor.getId());
@@ -354,6 +355,9 @@ public class VisitanteService {
         a.setPeito(peito);
         a.setBraco(braco);
         a.setCoxa(coxa);
+        a.setOmbro(ombro);
+        a.setAntebraco(antebraco);
+        a.setPanturrilha(panturrilha);
         avaliacaoFisicaRepository.save(a);
     }
 

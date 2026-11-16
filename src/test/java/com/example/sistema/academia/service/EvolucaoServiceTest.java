@@ -120,8 +120,46 @@ class EvolucaoServiceTest {
         a.setQuadril(98 + v);
         a.setPeito(100 + v);
         a.setCoxa(56 + v);
+        a.setOmbro(112 + v);
+        a.setAntebraco(28 + v);
+        a.setPanturrilha(37 + v);
         a.setAltura(1.75);
         return a;
+    }
+
+    @Test
+    void aumentarEhBomParaOmbroAntebracoEPanturrilha() {
+        List<String> novas = List.of("ombro", "antebraco", "panturrilha");
+        MapaCorpo subiu = service.mapaCorpo(1L, "Aluno", List.of(
+                completa(LocalDate.of(2026, 8, 18), 0), completa(LocalDate.of(2026, 11, 11), 2)));
+        for (String chave : novas) assertEquals("melhorou", medida(subiu, chave).getClasse(), chave);
+        MapaCorpo desceu = service.mapaCorpo(1L, "Aluno", List.of(
+                completa(LocalDate.of(2026, 8, 18), 2), completa(LocalDate.of(2026, 11, 11), 0)));
+        for (String chave : novas) assertEquals("piorou", medida(desceu, chave).getClasse(), chave);
+        // Panturrilha 37 → 39 (+5,4%): mesma escala de intensidade das outras medidas
+        assertEquals(0.68, medida(subiu, "panturrilha").getIntensidade());
+        // Também entram na tabela "primeira x última", com a mesma cor
+        assertTrue(service.comparacao(List.of(completa(LocalDate.of(2026, 8, 18), 0), completa(LocalDate.of(2026, 11, 11), 2)))
+                .stream().anyMatch(c -> c.getRotulo().equals("Antebraço") && c.getClasse().equals("melhorou")));
+    }
+
+    @Test
+    void medidaNovaNulaNaoEntraNoMapaNemNaComparacao() {
+        // Avaliações antigas não têm ombro, antebraço nem panturrilha
+        AvaliacaoFisica antiga = completa(LocalDate.of(2026, 8, 18), 0);
+        antiga.setOmbro(null);
+        antiga.setAntebraco(null);
+        antiga.setPanturrilha(null);
+        AvaliacaoFisica nova = completa(LocalDate.of(2026, 11, 11), 2);
+        nova.setAntebraco(null);
+        nova.setPanturrilha(null);
+        MapaCorpo mapa = service.mapaCorpo(1L, "Aluno", List.of(antiga, nova));
+        // Ombro medido só uma vez: aparece sem diferença e sem cor; antebraço e panturrilha ficam de fora
+        assertEquals("neutro", medida(mapa, "ombro").getClasse());
+        assertNull(medida(mapa, "ombro").getDiferenca());
+        assertTrue(mapa.getMedidas().stream().noneMatch(m -> m.getChave().equals("antebraco") || m.getChave().equals("panturrilha")));
+        assertTrue(service.comparacao(List.of(antiga, nova)).stream()
+                .noneMatch(c -> List.of("Ombro", "Antebraço", "Panturrilha").contains(c.getRotulo())));
     }
 
     @Test

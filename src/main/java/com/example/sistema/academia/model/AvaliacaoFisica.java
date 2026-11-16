@@ -25,6 +25,9 @@ public class AvaliacaoFisica {
     private Double peito;
     private Double braco;
     private Double coxa;
+    private Double ombro;
+    private Double antebraco;
+    private Double panturrilha;
 
     @Column(length = 300)
     private String observacao;
@@ -60,6 +63,12 @@ public class AvaliacaoFisica {
     public void setBraco(Double braco) { this.braco = braco; }
     public Double getCoxa() { return coxa; }
     public void setCoxa(Double coxa) { this.coxa = coxa; }
+    public Double getOmbro() { return ombro; }
+    public void setOmbro(Double ombro) { this.ombro = ombro; }
+    public Double getAntebraco() { return antebraco; }
+    public void setAntebraco(Double antebraco) { this.antebraco = antebraco; }
+    public Double getPanturrilha() { return panturrilha; }
+    public void setPanturrilha(Double panturrilha) { this.panturrilha = panturrilha; }
     public String getObservacao() { return observacao; }
     public void setObservacao(String observacao) { this.observacao = observacao; }
 }

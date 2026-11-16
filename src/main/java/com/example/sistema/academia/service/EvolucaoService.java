@@ -39,7 +39,7 @@ public class EvolucaoService {
 
     private record Medida(String chave, String rotulo, String unidade, Function<AvaliacaoFisica, Double> valor, Direcao direcao) {}
 
-    // Gordura, cintura e quadril: diminuir é bom. Peito, braço e coxa: aumentar é bom. Peso e IMC: sem cor
+    // Gordura, cintura e quadril: diminuir é bom. Peito, braço, coxa, ombro, antebraço e panturrilha: aumentar é bom. Peso e IMC: sem cor
     private static final List<Medida> MEDIDAS = List.of(
             new Medida("peso", "Peso", " kg", AvaliacaoFisica::getPeso, Direcao.NEUTRA),
             new Medida("gordura", "Gordura", "%", AvaliacaoFisica::getPercentualGordura, Direcao.MENOR_EH_MELHOR),
@@ -47,9 +47,12 @@ public class EvolucaoService {
             new Medida("quadril", "Quadril", " cm", AvaliacaoFisica::getQuadril, Direcao.MENOR_EH_MELHOR),
             new Medida("peito", "Peito", " cm", AvaliacaoFisica::getPeito, Direcao.MAIOR_EH_MELHOR),
             new Medida("braco", "Braço", " cm", AvaliacaoFisica::getBraco, Direcao.MAIOR_EH_MELHOR),
-            new Medida("coxa", "Coxa", " cm", AvaliacaoFisica::getCoxa, Direcao.MAIOR_EH_MELHOR));
+            new Medida("coxa", "Coxa", " cm", AvaliacaoFisica::getCoxa, Direcao.MAIOR_EH_MELHOR),
+            new Medida("ombro", "Ombro", " cm", AvaliacaoFisica::getOmbro, Direcao.MAIOR_EH_MELHOR),
+            new Medida("antebraco", "Antebraço", " cm", AvaliacaoFisica::getAntebraco, Direcao.MAIOR_EH_MELHOR),
+            new Medida("panturrilha", "Panturrilha", " cm", AvaliacaoFisica::getPanturrilha, Direcao.MAIOR_EH_MELHOR));
 
-    // Só no mapa do corpo (a tabela "primeira x última" continua com as sete medidas acima)
+    // Só no mapa do corpo (a tabela "primeira x última" continua com as medidas acima)
     private static final Medida IMC = new Medida("imc", "IMC", "", AvaliacaoFisica::getImc, Direcao.NEUTRA);
 
     private String numero(double v) {

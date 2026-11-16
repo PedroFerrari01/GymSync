@@ -35,6 +35,9 @@ public class AvaliacaoController {
                          @RequestParam(required = false) Double peito,
                          @RequestParam(required = false) Double braco,
                          @RequestParam(required = false) Double coxa,
+                         @RequestParam(required = false) Double ombro,
+                         @RequestParam(required = false) Double antebraco,
+                         @RequestParam(required = false) Double panturrilha,
                          @RequestParam(required = false) String observacao,
                          HttpSession session,
                          RedirectAttributes redirect) {
@@ -46,7 +49,8 @@ public class AvaliacaoController {
         if (dataAvaliacao.isAfter(LocalDate.now()) || peso <= 0 || peso > 500
                 || medidaInvalida(altura, 3) || medidaInvalida(percentualGordura, 80)
                 || medidaInvalida(cintura, 300) || medidaInvalida(quadril, 300) || medidaInvalida(peito, 300)
-                || medidaInvalida(braco, 150) || medidaInvalida(coxa, 200)) {
+                || medidaInvalida(braco, 150) || medidaInvalida(coxa, 200)
+                || medidaInvalida(ombro, 200) || medidaInvalida(antebraco, 100) || medidaInvalida(panturrilha, 100)) {
             redirect.addFlashAttribute("erro", "Confira os valores da avaliação (altura em metros, medidas em centímetros).");
             return "redirect:/";
         }
@@ -62,6 +66,9 @@ public class AvaliacaoController {
         a.setPeito(peito);
         a.setBraco(braco);
         a.setCoxa(coxa);
+        a.setOmbro(ombro);
+        a.setAntebraco(antebraco);
+        a.setPanturrilha(panturrilha);
         if (observacao != null && !observacao.isBlank()) {
             String limpa = observacao.trim();
             a.setObservacao(limpa.length() > 300 ? limpa.substring(0, 300) : limpa);

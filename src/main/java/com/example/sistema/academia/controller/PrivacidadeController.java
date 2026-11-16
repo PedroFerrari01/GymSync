@@ -137,6 +137,9 @@ public class PrivacidadeController {
             l.put("peitoCm", av.getPeito());
             l.put("bracoCm", av.getBraco());
             l.put("coxaCm", av.getCoxa());
+            l.put("ombroCm", av.getOmbro());
+            l.put("antebracoCm", av.getAntebraco());
+            l.put("panturrilhaCm", av.getPanturrilha());
             l.put("observacao", av.getObservacao());
             return l;
         }).toList());

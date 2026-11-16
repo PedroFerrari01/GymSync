@@ -1,5 +1,5 @@
 /* Mapa do corpo (aba Avaliações Físicas): manequim 3D que gira, com uma fita em cada região medida
-   (peito, braço, cintura, quadril e coxa) e a diferença entre a primeira e a última avaliação.
+   (peito, braço, cintura, quadril, coxa, ombro, antebraço e panturrilha; as três últimas só no 2D) e a diferença entre a primeira e a última avaliação.
    - O manequim é feito aqui mesmo, em código (nenhum modelo de terceiros). As proporções são ilustrativas:
      cada região engrossa ou afina um pouco conforme a medida do aluno.
    - Os dados vêm do HTML (data-*), montados pelo EvolucaoService; a cor segue a regra de lá.
@@ -78,6 +78,16 @@ const REGIOES = {
 };
 const CHAVES_REGIAO = Object.keys(REGIOES);
 const CHAVES_RESUMO = ['peso', 'gordura', 'imc'];
+
+// Medidas que só o mapa dos músculos (2D) desenha; o manequim 3D não tem fita para elas.
+// lado: de que lado fica o rótulo; em: altura aproximada (m) para alinhar o rótulo quando não há músculo para medir
+const SO_2D = {
+    ombro: { lado: -1, em: 1.40 },
+    antebraco: { lado: 1, em: 0.98 },
+    panturrilha: { lado: 1, em: 0.38 }
+};
+const CHAVES_ROTULO = [...CHAVES_REGIAO, ...Object.keys(SO_2D)];
+const ladoDe = chave => (REGIOES[chave] || SO_2D[chave]).lado;
 const FATOR_NEUTRO = Object.fromEntries(CHAVES_REGIAO.map(c => [c, 1]));
 
 const limitar = (v, min, max) => Math.max(min, Math.min(max, v));
@@ -175,8 +185,14 @@ const DESENHOS = { frente: anteriorData, costas: posteriorData };
 
 // Medida → músculos de cada lado do corpo (só as medidas que a avaliação física tem)
 const MUSCULOS = {
-    frente: { peito: ['chest'], braco: ['biceps', 'triceps'], cintura: ['abs', 'obliques'], quadril: ['abductors'], coxa: ['quadriceps'] },
-    costas: { braco: ['triceps'], cintura: ['lower-back'], quadril: ['gluteal'], coxa: ['hamstring'] }
+    frente: {
+        peito: ['chest'], braco: ['biceps', 'triceps'], cintura: ['abs', 'obliques'], quadril: ['abductors'], coxa: ['quadriceps'],
+        ombro: ['front-deltoids'], antebraco: ['forearm'], panturrilha: ['calves'] // na frente, "calves" é a perna abaixo do joelho (tibial)
+    },
+    costas: {
+        braco: ['triceps'], cintura: ['lower-back'], quadril: ['gluteal'], coxa: ['hamstring'],
+        ombro: ['back-deltoids'], antebraco: ['forearm'], panturrilha: ['calves'] // gastrocnêmio
+    }
 };
 const CHAVE_DO_MUSCULO = Object.fromEntries(Object.entries(MUSCULOS).map(([vista, mapa]) =>
     [vista, Object.fromEntries(Object.entries(mapa).flatMap(([chave, nomes]) => nomes.map(n => [n, chave])))]));
@@ -676,10 +692,10 @@ function iniciar() {
         if (!a) return;
 
         const valor = m => (momento === 'primeira' ? m.primeira : m.ultima);
-        for (const chave of CHAVES_REGIAO) {
+        for (const chave of CHAVES_ROTULO) {
             const m = a.medidas[chave];
             if (!m) continue;
-            const lado = REGIOES[chave].lado;
+            const lado = ladoDe(chave);
             const li = elemento('li', `mapa-rotulo ${m.classe}`);
             li.tabIndex = 0;
             li.append(elemento('span', 'mapa-rotulo-nome', m.rotulo), elemento('span', 'mapa-rotulo-valor', valor(m)));
@@ -770,6 +786,7 @@ function iniciar() {
     }
     function alturaDe(chave) {
         const regiao = REGIOES[chave];
+        if (!regiao) return SO_2D[chave].em;
         return regiao.parte === 'braco' ? OMBRO.y - regiao.em : regiao.em;
     }
 
@@ -800,7 +817,7 @@ function iniciar() {
     function intensidades() {
         const a = aluno();
         const forca = {};
-        if (a) for (const chave of CHAVES_REGIAO) if (a.medidas[chave]) forca[chave] = a.medidas[chave].intensidade;
+        if (a) for (const chave of CHAVES_ROTULO) if (a.medidas[chave]) forca[chave] = a.medidas[chave].intensidade;
         return forca;
     }
 
@@ -849,7 +866,7 @@ function iniciar() {
     function regioesComClasse() {
         const a = aluno();
         const regioes = {};
-        if (a) for (const chave of CHAVES_REGIAO) if (a.medidas[chave]) regioes[chave] = a.medidas[chave].classe;
+        if (a) for (const chave of CHAVES_ROTULO) if (a.medidas[chave]) regioes[chave] = a.medidas[chave].classe;
         return regioes;
     }
 
