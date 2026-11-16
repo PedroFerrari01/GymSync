@@ -47,9 +47,9 @@ class EvolucaoServiceTest {
 
         assertEquals("+2,0 cm", linhas.get(2).getDiferenca());
         assertEquals("piorou", linhas.get(2).getClasse());
-        // Peso e braço dependem do objetivo: sem cor
+        // Peso não tem cor; braço que aumentou melhorou
         assertEquals("neutro", linhas.get(0).getClasse());
-        assertEquals("neutro", linhas.get(3).getClasse());
+        assertEquals("melhorou", linhas.get(3).getClasse());
     }
 
     @Test
@@ -76,7 +76,8 @@ class EvolucaoServiceTest {
         assertEquals("+2,0 cm", cintura.getDiferenca());
         assertEquals("piorou", cintura.getClasse());
         assertEquals("melhorou", mapa.getMedidas().get(1).getClasse());
-        assertEquals("neutro", mapa.getMedidas().get(3).getClasse());
+        assertEquals("neutro", mapa.getMedidas().get(0).getClasse());
+        assertEquals("melhorou", mapa.getMedidas().get(3).getClasse());
 
         // Medida feita uma vez só: aparece o valor, sem diferença e sem cor
         MedidaCorpo coxa = mapa.getMedidas().get(4);
@@ -108,6 +109,48 @@ class EvolucaoServiceTest {
         assertEquals("-4,0 cm", cinturaBia.getDiferenca());
         assertEquals("melhorou", cinturaBia.getClasse());
         assertTrue(service.mapasCorpo(List.of()).isEmpty());
+    }
+
+    private MedidaCorpo medida(MapaCorpo mapa, String chave) {
+        return mapa.getMedidas().stream().filter(m -> m.getChave().equals(chave)).findFirst().orElseThrow();
+    }
+
+    private AvaliacaoFisica completa(LocalDate data, double v) {
+        AvaliacaoFisica a = avaliacao(data, 80 + v, 20 + v, 85 + v, 33 + v);
+        a.setQuadril(98 + v);
+        a.setPeito(100 + v);
+        a.setCoxa(56 + v);
+        a.setAltura(1.75);
+        return a;
+    }
+
+    @Test
+    void aumentarEhBomParaPeitoBracoECoxa() {
+        // Todas as medidas sobem 2: peito, braço e coxa melhoram; cintura, quadril e gordura pioram
+        MapaCorpo mapa = service.mapaCorpo(1L, "Aluno", List.of(
+                completa(LocalDate.of(2026, 8, 18), 0), completa(LocalDate.of(2026, 11, 11), 2)));
+        for (String chave : List.of("peito", "braco", "coxa")) assertEquals("melhorou", medida(mapa, chave).getClasse(), chave);
+        for (String chave : List.of("cintura", "quadril", "gordura")) assertEquals("piorou", medida(mapa, chave).getClasse(), chave);
+        for (String chave : List.of("peso", "imc")) assertEquals("neutro", medida(mapa, chave).getClasse(), chave);
+    }
+
+    @Test
+    void diminuirEhBomParaCinturaQuadrilEGordura() {
+        // Todas as medidas descem 2: o contrário do teste acima; peso e IMC continuam sem cor
+        MapaCorpo mapa = service.mapaCorpo(1L, "Aluno", List.of(
+                completa(LocalDate.of(2026, 8, 18), 2), completa(LocalDate.of(2026, 11, 11), 0)));
+        for (String chave : List.of("cintura", "quadril", "gordura")) assertEquals("melhorou", medida(mapa, chave).getClasse(), chave);
+        for (String chave : List.of("peito", "braco", "coxa")) assertEquals("piorou", medida(mapa, chave).getClasse(), chave);
+        for (String chave : List.of("peso", "imc")) assertEquals("neutro", medida(mapa, chave).getClasse(), chave);
+        // Cada região tem um status só
+        assertEquals(mapa.getMedidas().size(), mapa.getMedidas().stream().map(MedidaCorpo::getChave).distinct().count());
+    }
+
+    @Test
+    void semMudancaFicaNeutro() {
+        assertEquals("neutro", EvolucaoService.classe(EvolucaoService.Direcao.MAIOR_EH_MELHOR, 0));
+        assertEquals("neutro", EvolucaoService.classe(EvolucaoService.Direcao.MENOR_EH_MELHOR, 0));
+        assertEquals("neutro", EvolucaoService.classe(EvolucaoService.Direcao.NEUTRA, 5));
     }
 
     @Test

@@ -3,8 +3,11 @@
    - O manequim é feito aqui mesmo, em código (nenhum modelo de terceiros). As proporções são ilustrativas:
      cada região engrossa ou afina um pouco conforme a medida do aluno.
    - Os dados vêm do HTML (data-*), montados pelo EvolucaoService; a cor segue a regra de lá.
-   - Sem WebGL, em aparelho fraco ou no botão "2D", a mesma figura é desenhada em SVG.
+   - No botão "2D" (o padrão), sem WebGL ou em aparelho fraco aparece o mapa dos músculos em SVG
+     (frente e costas), com cada músculo na cor da medida ligada a ele.
    - O Three.js só é baixado quando a aba aparece na tela. */
+
+import { anteriorData, posteriorData } from '../vendor/react-body-highlighter/musculos.js';
 
 const raiz = document.querySelector('[data-mapa-corpo]');
 
@@ -161,12 +164,21 @@ function lerAlunos() {
     return alunos;
 }
 
-/* ---------- Silhueta 2D (reserva em SVG, mesma forma do manequim) ---------- */
+/* ---------- Mapa dos músculos 2D (frente e costas) ----------
+   Polígonos do react-body-highlighter (MIT, ver static/vendor/react-body-highlighter/LICENSE).
+   Cada músculo ligado a uma medida recebe a cor dela; os outros ficam na cor base. */
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
-const VISTA = { x: -450, y: -30, largura: 900, altura: 1850 };
-const sx = x => Math.round(x * 1000);
-const sy = y => Math.round((1.8 - y) * 1000);
+const VISTA = { largura: 100, altura: 200 };
+const DESENHOS = { frente: anteriorData, costas: posteriorData };
+
+// Medida → músculos de cada lado do corpo (só as medidas que a avaliação física tem)
+const MUSCULOS = {
+    frente: { peito: ['chest'], braco: ['biceps', 'triceps'], cintura: ['abs', 'obliques'], quadril: ['abductors'], coxa: ['quadriceps'] },
+    costas: { braco: ['triceps'], cintura: ['lower-back'], quadril: ['gluteal'], coxa: ['hamstring'] }
+};
+const CHAVE_DO_MUSCULO = Object.fromEntries(Object.entries(MUSCULOS).map(([vista, mapa]) =>
+    [vista, Object.fromEntries(Object.entries(mapa).flatMap(([chave, nomes]) => nomes.map(n => [n, chave])))]));
 
 function noSvg(nome, atributos) {
     const el = document.createElementNS(SVG_NS, nome);
@@ -174,91 +186,79 @@ function noSvg(nome, atributos) {
     return el;
 }
 
-// Ponto do braço (lx para o lado, p ao longo do braço) na posição da figura
-function pontoBraco(lado, lx, p) {
-    const a = OMBRO.giro * lado;
-    return { x: lado * OMBRO.x + lx * Math.cos(a) + p * Math.sin(a), y: OMBRO.y + lx * Math.sin(a) - p * Math.cos(a) };
+function pontosDe(texto) {
+    const n = texto.trim().split(/\s+/).map(Number);
+    const pontos = [];
+    for (let i = 0; i + 1 < n.length; i += 2) pontos.push({ x: n[i], y: n[i + 1] });
+    return pontos;
+}
+
+/** Centro de cada polígono dos músculos de uma medida, numa vista (coordenadas do desenho). */
+function centrosDe(vista, chave) {
+    const nomes = MUSCULOS[vista][chave] || [];
+    const centros = [];
+    for (const item of DESENHOS[vista]) {
+        if (!nomes.includes(item.muscle)) continue;
+        for (const texto of item.svgPoints) {
+            const pts = pontosDe(texto);
+            centros.push({ x: pts.reduce((s, p) => s + p.x, 0) / pts.length, y: pts.reduce((s, p) => s + p.y, 0) / pts.length });
+        }
+    }
+    return centros;
 }
 
 function criarSilhueta(svg) {
-    svg.setAttribute('viewBox', `${VISTA.x} ${VISTA.y} ${VISTA.largura} ${VISTA.altura}`);
-    let faixas = {};
+    svg.setAttribute('viewBox', `0 0 ${VISTA.largura} ${VISTA.altura}`);
+    let vista = 'frente';
 
-    const contorno = pontos => 'M' + pontos.map(pt => `${sx(pt.x)},${sy(pt.y)}`).join('L') + 'Z';
-    const parte = d => svg.appendChild(noSvg('path', { d, class: 'mapa-2d-corpo' }));
-
-    function desenhar(fatores, regioes) {
+    function desenhar(regioes) {
         svg.replaceChildren();
-        faixas = {};
-        svg.appendChild(noSvg('ellipse', { cx: 0, cy: sy(0.012), rx: 330, ry: 26, class: 'mapa-2d-chao' }));
-
-        const tronco = secoesDe('tronco', fatores);
-        const perna = secoesDe('perna', fatores);
-        const braco = secoesDe('braco', fatores);
-        for (const lado of [-1, 1]) {
-            svg.appendChild(noSvg('ellipse', { cx: sx(lado * PE.x), cy: sy(PE.y), rx: sx(PE.rx), ry: sx(PE.ry), class: 'mapa-2d-corpo' }));
-            parte(contorno([...perna.map(s => ({ x: lado * s.cx - s.rx, y: s.p })), ...perna.map(s => ({ x: lado * s.cx + s.rx, y: s.p })).reverse()]));
-            parte(contorno([...braco.map(s => pontoBraco(lado, -s.rx, s.p)), ...braco.map(s => pontoBraco(lado, s.rx, s.p)).reverse()]));
-            const mao = pontoBraco(lado, 0, MAO.p);
-            svg.appendChild(noSvg('ellipse', {
-                cx: sx(mao.x), cy: sy(mao.y), rx: sx(MAO.rx), ry: sx(MAO.ry), class: 'mapa-2d-corpo',
-                transform: `rotate(${(-OMBRO.giro * lado * 180 / Math.PI).toFixed(1)} ${sx(mao.x)} ${sy(mao.y)})`
-            }));
-        }
-        parte(contorno([...tronco.map(s => ({ x: -s.rx, y: s.p })), ...tronco.map(s => ({ x: s.rx, y: s.p })).reverse()]));
-        svg.appendChild(noSvg('ellipse', { cx: 0, cy: sy(CABECA.y), rx: sx(CABECA.rx), ry: sx(CABECA.ry), class: 'mapa-2d-corpo' }));
-
-        // Fitas: um arco leve atravessando a região (nos braços e nas coxas, dos dois lados)
-        const fita = (chave, a, b, queda) => {
-            const meio = { x: (a.x + b.x) / 2 + queda.x, y: (a.y + b.y) / 2 + queda.y };
-            const el = noSvg('path', {
-                d: `M${sx(a.x)},${sy(a.y)}Q${sx(meio.x)},${sy(meio.y)} ${sx(b.x)},${sy(b.y)}`,
-                class: `mapa-2d-fita ${regioes[chave]}`, 'data-chave': chave
-            });
-            svg.appendChild(el);
-            (faixas[chave] = faixas[chave] || []).push({ a, b });
-        };
-        for (const chave of CHAVES_REGIAO) {
-            if (!regioes[chave]) continue;
-            const regiao = REGIOES[chave];
-            if (regiao.parte === 'tronco') {
-                const s = secaoEm(tronco, regiao.em);
-                fita(chave, { x: -s.rx, y: regiao.em }, { x: s.rx, y: regiao.em }, { x: 0, y: -0.028 });
-            } else if (regiao.parte === 'perna') {
-                const s = secaoEm(perna, regiao.em);
-                for (const lado of [-1, 1]) {
-                    fita(chave, { x: lado * s.cx - s.rx, y: regiao.em }, { x: lado * s.cx + s.rx, y: regiao.em }, { x: 0, y: -0.016 });
-                }
-            } else {
-                const s = secaoEm(braco, regiao.em);
-                for (const lado of [-1, 1]) {
-                    fita(chave, pontoBraco(lado, -s.rx, regiao.em), pontoBraco(lado, s.rx, regiao.em), { x: 0, y: -0.01 });
-                }
+        for (const item of DESENHOS[vista]) {
+            const chave = CHAVE_DO_MUSCULO[vista][item.muscle];
+            const classe = chave && regioes[chave] ? ` medido ${regioes[chave]}` : '';
+            for (const texto of item.svgPoints) {
+                const el = noSvg('polygon', { points: texto.trim(), class: `mapa-musculo${classe}` });
+                if (classe) el.dataset.chave = chave;
+                svg.appendChild(el);
             }
         }
     }
 
-    /** Ponta da fita do lado pedido, em pixels dentro da figura. */
-    function ancora(chave, lado) {
+    // Do desenho (viewBox) para pixels dentro da figura
+    function emPixels(pt) {
         const caixa = svg.getBoundingClientRect();
-        if (!caixa.width || !faixas[chave]) return null;
+        if (!caixa.width) return null;
         const escala = Math.min(caixa.width / VISTA.largura, caixa.height / VISTA.altura);
-        const sobraX = (caixa.width - VISTA.largura * escala) / 2;
-        const sobraY = (caixa.height - VISTA.altura * escala) / 2;
+        return {
+            x: (caixa.width - VISTA.largura * escala) / 2 + pt.x * escala,
+            y: (caixa.height - VISTA.altura * escala) / 2 + pt.y * escala
+        };
+    }
+
+    /** Centro do músculo da medida mais para o lado pedido; sem músculo nesta vista, null. */
+    function ancora(chave, lado) {
         let melhor = null;
-        for (const f of faixas[chave]) {
-            for (const pt of [f.a, f.b]) {
-                if (!melhor || lado * pt.x > lado * melhor.x) melhor = pt;
-            }
-        }
-        return { x: sobraX + (sx(melhor.x) - VISTA.x) * escala, y: sobraY + (sy(melhor.y) - VISTA.y) * escala };
+        for (const c of centrosDe(vista, chave)) if (!melhor || lado * c.x > lado * melhor.x) melhor = c;
+        return melhor && emPixels(melhor);
+    }
+
+    /** Altura (em pixels) da medida para alinhar o rótulo; usa a frente quando a vista não tem o músculo. */
+    function alturaRotulo(chave) {
+        const centros = centrosDe(vista, chave).length ? centrosDe(vista, chave) : centrosDe('frente', chave);
+        if (!centros.length) return null;
+        const p = emPixels({ x: 0, y: centros.reduce((s, c) => s + c.y, 0) / centros.length });
+        return p && p.y;
     }
 
     function destacar(chave) {
-        svg.querySelectorAll('.mapa-2d-fita').forEach(el => el.classList.toggle('ativo', el.dataset.chave === chave));
+        svg.querySelectorAll('.mapa-musculo.medido').forEach(el => el.classList.toggle('ativo', el.dataset.chave === chave));
     }
 
-    return { desenhar, ancora, destacar };
+    return {
+        desenhar, ancora, alturaRotulo, destacar,
+        vista: () => vista,
+        trocarVista(nova) { vista = nova; }
+    };
 }
 
 /* ---------- Cena 3D ---------- */
@@ -594,6 +594,10 @@ function iniciar() {
     const seletor = raiz.querySelector('.mapa-aluno');
     const botoesMomento = raiz.querySelectorAll('[data-momento]');
     const botoesModo = raiz.querySelectorAll('[data-modo]');
+    const botoesVista = raiz.querySelectorAll('[data-vista]');
+    const grupoVista = raiz.querySelector('.mapa-vista');
+    const comparando = raiz.querySelector('.mapa-comparando');
+    const legenda = raiz.querySelector('.mapa-legenda');
     const silhueta = criarSilhueta(raiz.querySelector('.mapa-silhueta'));
 
     let alunoAtual = seletor ? seletor.value : alunos.keys().next().value;
@@ -607,7 +611,9 @@ function iniciar() {
     const guardado = (() => { try { return localStorage.getItem('gymsync-mapa-modo'); } catch (e) { return null; } })();
     const aparelhoFraco = (navigator.deviceMemory && navigator.deviceMemory <= 2)
         || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2);
-    let modo = guardado === '2d' || guardado === '3d' ? guardado : (aparelhoFraco ? '2d' : '3d');
+    // O mapa dos músculos (2D) é o padrão; o 3D fica no botão
+    let modo = guardado === '2d' || guardado === '3d' ? guardado : '2d';
+    if (aparelhoFraco) modo = '2d';
     let sem3d = false;
 
     const aluno = () => alunos.get(alunoAtual);
@@ -688,6 +694,28 @@ function iniciar() {
         } else {
             periodo.textContent = `${a.avaliacoes} avaliações, de ${a.dataPrimeira} a ${a.dataUltima}. A diferença compara a primeira com a última medida.`;
         }
+
+        // O que está sendo comparado, ao lado do Primeira/Última
+        if (comEvolucao && a.dataPrimeira && a.dataUltima) {
+            comparando.textContent = `Comparando ${a.dataPrimeira} → ${a.dataUltima}`;
+            botoesMomento.forEach(b => {
+                b.title = `Mostrar os valores de ${b.dataset.momento === 'primeira' ? a.dataPrimeira : a.dataUltima}`;
+            });
+        } else {
+            comparando.textContent = a.dataUltima ? `Avaliação de ${a.dataUltima}` : '';
+        }
+
+        // Legenda a partir dos dados: cada medida entra num status só
+        legenda.replaceChildren();
+        const grupos = { melhorou: 'Melhorou', piorou: 'Piorou', neutro: 'Sem cor' };
+        for (const classe in grupos) {
+            const doGrupo = Object.values(a.medidas).filter(m => (m.classe || 'neutro') === classe);
+            if (!doGrupo.length) continue;
+            const li = elemento('li');
+            const texto = doGrupo.map(m => (m.diferenca && classe !== 'neutro' ? `${m.rotulo} (${m.diferenca})` : m.rotulo)).join(', ');
+            li.append(elemento('span', `mapa-ponto ${classe}`), elemento('span', null, `${grupos[classe]}: ${texto}`));
+            legenda.append(li);
+        }
     }
 
     // Em tela larga os rótulos ficam ao lado da figura, na altura da região, ligados por um traço
@@ -697,13 +725,19 @@ function iniciar() {
     function posicionarRotulos() {
         const largo = comTracos();
         const alturaPalco = palco.clientHeight;
+        const topoFigura = figura.getBoundingClientRect().top - palco.getBoundingClientRect().top;
+        // Altura do rótulo no palco: no 3D pela forma do manequim, no 2D pelo centro do músculo
+        const meioDe = chave => {
+            const y = usando3d() ? null : silhueta.alturaRotulo(chave);
+            return y != null ? topoFigura + y : (1 - (alturaDe(chave) + 0.06) / 1.92) * alturaPalco;
+        };
         for (const lado of [-1, 1]) {
             const doLado = rotulos.filter(r => r.lado === lado)
-                .sort((x, y) => alturaDe(y.chave) - alturaDe(x.chave));
+                .sort((x, y) => meioDe(x.chave) - meioDe(y.chave));
             let minimo = 0;
             doLado.forEach(r => {
                 if (!largo) { r.li.style.top = ''; return; }
-                const meio = (1 - (alturaDe(r.chave) + 0.06) / 1.92) * alturaPalco;
+                const meio = meioDe(r.chave);
                 const topo = Math.max(minimo, meio - r.li.offsetHeight / 2);
                 r.li.style.top = `${Math.round(topo)}px`;
                 minimo = topo + r.li.offsetHeight + 8;
@@ -723,6 +757,8 @@ function iniciar() {
         linhas.setAttribute('viewBox', `0 0 ${base.width} ${base.height}`);
         for (const r of rotulos) {
             const ancora = fonte.ancora(r.chave, r.lado);
+            // No mapa dos músculos, medida sem músculo nesta vista (o peito nas costas) fica apagada
+            r.li.classList.toggle('fora-da-vista', !ancora && !usando3d());
             if (!ancora) { r.traco.setAttribute('d', ''); r.bolinha.setAttribute('visibility', 'hidden'); continue; }
             const ax = caixaFigura.left - base.left + ancora.x;
             const ay = caixaFigura.top - base.top + ancora.y;
@@ -747,7 +783,7 @@ function iniciar() {
     function atualizarFigura(semAnimar) {
         const a = aluno();
         const fatores = a ? fatoresDe(a, momento) : { ...FATOR_NEUTRO };
-        silhueta.desenhar(fatores, regioesComClasse());
+        silhueta.desenhar(regioesComClasse());
         if (cena3d) cena3d.mostrar(fatores, regioesComClasse(), semAnimar);
         destacar(null);
         atualizarTracos();
@@ -770,7 +806,9 @@ function iniciar() {
                 if (sem3d) b.title = 'Este aparelho não conseguiu abrir o 3D';
             }
         });
+        grupoVista.hidden = usando3d(); // Frente/Costas é do mapa dos músculos; o 3D gira
         if (usando3d()) cena3d.redimensionar();
+        posicionarRotulos();
         atualizarTracos();
     }
 
@@ -823,6 +861,17 @@ function iniciar() {
         try { localStorage.setItem('gymsync-mapa-modo', modo); } catch (e) { /* sem armazenamento: vale só nesta visita */ }
         aplicarModo();
         carregar3d();
+    }));
+    botoesVista.forEach(botao => botao.addEventListener('click', () => {
+        silhueta.trocarVista(botao.dataset.vista);
+        botoesVista.forEach(b => {
+            b.classList.toggle('active', b === botao);
+            b.setAttribute('aria-pressed', b === botao);
+        });
+        silhueta.desenhar(regioesComClasse());
+        posicionarRotulos();
+        destacar(null);
+        atualizarTracos();
     }));
     canvas.addEventListener('pointerdown', () => raiz.classList.add('mapa-ja-girou'), { once: true });
 

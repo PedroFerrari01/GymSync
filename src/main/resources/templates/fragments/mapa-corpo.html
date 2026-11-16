@@ -13,9 +13,14 @@
             <select th:if="${perfil != 'ALUNO'}" class="form-select mapa-aluno" aria-label="Aluno do mapa do corpo">
                 <option th:each="mp : ${mapasCorpo}" th:value="${mp.alunoId}" th:text="${mp.nome}"></option>
             </select>
-            <div class="mapa-alternar mapa-momento" role="group" aria-label="Avaliação mostrada">
+            <span class="mapa-comparando small" aria-live="polite"></span>
+            <div class="mapa-alternar mapa-momento" role="group" aria-label="Valores mostrados">
                 <button type="button" data-momento="primeira" aria-pressed="false">Primeira</button>
                 <button type="button" data-momento="ultima" class="active" aria-pressed="true">Última</button>
+            </div>
+            <div class="mapa-alternar mapa-vista" role="group" aria-label="Lado do corpo">
+                <button type="button" data-vista="frente" class="active" aria-pressed="true">Frente</button>
+                <button type="button" data-vista="costas" aria-pressed="false">Costas</button>
             </div>
             <div class="mapa-alternar" role="group" aria-label="Modo de exibição">
                 <button type="button" data-modo="3d" aria-pressed="false">3D</button>
@@ -31,7 +36,7 @@
         <div class="mapa-palco">
             <ul class="mapa-rotulos mapa-esq" aria-label="Medidas por região"></ul>
             <div class="mapa-figura">
-                <svg class="mapa-silhueta" role="img" aria-label="Silhueta do corpo com as regiões medidas"></svg>
+                <svg class="mapa-silhueta" role="img" aria-label="Mapa dos músculos com a cor de cada medida"></svg>
                 <canvas class="mapa-canvas" tabindex="0" role="img" aria-label="Corpo em 3D com as regiões medidas. Arraste ou use as setas para girar."></canvas>
                 <span class="mapa-dica"><i class="ph ph-arrows-horizontal"></i> arraste para girar</span>
             </div>
@@ -43,12 +48,11 @@
             <div class="mapa-resumo"></div>
             <p class="small mb-0 texto-apoio mapa-sem-medidas" hidden>Nenhuma medida de fita (cintura, quadril, peito, braço ou coxa) foi registrada ainda.</p>
             <p class="small mb-0 texto-apoio mapa-periodo"></p>
-            <ul class="mapa-legenda small">
-                <li><span class="mapa-ponto melhorou"></span> Diminuiu (gordura, cintura e quadril)</li>
-                <li><span class="mapa-ponto piorou"></span> Aumentou (gordura, cintura e quadril)</li>
-                <li><span class="mapa-ponto neutro"></span> Sem cor: peso, peito, braço e coxa dependem do objetivo</li>
-            </ul>
-            <p class="small mb-0 texto-apoio">Figura ilustrativa: as proporções acompanham as medidas, mas não são um retrato do corpo.</p>
+            <!-- Preenchida pelo mapa-corpo.js com as medidas do aluno: cada uma aparece num status só -->
+            <ul class="mapa-legenda small"></ul>
+            <p class="small mb-0 texto-apoio mapa-regra">Peito, braço e coxa: aumentar é bom. Cintura, quadril e gordura: diminuir é bom. Peso e IMC ficam sem cor.</p>
+            <p class="small mb-0 texto-apoio mapa-nota-3d">Figura ilustrativa: as proporções acompanham as medidas, mas não são um retrato do corpo.</p>
+            <p class="small mb-0 texto-apoio mapa-nota-2d">Desenho dos músculos: <a href="https://github.com/GV79/react-body-highlighter" target="_blank" rel="noopener">react-body-highlighter</a> (licença MIT).</p>
         </div>
     </div>
 

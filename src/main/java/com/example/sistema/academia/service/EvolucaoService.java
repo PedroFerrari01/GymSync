@@ -19,22 +19,23 @@ public class EvolucaoService {
     private static final Locale BR = Locale.of("pt", "BR");
     private static final DateTimeFormatter DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-    private record Medida(String chave, String rotulo, String unidade, Function<AvaliacaoFisica, Double> valor, boolean menorEhMelhor) {}
+    /** Sentido bom de cada medida: diminuir, aumentar ou nenhum (sem cor). */
+    enum Direcao { MENOR_EH_MELHOR, MAIOR_EH_MELHOR, NEUTRA }
 
-    // Peso, peito, braço e coxa dependem do objetivo do aluno: ficam sem cor de "melhorou" ou "piorou"
+    private record Medida(String chave, String rotulo, String unidade, Function<AvaliacaoFisica, Double> valor, Direcao direcao) {}
+
+    // Gordura, cintura e quadril: diminuir é bom. Peito, braço e coxa: aumentar é bom. Peso e IMC: sem cor
     private static final List<Medida> MEDIDAS = List.of(
-            new Medida("peso", "Peso", " kg", AvaliacaoFisica::getPeso, false),
-            new Medida("gordura", "Gordura", "%", AvaliacaoFisica::getPercentualGordura, true),
-            new Medida("cintura", "Cintura", " cm", AvaliacaoFisica::getCintura, true),
-            new Medida("quadril", "Quadril", " cm", AvaliacaoFisica::getQuadril, true),
-            new Medida("peito", "Peito", " cm", AvaliacaoFisica::getPeito, false),
-            new Medida("braco", "Braço", " cm", AvaliacaoFisica::getBraco, false),
-            new Medida("coxa", "Coxa", " cm", AvaliacaoFisica::getCoxa, false));
+            new Medida("peso", "Peso", " kg", AvaliacaoFisica::getPeso, Direcao.NEUTRA),
+            new Medida("gordura", "Gordura", "%", AvaliacaoFisica::getPercentualGordura, Direcao.MENOR_EH_MELHOR),
+            new Medida("cintura", "Cintura", " cm", AvaliacaoFisica::getCintura, Direcao.MENOR_EH_MELHOR),
+            new Medida("quadril", "Quadril", " cm", AvaliacaoFisica::getQuadril, Direcao.MENOR_EH_MELHOR),
+            new Medida("peito", "Peito", " cm", AvaliacaoFisica::getPeito, Direcao.MAIOR_EH_MELHOR),
+            new Medida("braco", "Braço", " cm", AvaliacaoFisica::getBraco, Direcao.MAIOR_EH_MELHOR),
+            new Medida("coxa", "Coxa", " cm", AvaliacaoFisica::getCoxa, Direcao.MAIOR_EH_MELHOR));
 
     // Só no mapa do corpo (a tabela "primeira x última" continua com as sete medidas acima)
-    private static final Medida IMC = new Medida("imc", "IMC", "", AvaliacaoFisica::getImc, false);
-
-    private static final Set<String> COM_COR = Set.of("Gordura", "Cintura", "Quadril");
+    private static final Medida IMC = new Medida("imc", "IMC", "", AvaliacaoFisica::getImc, Direcao.NEUTRA);
 
     private String numero(double v) {
         NumberFormat nf = NumberFormat.getNumberInstance(BR);
@@ -47,10 +48,15 @@ public class EvolucaoService {
         return Math.round((ultima - primeira) * 10) / 10.0;
     }
 
-    /** Regra das cores: só gordura, cintura e quadril têm "melhorou" (diminuiu) ou "piorou" (aumentou). */
+    /** Regra das cores: "melhorou" quando a medida andou no sentido bom dela, "piorou" no contrário. */
+    static String classe(Direcao direcao, double diferenca) {
+        if (direcao == Direcao.NEUTRA || diferenca == 0) return "neutro";
+        boolean diminuiu = diferenca < 0;
+        return diminuiu == (direcao == Direcao.MENOR_EH_MELHOR) ? "melhorou" : "piorou";
+    }
+
     private static String classe(Medida m, double diferenca) {
-        if (!COM_COR.contains(m.rotulo()) || diferenca == 0) return "neutro";
-        return (diferenca < 0) == m.menorEhMelhor() ? "melhorou" : "piorou";
+        return classe(m.direcao(), diferenca);
     }
 
     private String comSinal(double diferenca, String unidade) {
