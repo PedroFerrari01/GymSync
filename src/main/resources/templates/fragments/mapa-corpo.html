@@ -1,0 +1,64 @@
+<!-- Mapa do corpo: manequim 3D com as medidas por região. A lógica fica em /js/mapa-corpo.js; os dados vão em data-*. -->
+<div th:fragment="mapa" class="panel-card mapa-corpo" data-mapa-corpo>
+    <div class="mapa-topo">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <h5 class="panel-title">Mapa do corpo</h5>
+                <span class="tag-pill">Medidas</span>
+            </div>
+            <p class="small mb-0 texto-apoio" th:if="${perfil == 'ALUNO'}">As suas medidas em cada região e o quanto mudaram desde a primeira avaliação.</p>
+            <p class="small mb-0 texto-apoio" th:unless="${perfil == 'ALUNO'}">As medidas do aluno em cada região e o quanto mudaram desde a primeira avaliação.</p>
+        </div>
+        <div class="mapa-controles" th:unless="${#lists.isEmpty(mapasCorpo)}">
+            <select th:if="${perfil != 'ALUNO'}" class="form-select mapa-aluno" aria-label="Aluno do mapa do corpo">
+                <option th:each="mp : ${mapasCorpo}" th:value="${mp.alunoId}" th:text="${mp.nome}"></option>
+            </select>
+            <div class="mapa-alternar mapa-momento" role="group" aria-label="Avaliação mostrada">
+                <button type="button" data-momento="primeira" aria-pressed="false">Primeira</button>
+                <button type="button" data-momento="ultima" class="active" aria-pressed="true">Última</button>
+            </div>
+            <div class="mapa-alternar" role="group" aria-label="Modo de exibição">
+                <button type="button" data-modo="3d" aria-pressed="false">3D</button>
+                <button type="button" data-modo="2d" aria-pressed="false">2D</button>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${#lists.isEmpty(mapasCorpo)}" class="vazio" th:text="${perfil == 'ALUNO'} ? 'Depois da sua primeira avaliação, as medidas aparecem aqui no corpo.' : 'Registre uma avaliação para ver as medidas do aluno no corpo.'"></div>
+
+    <div th:unless="${#lists.isEmpty(mapasCorpo)}" class="mapa-grade">
+        <div class="mapa-palco-caixa">
+        <div class="mapa-palco">
+            <ul class="mapa-rotulos mapa-esq" aria-label="Medidas por região"></ul>
+            <div class="mapa-figura">
+                <svg class="mapa-silhueta" role="img" aria-label="Silhueta do corpo com as regiões medidas"></svg>
+                <canvas class="mapa-canvas" tabindex="0" role="img" aria-label="Corpo em 3D com as regiões medidas. Arraste ou use as setas para girar."></canvas>
+                <span class="mapa-dica"><i class="ph ph-arrows-horizontal"></i> arraste para girar</span>
+            </div>
+            <ul class="mapa-rotulos mapa-dir" aria-label="Medidas por região"></ul>
+            <svg class="mapa-linhas" aria-hidden="true"></svg>
+        </div>
+        </div>
+        <div class="mapa-lateral">
+            <div class="mapa-resumo"></div>
+            <p class="small mb-0 texto-apoio mapa-sem-medidas" hidden>Nenhuma medida de fita (cintura, quadril, peito, braço ou coxa) foi registrada ainda.</p>
+            <p class="small mb-0 texto-apoio mapa-periodo"></p>
+            <ul class="mapa-legenda small">
+                <li><span class="mapa-ponto melhorou"></span> Diminuiu (gordura, cintura e quadril)</li>
+                <li><span class="mapa-ponto piorou"></span> Aumentou (gordura, cintura e quadril)</li>
+                <li><span class="mapa-ponto neutro"></span> Sem cor: peso, peito, braço e coxa dependem do objetivo</li>
+            </ul>
+            <p class="small mb-0 texto-apoio">Figura ilustrativa: as proporções acompanham as medidas, mas não são um retrato do corpo.</p>
+        </div>
+    </div>
+
+    <div class="mapa-dados" hidden th:unless="${#lists.isEmpty(mapasCorpo)}">
+        <div th:each="mp : ${mapasCorpo}" th:data-aluno="${mp.alunoId}" th:data-nome="${mp.nome}" th:data-avaliacoes="${mp.avaliacoes}"
+             th:data-primeira="${mp.dataPrimeira}" th:data-ultima="${mp.dataUltima}" th:data-altura="${mp.alturaCm}">
+            <span th:each="md : ${mp.medidas}" th:data-chave="${md.chave}" th:data-rotulo="${md.rotulo}"
+                  th:data-primeira="${md.primeira}" th:data-ultima="${md.ultima}"
+                  th:data-primeira-numero="${md.primeiraNumero}" th:data-ultima-numero="${md.ultimaNumero}"
+                  th:data-diferenca="${md.diferenca}" th:data-classe="${md.classe}"></span>
+        </div>
+    </div>
+</div>

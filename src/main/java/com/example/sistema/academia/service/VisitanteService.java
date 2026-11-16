@@ -235,9 +235,13 @@ public class VisitanteService {
         }
 
         // Avaliações da Ana: o peso e o percentual de gordura caem aos poucos
-        avaliacao(ana, marcos, hoje.minusDays(90), 68.0, 27.5, 76.0);
-        avaliacao(ana, marcos, hoje.minusDays(45), 66.4, 25.8, 73.5);
-        avaliacao(ana, marcos, hoje.minusDays(5), 65.1, 24.2, 71.0);
+        // Medidas: cintura, quadril, peito, braço e coxa (aparecem no mapa do corpo)
+        avaliacao(ana, marcos, hoje.minusDays(90), 1.65, 68.0, 27.5, 76.0, 100.0, 91.0, 27.5, 55.0);
+        avaliacao(ana, marcos, hoje.minusDays(45), 1.65, 66.4, 25.8, 73.5, 98.5, 90.0, 28.0, 55.5);
+        avaliacao(ana, marcos, hoje.minusDays(5), 1.65, 65.1, 24.2, 71.0, 97.0, 89.5, 28.5, 56.0);
+        // Bruno parou de treinar: a cintura e a gordura subiram
+        avaliacao(bruno, marcos, hoje.minusDays(75), 1.78, 84.0, 21.0, 88.0, 101.0, 102.0, 35.0, 58.0);
+        avaliacao(bruno, marcos, hoje.minusDays(14), 1.78, 86.5, 23.4, 91.5, 102.0, 101.0, 34.5, 57.5);
 
         aula("Spinning", carla, DayOfWeek.MONDAY, LocalTime.of(18, 0), 12);
         aula("Funcional", carla, DayOfWeek.WEDNESDAY, LocalTime.of(7, 0), 10);
@@ -335,19 +339,21 @@ public class VisitanteService {
         registroExercicioRepository.save(r);
     }
 
-    private void avaliacao(Aluno aluno, Professor professor, LocalDate data, double peso, double gordura, double cintura) {
+    private void avaliacao(Aluno aluno, Professor professor, LocalDate data, double altura, double peso, double gordura,
+                           double cintura, double quadril, double peito, double braco, double coxa) {
         AvaliacaoFisica a = new AvaliacaoFisica();
         a.setAluno(aluno);
         a.setProfessorId(professor.getId());
         a.setRegistradoPor(professor.getNome());
         a.setDataAvaliacao(data);
         a.setPeso(peso);
-        a.setAltura(1.65);
+        a.setAltura(altura);
         a.setPercentualGordura(gordura);
         a.setCintura(cintura);
-        a.setQuadril(98.0);
-        a.setBraco(28.0);
-        a.setCoxa(55.0);
+        a.setQuadril(quadril);
+        a.setPeito(peito);
+        a.setBraco(braco);
+        a.setCoxa(coxa);
         avaliacaoFisicaRepository.save(a);
     }
 

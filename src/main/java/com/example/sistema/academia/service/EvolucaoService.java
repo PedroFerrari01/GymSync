@@ -2,9 +2,13 @@ package com.example.sistema.academia.service;
 
 import com.example.sistema.academia.dto.Barra;
 import com.example.sistema.academia.dto.Comparacao;
+import com.example.sistema.academia.dto.MapaCorpo;
+import com.example.sistema.academia.dto.MedidaCorpo;
 import com.example.sistema.academia.model.AvaliacaoFisica;
 import org.springframework.stereotype.Service;
 import java.text.NumberFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Function;
 
@@ -13,18 +17,22 @@ import java.util.function.Function;
 public class EvolucaoService {
 
     private static final Locale BR = Locale.of("pt", "BR");
+    private static final DateTimeFormatter DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-    private record Medida(String rotulo, String unidade, Function<AvaliacaoFisica, Double> valor, boolean menorEhMelhor) {}
+    private record Medida(String chave, String rotulo, String unidade, Function<AvaliacaoFisica, Double> valor, boolean menorEhMelhor) {}
 
     // Peso, peito, braço e coxa dependem do objetivo do aluno: ficam sem cor de "melhorou" ou "piorou"
     private static final List<Medida> MEDIDAS = List.of(
-            new Medida("Peso", " kg", AvaliacaoFisica::getPeso, false),
-            new Medida("Gordura", "%", AvaliacaoFisica::getPercentualGordura, true),
-            new Medida("Cintura", " cm", AvaliacaoFisica::getCintura, true),
-            new Medida("Quadril", " cm", AvaliacaoFisica::getQuadril, true),
-            new Medida("Peito", " cm", AvaliacaoFisica::getPeito, false),
-            new Medida("Braço", " cm", AvaliacaoFisica::getBraco, false),
-            new Medida("Coxa", " cm", AvaliacaoFisica::getCoxa, false));
+            new Medida("peso", "Peso", " kg", AvaliacaoFisica::getPeso, false),
+            new Medida("gordura", "Gordura", "%", AvaliacaoFisica::getPercentualGordura, true),
+            new Medida("cintura", "Cintura", " cm", AvaliacaoFisica::getCintura, true),
+            new Medida("quadril", "Quadril", " cm", AvaliacaoFisica::getQuadril, true),
+            new Medida("peito", "Peito", " cm", AvaliacaoFisica::getPeito, false),
+            new Medida("braco", "Braço", " cm", AvaliacaoFisica::getBraco, false),
+            new Medida("coxa", "Coxa", " cm", AvaliacaoFisica::getCoxa, false));
+
+    // Só no mapa do corpo (a tabela "primeira x última" continua com as sete medidas acima)
+    private static final Medida IMC = new Medida("imc", "IMC", "", AvaliacaoFisica::getImc, false);
 
     private static final Set<String> COM_COR = Set.of("Gordura", "Cintura", "Quadril");
 
@@ -35,6 +43,20 @@ public class EvolucaoService {
         return nf.format(v);
     }
 
+    private static double diferenca(double primeira, double ultima) {
+        return Math.round((ultima - primeira) * 10) / 10.0;
+    }
+
+    /** Regra das cores: só gordura, cintura e quadril têm "melhorou" (diminuiu) ou "piorou" (aumentou). */
+    private static String classe(Medida m, double diferenca) {
+        if (!COM_COR.contains(m.rotulo()) || diferenca == 0) return "neutro";
+        return (diferenca < 0) == m.menorEhMelhor() ? "melhorou" : "piorou";
+    }
+
+    private String comSinal(double diferenca, String unidade) {
+        return (diferenca > 0 ? "+" : "") + numero(diferenca) + unidade;
+    }
+
     /** Primeira x última medida de cada item. Só entra o que foi medido em pelo menos duas avaliações. */
     public List<Comparacao> comparacao(List<AvaliacaoFisica> avaliacoes) {
         List<Comparacao> linhas = new ArrayList<>();
@@ -43,17 +65,60 @@ public class EvolucaoService {
             if (valores.size() < 2) continue;
             double primeira = valores.get(0);
             double ultima = valores.get(valores.size() - 1);
-            double diferenca = Math.round((ultima - primeira) * 10) / 10.0;
-
-            String classe = "neutro";
-            if (COM_COR.contains(m.rotulo()) && diferenca != 0) {
-                classe = (diferenca < 0) == m.menorEhMelhor() ? "melhorou" : "piorou";
-            }
-            String sinal = diferenca > 0 ? "+" : "";
+            double diferenca = diferenca(primeira, ultima);
             linhas.add(new Comparacao(m.rotulo(), numero(primeira) + m.unidade(), numero(ultima) + m.unidade(),
-                    sinal + numero(diferenca) + m.unidade(), classe));
+                    comSinal(diferenca, m.unidade()), classe(m, diferenca)));
         }
         return linhas;
+    }
+
+    /**
+     * Mapa do corpo de um aluno (avaliações em ordem de data). Entra toda medida feita pelo menos uma vez;
+     * a diferença e a cor só existem a partir da segunda medição, com a mesma regra da comparação.
+     */
+    public MapaCorpo mapaCorpo(Long alunoId, String nome, List<AvaliacaoFisica> avaliacoes) {
+        List<Medida> todas = new ArrayList<>(MEDIDAS);
+        todas.add(IMC);
+        List<MedidaCorpo> medidas = new ArrayList<>();
+        for (Medida m : todas) {
+            List<Double> valores = avaliacoes.stream().map(m.valor()).filter(Objects::nonNull).toList();
+            if (valores.isEmpty()) continue;
+            double primeira = valores.get(0);
+            double ultima = valores.get(valores.size() - 1);
+            String texto = null;
+            String classe = "neutro";
+            if (valores.size() >= 2) {
+                double diferenca = diferenca(primeira, ultima);
+                texto = comSinal(diferenca, m.unidade());
+                classe = classe(m, diferenca);
+            }
+            medidas.add(new MedidaCorpo(m.chave(), m.rotulo(), numero(primeira) + m.unidade(), numero(ultima) + m.unidade(),
+                    primeira, ultima, texto, classe));
+        }
+        List<LocalDate> datas = avaliacoes.stream().map(AvaliacaoFisica::getDataAvaliacao).filter(Objects::nonNull).toList();
+        Double alturaCm = avaliacoes.stream().map(AvaliacaoFisica::getAltura).filter(a -> a != null && a > 0)
+                .reduce((antiga, nova) -> nova).map(a -> Math.round(a * 1000) / 10.0).orElse(null);
+        return new MapaCorpo(alunoId, nome, avaliacoes.size(),
+                datas.isEmpty() ? null : datas.get(0).format(DATA),
+                datas.isEmpty() ? null : datas.get(datas.size() - 1).format(DATA),
+                alturaCm, medidas);
+    }
+
+    /** Um mapa por aluno que tem avaliação (para o administrador e o professor), em ordem de nome. */
+    public List<MapaCorpo> mapasCorpo(List<AvaliacaoFisica> todas) {
+        Map<Long, List<AvaliacaoFisica>> porAluno = new LinkedHashMap<>();
+        for (AvaliacaoFisica a : todas) {
+            if (a.getAluno() == null || a.getAluno().getId() == null) continue;
+            porAluno.computeIfAbsent(a.getAluno().getId(), id -> new ArrayList<>()).add(a);
+        }
+        List<MapaCorpo> mapas = new ArrayList<>();
+        for (List<AvaliacaoFisica> doAluno : porAluno.values()) {
+            doAluno.sort(Comparator.comparing(AvaliacaoFisica::getDataAvaliacao, Comparator.nullsFirst(Comparator.<LocalDate>naturalOrder()))
+                    .thenComparing(AvaliacaoFisica::getId, Comparator.nullsFirst(Comparator.<Long>naturalOrder())));
+            mapas.add(mapaCorpo(doAluno.get(0).getAluno().getId(), doAluno.get(0).getAluno().getNome(), doAluno));
+        }
+        mapas.sort(Comparator.comparing(m -> m.getNome() == null ? "" : m.getNome(), String.CASE_INSENSITIVE_ORDER));
+        return mapas;
     }
 
     /** Barras do percentual de gordura em cada avaliação (mesmo formato do gráfico de peso). */

@@ -1279,3 +1279,162 @@ html:has(.sobre) { scroll-behavior: smooth; }
 .contato-pendente { border-left: 3px solid #f97316; }
 
 .mensalidades-resumo { display: flex; flex-wrap: wrap; gap: 4px 14px; }
+
+/* ===== Mapa do corpo (aba Avaliações Físicas): manequim 3D com as medidas por região =====
+   As cores do 3D são lidas destas variáveis pelo mapa-corpo.js. Para tirar a tela, apague este bloco,
+   o fragmento mapa-corpo.html e o mapa-corpo.js. */
+.mapa-corpo {
+    --mapa-pele: #a3a9b7;
+    --mapa-chao: #ffffff;
+    --mapa-melhorou: #34d399;
+    --mapa-piorou: #f87171;
+    --mapa-neutro: #e2e8f0;
+    height: auto;
+}
+:root[data-theme="light"] .mapa-corpo {
+    --mapa-pele: #b4bac6;
+    --mapa-chao: #111827;
+    --mapa-melhorou: #047857;
+    --mapa-piorou: #b91c1c;
+    --mapa-neutro: #475569;
+}
+.mapa-topo { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: var(--s3); margin-bottom: var(--s3); }
+.mapa-controles { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2); }
+.mapa-controles .mapa-aluno { width: auto; min-width: 180px; max-width: 260px; }
+.mapa-alternar { display: inline-flex; border: 1px solid var(--border-color); border-radius: 10px; overflow: hidden; }
+.mapa-alternar[hidden] { display: none; }
+.mapa-alternar button {
+    border: 0;
+    background: transparent;
+    color: var(--text-secondary);
+    font: inherit;
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 7px 12px;
+    transition: background-color 200ms, color 200ms;
+}
+.mapa-alternar button:hover:not(:disabled) { color: var(--text-primary); }
+.mapa-alternar button.active { background: var(--accent-soft); color: var(--accent); }
+.mapa-alternar button:disabled { opacity: 0.45; cursor: not-allowed; }
+.mapa-alternar button:focus-visible, .mapa-canvas:focus-visible, .mapa-rotulo:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+.mapa-grade { display: grid; gap: var(--s4); }
+@media (min-width: 1200px) {
+    .mapa-grade { grid-template-columns: minmax(0, 1.75fr) minmax(230px, 1fr); align-items: center; }
+}
+.mapa-palco-caixa { container-type: inline-size; min-width: 0; }
+.mapa-palco {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 290px) minmax(0, 1fr);
+    height: clamp(420px, 58vh, 540px);
+    max-width: 780px;
+    margin: 0 auto;
+}
+.mapa-figura { position: relative; min-width: 0; background: radial-gradient(closest-side at 50% 46%, var(--accent-soft), transparent 78%); }
+.mapa-silhueta, .mapa-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.mapa-canvas { visibility: hidden; cursor: grab; touch-action: pan-y; border-radius: var(--raio); }
+.mapa-canvas.arrastando { cursor: grabbing; }
+.mapa-em-3d .mapa-canvas { visibility: visible; }
+.mapa-em-3d .mapa-silhueta { visibility: hidden; }
+.mapa-2d-corpo { fill: var(--mapa-pele); }
+.mapa-2d-chao { fill: var(--mapa-chao); opacity: 0.07; }
+.mapa-2d-fita { fill: none; stroke: var(--mapa-neutro); stroke-width: 15; stroke-linecap: round; transition: stroke-width 200ms; }
+.mapa-2d-fita.melhorou { stroke: var(--mapa-melhorou); }
+.mapa-2d-fita.piorou { stroke: var(--mapa-piorou); }
+.mapa-2d-fita.ativo { stroke-width: 26; }
+.mapa-dica {
+    position: absolute;
+    left: 50%;
+    bottom: 2px;
+    transform: translateX(-50%);
+    display: none;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    pointer-events: none;
+    transition: opacity 400ms;
+}
+.mapa-em-3d .mapa-dica { display: inline-flex; }
+.mapa-ja-girou .mapa-dica { opacity: 0; }
+
+.mapa-rotulos { position: relative; list-style: none; margin: 0; padding: 0; min-width: 0; }
+.mapa-rotulo {
+    position: absolute;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 8px;
+    max-width: calc(100% - 22px);
+    padding: 6px 10px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    cursor: default;
+    transition: background-color 200ms, border-color 200ms;
+}
+.mapa-esq .mapa-rotulo { right: 22px; justify-content: flex-end; text-align: right; }
+.mapa-dir .mapa-rotulo { left: 22px; }
+.mapa-rotulo:hover, .mapa-rotulo.ativo { background: var(--bg-input); border-color: var(--border-color); }
+.mapa-rotulo-nome {
+    flex-basis: 100%;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.7px;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+}
+.mapa-rotulo-valor { font-weight: 700; font-size: 1.02rem; color: var(--text-primary); white-space: nowrap; }
+.mapa-rotulo .evo-dif, .mapa-resumo-item .evo-dif { font-size: 0.85rem; }
+.mapa-rotulo .evo-dif.neutro, .mapa-resumo-item .evo-dif.neutro { color: var(--text-secondary); }
+
+.mapa-linhas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+.mapa-traco { fill: none; stroke: var(--mapa-neutro); stroke-width: 1.25; opacity: 0.75; }
+.mapa-bolinha { fill: var(--mapa-neutro); stroke: var(--bg-card); stroke-width: 2; }
+.mapa-traco.melhorou { stroke: var(--mapa-melhorou); }
+.mapa-traco.piorou { stroke: var(--mapa-piorou); }
+.mapa-bolinha.melhorou { fill: var(--mapa-melhorou); }
+.mapa-bolinha.piorou { fill: var(--mapa-piorou); }
+.mapa-traco.ativo { stroke-width: 2; opacity: 1; }
+
+/* Cartão estreito (celular): a figura em cima e os rótulos embaixo, em duas colunas, sem os traços */
+@container (max-width: 559.98px) {
+    .mapa-palco { grid-template-columns: 1fr 1fr; gap: var(--s2); height: auto; }
+    .mapa-figura { grid-column: 1 / -1; order: -1; height: clamp(360px, 60vh, 460px); }
+    .mapa-rotulos { display: flex; flex-direction: column; gap: var(--s2); }
+    .mapa-rotulo, .mapa-esq .mapa-rotulo, .mapa-dir .mapa-rotulo {
+        position: static;
+        max-width: none;
+        justify-content: flex-start;
+        text-align: left;
+        background: var(--bg-input);
+        border-left: 3px solid var(--mapa-neutro);
+    }
+    .mapa-rotulo.melhorou { border-left-color: var(--mapa-melhorou); }
+    .mapa-rotulo.piorou { border-left-color: var(--mapa-piorou); }
+    .mapa-rotulo.ativo { border-color: var(--accent); }
+    .mapa-linhas { display: none; }
+}
+
+.mapa-lateral { display: flex; flex-direction: column; gap: var(--s3); min-width: 0; }
+.mapa-resumo { display: grid; grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)); gap: var(--s2); }
+.mapa-resumo:empty { display: none; }
+.mapa-resumo-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 8px;
+    padding: 12px 14px;
+    border-radius: var(--raio);
+    background: var(--bg-input);
+}
+.mapa-resumo-valor { font-weight: 700; font-size: 1.3rem; color: var(--text-primary); white-space: nowrap; }
+.mapa-legenda { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; color: var(--text-secondary); }
+.mapa-legenda li { display: flex; align-items: baseline; gap: 8px; }
+.mapa-ponto { flex: none; width: 10px; height: 10px; border-radius: 50%; background: var(--mapa-neutro); transform: translateY(1px); }
+.mapa-ponto.melhorou { background: var(--mapa-melhorou); }
+.mapa-ponto.piorou { background: var(--mapa-piorou); }
+@media (prefers-reduced-motion: reduce) {
+    .mapa-alternar button, .mapa-rotulo, .mapa-2d-fita, .mapa-dica { transition: none; }
+}
