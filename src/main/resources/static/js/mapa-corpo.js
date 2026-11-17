@@ -848,7 +848,7 @@ function iniciar() {
             li.tabIndex = 0;
             // Fita métrica mede o perímetro da região: o texto diz isso, sem falar em ganho ou perda de músculo
             const nome = elemento('span', 'mapa-rotulo-nome', m.rotulo);
-            nome.append(' ', elemento('span', 'mapa-rotulo-tipo', 'perímetro')); // o espaço deixa quebrar a linha em tela estreita
+            nome.append(' ', elemento('span', 'mapa-rotulo-tipo', '(perímetro)')); // o espaço deixa quebrar a linha em tela estreita
             li.append(nome, elemento('span', 'mapa-rotulo-valor', valor(m)));
             if (m.diferenca) li.append(elemento('span', `evo-dif ${m.classe}`, `${m.diferenca} ${sentido(m.diferenca)}`));
             li.addEventListener('mouseenter', () => destacar(chave));
