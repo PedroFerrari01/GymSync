@@ -1405,6 +1405,14 @@
                     </div>
                     <div class="modal-footer"><button type="submit" class="btn-biometria"><i class="bi bi-unlock-fill me-2"></i>Liberar Catraca</button></div>
                 </form>
+                <form th:action="@{/entradas/carteirinha}" method="post" class="border-top">
+                    <div class="modal-body">
+                        <label class="form-label" for="codigoCarteirinha"><i class="bi bi-qr-code-scan me-1"></i>Ler carteirinha digital</label>
+                        <input id="codigoCarteirinha" name="codigo" class="form-control" required autocomplete="off" placeholder="Cole ou digite o código do QR (GS1...)">
+                        <div class="form-text">Simulação: o leitor da catraca envia o código lido do QR da carteirinha do aluno.</div>
+                    </div>
+                    <div class="modal-footer"><button type="submit" class="btn-biometria"><i class="bi bi-qr-code me-2"></i>Validar carteirinha</button></div>
+                </form>
             </div>
         </div>
     </div>

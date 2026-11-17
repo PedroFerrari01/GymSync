@@ -145,4 +145,13 @@ class RegrasAcessoTest {
     void respeitaAsPermissoesDeCadaPerfil(String perfil, String caminho, boolean esperado) {
         assertEquals(esperado, RegrasAcesso.permitido(perfil, caminho));
     }
+
+    @Test
+    void carteirinhaNaCatracaEhSoDoAdminENaoDoVisitante() {
+        assertTrue(RegrasAcesso.permitido("ADMIN", "/entradas/carteirinha"));
+        assertFalse(RegrasAcesso.permitido("ALUNO", "/entradas/carteirinha"));
+        assertFalse(RegrasAcesso.permitido("PROFESSOR", "/entradas/carteirinha"));
+        assertFalse(RegrasAcesso.permitido(null, "/entradas/carteirinha"));
+        assertFalse(RegrasAcesso.visitantePode("POST", "/entradas/carteirinha"));
+    }
 }
