@@ -234,10 +234,11 @@ function perfilDe(aluno, momento) {
     };
     const peso = valor('peso');
     const imc = peso ? peso / ((altura / 100) ** 2) : 23;
-    const geral = limitar(1 + (imc - 23) * 0.025, 0.86, 1.22);
+    // Sensibilidade maior que a proporção real, para que poucos centímetros de diferença apareçam no desenho
+    const geral = limitar(1 + (imc - 23) * 0.035, 0.84, 1.25);
     const razao = (chave, referencia) => {
         const v = valor(chave);
-        return v ? limitar(1 + (v / altura / referencia - 1) * 0.9, 0.82, 1.28) : geral;
+        return v ? limitar(1 + (v / altura / referencia - 1) * 1.8, 0.8, 1.3) : geral;
     };
     const cintura = razao('cintura', ref.cintura);
     const quadril = razao('quadril', ref.quadril);

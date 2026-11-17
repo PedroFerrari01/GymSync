@@ -74,7 +74,48 @@ public class VisitanteService {
     @Transactional
     public void aoSubir() {
         criarDadosDeExemplo();
+        completarCamposNovos();
         renovarDatas();
+    }
+
+    // Valores de exemplo dos campos que vieram depois (na ordem das avaliações, da mais antiga para a mais nova):
+    // ombro, antebraço, panturrilha, massa muscular e massa gorda. Os mesmos usados em criarDadosDeExemplo.
+    private static final double[][] NOVOS_ANA = {
+            {104.0, 24.5, 35.0, 24.8, 18.7}, {105.0, 25.0, 35.5, 25.3, 17.1}, {106.0, 25.5, 36.0, 25.9, 15.8}};
+    private static final double[][] NOVOS_BRUNO = {{116.0, 29.5, 38.5, 33.0, 17.6}, {114.5, 29.0, 38.0, 32.4, 20.2}};
+    private static final String EMAIL_BRUNO = "bruno.lima@exemplo.gymsync";
+
+    /**
+     * Banco de visitante criado antes da altura, da silhueta, das medidas novas e da bioimpedância: completa a Ana e o
+     * Bruno de exemplo. Só preenche campo vazio de aluno com e-mail @exemplo.gymsync; dado real e valor já salvo não mudam.
+     */
+    @Transactional
+    public void completarCamposNovos() {
+        if (!habilitado) return;
+        for (Aluno a : alunoRepository.findByEmailEndingWithIgnoreCase(SUFIXO_EXEMPLO)) {
+            boolean ehAna = EMAIL_ALUNO.equalsIgnoreCase(a.getEmail());
+            boolean ehBruno = EMAIL_BRUNO.equalsIgnoreCase(a.getEmail());
+            if (!ehAna && !ehBruno) continue;
+            if (a.getAlturaCm() == null) {
+                a.setAlturaCm(ehAna ? 165 : 178);
+                a.setSilhueta(ehAna ? Aluno.SILHUETA_FEMININA : Aluno.SILHUETA_MASCULINA);
+                alunoRepository.save(a);
+                log.info("Visitante: altura e silhueta de exemplo completadas para {}.", a.getNome());
+            }
+            double[][] valores = ehAna ? NOVOS_ANA : NOVOS_BRUNO;
+            List<AvaliacaoFisica> avaliacoes = avaliacaoFisicaRepository.findByAlunoIdOrderByDataAvaliacaoAscIdAsc(a.getId());
+            if (avaliacoes.size() != valores.length) continue; // alguém mexeu nas avaliações de exemplo: não adivinha
+            for (int i = 0; i < valores.length; i++) {
+                AvaliacaoFisica av = avaliacoes.get(i);
+                boolean mudou = false;
+                if (av.getOmbro() == null) { av.setOmbro(valores[i][0]); mudou = true; }
+                if (av.getAntebraco() == null) { av.setAntebraco(valores[i][1]); mudou = true; }
+                if (av.getPanturrilha() == null) { av.setPanturrilha(valores[i][2]); mudou = true; }
+                if (av.getMassaMuscularKg() == null) { av.setMassaMuscularKg(valores[i][3]); mudou = true; }
+                if (av.getMassaGordaKg() == null) { av.setMassaGordaKg(valores[i][4]); mudou = true; }
+                if (mudou) avaliacaoFisicaRepository.save(av);
+            }
+        }
     }
 
     /**
