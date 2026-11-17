@@ -81,7 +81,8 @@ const REGIOES = {
     coxa: { parte: 'perna', em: 0.76, lado: -1 }
 };
 const CHAVES_REGIAO = Object.keys(REGIOES);
-const CHAVES_RESUMO = ['peso', 'gordura', 'imc'];
+// Cartões do resumo; massa muscular e massa gorda (bioimpedância) são do corpo inteiro e não pintam região nenhuma
+const CHAVES_RESUMO = ['peso', 'gordura', 'imc', 'massaMuscular', 'massaGorda'];
 
 // Medidas que só o mapa dos músculos (2D) desenha; o manequim 3D não tem fita para elas.
 // lado: de que lado fica o rótulo; em: altura aproximada (m) para alinhar o rótulo quando não há músculo para medir

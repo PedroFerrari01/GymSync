@@ -28,6 +28,9 @@ public class AvaliacaoFisica {
     private Double ombro;
     private Double antebraco;
     private Double panturrilha;
+    /** Bioimpedância (opcional): massa muscular e massa gorda do corpo inteiro, em kg. */
+    private Double massaMuscularKg;
+    private Double massaGordaKg;
 
     @Column(length = 300)
     private String observacao;
@@ -69,6 +72,10 @@ public class AvaliacaoFisica {
     public void setAntebraco(Double antebraco) { this.antebraco = antebraco; }
     public Double getPanturrilha() { return panturrilha; }
     public void setPanturrilha(Double panturrilha) { this.panturrilha = panturrilha; }
+    public Double getMassaMuscularKg() { return massaMuscularKg; }
+    public void setMassaMuscularKg(Double massaMuscularKg) { this.massaMuscularKg = massaMuscularKg; }
+    public Double getMassaGordaKg() { return massaGordaKg; }
+    public void setMassaGordaKg(Double massaGordaKg) { this.massaGordaKg = massaGordaKg; }
     public String getObservacao() { return observacao; }
     public void setObservacao(String observacao) { this.observacao = observacao; }
 }

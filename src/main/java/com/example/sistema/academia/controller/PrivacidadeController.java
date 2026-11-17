@@ -142,6 +142,8 @@ public class PrivacidadeController {
             l.put("ombroCm", av.getOmbro());
             l.put("antebracoCm", av.getAntebraco());
             l.put("panturrilhaCm", av.getPanturrilha());
+            l.put("massaMuscularKg", av.getMassaMuscularKg());
+            l.put("massaGordaKg", av.getMassaGordaKg());
             l.put("observacao", av.getObservacao());
             return l;
         }).toList());

@@ -144,6 +144,33 @@ class EvolucaoServiceTest {
     }
 
     @Test
+    void bioimpedanciaMassaMuscularSobeEhBomMassaGordaDesceEhBom() {
+        AvaliacaoFisica antes = avaliacao(LocalDate.of(2026, 8, 18), 68.0, null, null, null);
+        antes.setMassaMuscularKg(24.8);
+        antes.setMassaGordaKg(18.7);
+        AvaliacaoFisica depois = avaliacao(LocalDate.of(2026, 11, 11), 65.1, null, null, null);
+        depois.setMassaMuscularKg(25.9);
+        depois.setMassaGordaKg(15.8);
+        MapaCorpo mapa = service.mapaCorpo(1L, "Ana", List.of(antes, depois));
+        assertEquals("melhorou", medida(mapa, "massaMuscular").getClasse());
+        assertEquals("+1,1 kg", medida(mapa, "massaMuscular").getDiferenca());
+        assertEquals("melhorou", medida(mapa, "massaGorda").getClasse());
+        assertEquals("-2,9 kg", medida(mapa, "massaGorda").getDiferenca());
+        assertTrue(service.comparacao(List.of(antes, depois)).stream()
+                .anyMatch(c -> c.getRotulo().equals("Massa muscular") && c.getClasse().equals("melhorou")));
+        // Ao contrário, as duas pioram
+        assertEquals("piorou", medida(service.mapaCorpo(1L, "Ana", List.of(depois, antes)), "massaMuscular").getClasse());
+        assertEquals("piorou", medida(service.mapaCorpo(1L, "Ana", List.of(depois, antes)), "massaGorda").getClasse());
+    }
+
+    @Test
+    void semBioimpedanciaNaoApareceNada() {
+        MapaCorpo mapa = service.mapaCorpo(1L, "Aluno", List.of(
+                completa(LocalDate.of(2026, 8, 18), 0), completa(LocalDate.of(2026, 11, 11), 2)));
+        assertTrue(mapa.getMedidas().stream().noneMatch(m -> m.getChave().startsWith("massa")));
+    }
+
+    @Test
     void alturaDoCadastroValeAntesDaAvaliacaoESilhuetaVemDoAluno() {
         Aluno aluno = new Aluno();
         aluno.setId(3L);

@@ -44,6 +44,9 @@ public class EvolucaoService {
     private static final List<Medida> MEDIDAS = List.of(
             new Medida("peso", "Peso", " kg", AvaliacaoFisica::getPeso, Direcao.NEUTRA),
             new Medida("gordura", "Gordura", "%", AvaliacaoFisica::getPercentualGordura, Direcao.MENOR_EH_MELHOR),
+            // Bioimpedância: total do corpo, por isso só no resumo e na comparação (nenhuma região do mapa usa)
+            new Medida("massaMuscular", "Massa muscular", " kg", AvaliacaoFisica::getMassaMuscularKg, Direcao.MAIOR_EH_MELHOR),
+            new Medida("massaGorda", "Massa gorda", " kg", AvaliacaoFisica::getMassaGordaKg, Direcao.MENOR_EH_MELHOR),
             new Medida("cintura", "Cintura", " cm", AvaliacaoFisica::getCintura, Direcao.MENOR_EH_MELHOR),
             new Medida("quadril", "Quadril", " cm", AvaliacaoFisica::getQuadril, Direcao.MENOR_EH_MELHOR),
             new Medida("peito", "Peito", " cm", AvaliacaoFisica::getPeito, Direcao.MAIOR_EH_MELHOR),
