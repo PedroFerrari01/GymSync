@@ -902,9 +902,18 @@ function iniciar() {
         for (const classe in grupos) {
             const doGrupo = Object.values(a.medidas).filter(m => (m.classe || 'neutro') === classe);
             if (!doGrupo.length) continue;
-            const li = elemento('li');
-            const texto = doGrupo.map(m => (m.diferenca && classe !== 'neutro' ? `${m.rotulo} (${m.diferenca})` : m.rotulo)).join(', ');
-            li.append(elemento('span', `mapa-ponto ${classe}`), elemento('span', null, `${grupos[classe]}: ${texto}`));
+            // Um grupo por linha: bolinha, título e os itens; cada item não quebra no meio (nome e número juntos)
+            const li = elemento('li', `mapa-legenda-grupo ${classe}`);
+            const corpo = elemento('div', 'mapa-legenda-corpo');
+            corpo.append(elemento('span', 'mapa-legenda-titulo', `${grupos[classe]}:`));
+            const itens = elemento('span', 'mapa-legenda-itens');
+            doGrupo.forEach((m, i) => {
+                const texto = m.diferenca && classe !== 'neutro' ? `${m.rotulo} (${m.diferenca})` : m.rotulo;
+                itens.append(elemento('span', 'mapa-legenda-item', texto + (i < doGrupo.length - 1 ? ',' : '')));
+                if (i < doGrupo.length - 1) itens.append(' ');
+            });
+            corpo.append(' ', itens);
+            li.append(elemento('span', `mapa-ponto ${classe}`), corpo);
             legenda.append(li);
         }
     }
