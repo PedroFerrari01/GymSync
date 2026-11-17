@@ -1350,6 +1350,9 @@ html:has(.sobre) { scroll-behavior: smooth; }
 .mapa-musculo.ativo { stroke: var(--mapa-destaque); stroke-width: 2.5px; }
 /* Mãos e pés: só contorno do corpo, sempre no tom neutro (não têm medida) */
 .mapa-musculo.mapa-extremidade { fill-opacity: 0.4; pointer-events: none; }
+/* Contorno do corpo atrás dos músculos (neutro); o da outra avaliação, tracejado */
+.mapa-contorno { fill: var(--mapa-pele); fill-opacity: 0.16; stroke: var(--mapa-pele); stroke-opacity: 0.85; stroke-width: 1.6px; vector-effect: non-scaling-stroke; stroke-linejoin: round; pointer-events: none; }
+.mapa-contorno-outro { fill: none; stroke: var(--text-secondary); stroke-opacity: 0.9; stroke-dasharray: 5 4; }
 /* Troca Frente/Costas: some e volta em 200 ms no total */
 .mapa-silhueta, .mapa-linhas { transition: opacity 100ms ease; }
 .mapa-trocando .mapa-silhueta, .mapa-trocando .mapa-linhas { opacity: 0; }
