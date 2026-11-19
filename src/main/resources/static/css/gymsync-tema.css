@@ -1290,6 +1290,7 @@ html:has(.sobre) { scroll-behavior: smooth; }
     --mapa-piorou: #f87171;
     --mapa-neutro: #e2e8f0;
     --mapa-destaque: #f8fafc;
+    --mapa-contorno: #a3a9b7;
     height: auto;
 }
 :root[data-theme="light"] .mapa-corpo {
@@ -1299,6 +1300,7 @@ html:has(.sobre) { scroll-behavior: smooth; }
     --mapa-piorou: #b91c1c;
     --mapa-neutro: #475569;
     --mapa-destaque: #94a3b8;
+    --mapa-contorno: #64748b; /* no fundo branco o tom da pele quase sumia */
 }
 .mapa-topo { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: var(--s3); margin-bottom: var(--s3); }
 .mapa-controles { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2); }
@@ -1351,7 +1353,7 @@ html:has(.sobre) { scroll-behavior: smooth; }
 /* Mãos e pés: só contorno do corpo, sempre no tom neutro (não têm medida) */
 .mapa-musculo.mapa-extremidade { fill-opacity: 0.4; pointer-events: none; }
 /* Contorno do corpo atrás dos músculos (neutro); o da outra avaliação, tracejado */
-.mapa-contorno { fill: var(--mapa-pele); fill-opacity: 0.16; stroke: var(--mapa-pele); stroke-opacity: 0.85; stroke-width: 1.6px; vector-effect: non-scaling-stroke; stroke-linejoin: round; pointer-events: none; }
+.mapa-contorno { fill: var(--mapa-pele); fill-opacity: 0.16; stroke: var(--mapa-contorno); stroke-opacity: 0.85; stroke-width: 1.6px; vector-effect: non-scaling-stroke; stroke-linejoin: round; pointer-events: none; }
 .mapa-contorno-outro { fill: none; stroke: var(--text-secondary); stroke-opacity: 0.9; stroke-dasharray: 5 4; }
 /* Troca Frente/Costas: some e volta em 200 ms no total */
 .mapa-silhueta, .mapa-linhas { transition: opacity 100ms ease; }
