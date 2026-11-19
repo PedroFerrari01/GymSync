@@ -1411,7 +1411,10 @@
                         <input id="codigoCarteirinha" name="codigo" class="form-control" required autocomplete="off" placeholder="Cole ou digite o código do QR (GS1...)">
                         <div class="form-text">Simulação: o leitor da catraca envia o código lido do QR da carteirinha do aluno.</div>
                     </div>
-                    <div class="modal-footer"><button type="submit" class="btn-biometria"><i class="bi bi-qr-code me-2"></i>Validar carteirinha</button></div>
+                    <div class="modal-footer">
+                        <a th:href="@{/catraca/leitor}" class="btn-theme text-decoration-none"><i class="bi bi-camera-video me-2"></i>Ler pela webcam</a>
+                        <button type="submit" class="btn-biometria"><i class="bi bi-qr-code me-2"></i>Validar carteirinha</button>
+                    </div>
                 </form>
             </div>
         </div>

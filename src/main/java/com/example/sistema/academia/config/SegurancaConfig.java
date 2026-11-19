@@ -13,7 +13,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
-import org.springframework.security.web.header.writers.StaticHeadersWriter;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.support.SessionFlashMapManager;
 
@@ -68,8 +67,18 @@ public class SegurancaConfig {
                 .frameOptions(f -> f.deny())
                 .referrerPolicy(r -> r.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.SAME_ORIGIN))
                 .contentSecurityPolicy(c -> c.policyDirectives(CSP))
-                .addHeaderWriter(new StaticHeadersWriter("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=()")));
+                .addHeaderWriter((req, res) -> res.setHeader("Permissions-Policy",
+                        politicaPermissoes(req.getRequestURI().substring(req.getContextPath().length())))));
         return http.build();
+    }
+
+    /** Única página que pode pedir a câmera: o leitor de QR da catraca (só do admin). */
+    static final String LEITOR_CATRACA = "/catraca/leitor";
+
+    /** Câmera bloqueada no site inteiro, menos no leitor da catraca. Microfone, localização e pagamento sempre bloqueados. */
+    static String politicaPermissoes(String caminho) {
+        String camera = LEITOR_CATRACA.equals(caminho) ? "camera=(self)" : "camera=()";
+        return camera + ", microphone=(), geolocation=(), payment=()";
     }
 
     private static String perfil(Authentication autenticacao) {

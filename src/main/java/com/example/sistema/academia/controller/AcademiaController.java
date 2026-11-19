@@ -559,13 +559,24 @@ public class AcademiaController {
 
     /** Leitura da carteirinha digital (simulada): o código do QR leva ao mesmo fluxo da catraca. */
     @PostMapping("/entradas/carteirinha")
-    public String registrarPelaCarteirinha(@RequestParam String codigo, RedirectAttributes redirect) {
+    public String registrarPelaCarteirinha(@RequestParam String codigo,
+                                           @RequestParam(required = false) String origem,
+                                           RedirectAttributes redirect) {
+        // Vindo do leitor pela webcam, volta para ele (próximo aluno); senão, para o painel
+        String volta = "leitor".equals(origem) ? "redirect:/catraca/leitor" : "redirect:/";
         Optional<Long> alunoId = carteirinhaService.alunoDoToken(codigo);
         if (alunoId.isEmpty()) {
             redirect.addFlashAttribute("erro", "Catraca Bloqueada: código da carteirinha inválido.");
-            return "redirect:/";
+            return volta;
         }
-        return liberarCatraca(alunoId.get(), redirect);
+        liberarCatraca(alunoId.get(), redirect);
+        return volta;
+    }
+
+    /** Leitor do QR da carteirinha pela webcam (simulado). O vídeo fica no navegador; só o código lido é enviado. */
+    @GetMapping("/catraca/leitor")
+    public String leitorCatraca() {
+        return "catraca-leitor";
     }
 
     private String liberarCatraca(Long alunoId, RedirectAttributes redirect) {
