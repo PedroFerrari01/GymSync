@@ -291,69 +291,6 @@ function formaDe(vista, perfil) {
     return forma.concat(extremidades(vista, forma));
 }
 
-/* ---------- Contorno da silhueta (atrás dos músculos) ----------
-   Linha do corpo (tronco e pernas) que segue as mesmas larguras da silhueta. A diferença entre a primeira e a
-   última avaliação é ampliada só no contorno, para a evolução aparecer; os músculos continuam com a proporção real. */
-
-// Meia-largura do corpo no desenho original: [y, borda de fora, borda de dentro da perna (0 = tronco)]
-const CONTORNO = {
-    frente: [[26, 8.5, 0], [36, 26, 0], [50, 22.5, 0], [80, 20.5, 0], [100, 22.5, 0], [112, 25, 1.5], [125, 26, 5.5],
-        [148, 23.5, 13], [170, 29.5, 14], [192, 23.5, 15], [203, 25, 16]],
-    costas: [[24, 8, 0], [38, 23.5, 0], [55, 23.5, 0], [88, 17.5, 0], [112, 21.8, 0], [122, 23.5, 1.5], [140, 24, 5.5],
-        [160, 21.5, 12.5], [180, 27, 10.5], [205, 23.5, 16.5], [225, 24.5, 17]]
-};
-const AMPLIA_EVOLUCAO = 4;
-const FOLGA_CONTORNO = 2.5; // o contorno fica um pouco por fora dos músculos, para aparecer
-const CHAVES_LARGURA = ['ombro', 'peito', 'cintura', 'quadril', 'coxa', 'joelho', 'panturrilha'];
-
-/** Perfil do contorno: a média das duas avaliações mais a diferença de cada uma ampliada. */
-function perfilContorno(aluno, momento) {
-    const primeira = perfilDe(aluno, 'primeira');
-    const ultima = perfilDe(aluno, 'ultima');
-    const atual = momento === 'primeira' ? primeira : ultima;
-    const p = { ...atual };
-    for (const chave of CHAVES_LARGURA) {
-        const media = (primeira[chave] + ultima[chave]) / 2;
-        p[chave] = limitar(media + (atual[chave] - media) * AMPLIA_EVOLUCAO, 0.65, 1.6);
-    }
-    return p;
-}
-
-/** Caminho fechado e suave (Catmull-Rom) passando pelos pontos. */
-function caminhoSuave(pts) {
-    const n = pts.length;
-    const p = i => pts[(i + n) % n];
-    let d = `M${p(0).x.toFixed(2)} ${p(0).y.toFixed(2)}`;
-    for (let i = 0; i < n; i++) {
-        const [a, b, c, e] = [p(i - 1), p(i), p(i + 1), p(i + 2)];
-        const c1 = { x: b.x + (c.x - a.x) / 6, y: b.y + (c.y - a.y) / 6 };
-        const c2 = { x: c.x - (e.x - b.x) / 6, y: c.y - (e.y - b.y) / 6 };
-        d += ` C${c1.x.toFixed(2)} ${c1.y.toFixed(2)} ${c2.x.toFixed(2)} ${c2.y.toFixed(2)} ${c.x.toFixed(2)} ${c.y.toFixed(2)}`;
-    }
-    return d + ' Z';
-}
-
-/** Contorno de uma vista com o perfil dado, em coordenadas do desenho. */
-function contornoDe(vista, perfil) {
-    const baseY = BASE_DOS_PES[vista];
-    const linhas = CONTORNO[vista];
-    const ponto = (y, meia, lado) => ({
-        x: 50 + lado * meia * larguraEm(vista, y, perfil) * perfil.escala,
-        y: baseY - (baseY - y) * perfil.escala
-    });
-    const ultimo = linhas[linhas.length - 1];
-    const pts = [];
-    // Lado esquerdo de cima para baixo pela borda de fora, sola, volta pela borda de dentro até a virilha
-    for (const [y, fora] of linhas) pts.push(ponto(y, fora + FOLGA_CONTORNO, -1));
-    for (let i = linhas.length - 1; i >= 0 && linhas[i][2] > 0; i--) pts.push(ponto(linhas[i][0], linhas[i][2], -1));
-    // Lado direito: da virilha pela borda de dentro até o pé, e sobe pela borda de fora
-    for (let i = 0; i < linhas.length; i++) if (linhas[i][2] > 0) pts.push(ponto(linhas[i][0], linhas[i][2], 1));
-    pts.push(ponto(ultimo[0] + 1.5, (ultimo[1] + ultimo[2]) / 2, 1)); // sola do pé direito
-    for (let i = linhas.length - 1; i >= 0; i--) pts.push(ponto(linhas[i][0], linhas[i][1] + FOLGA_CONTORNO, 1));
-    pts.splice(linhas.length, 0, ponto(ultimo[0] + 1.5, (ultimo[1] + ultimo[2]) / 2, -1)); // sola do pé esquerdo
-    return caminhoSuave(pts);
-}
-
 // Formas da mão e do pé (origem no meio da ponta do antebraço ou da perna; x espelhado para o lado esquerdo)
 const FORMA_MAO = [[-3.2, 0], [3.2, 0], [4.3, 4.5], [3.8, 9.5], [1.2, 12.8], [-1.8, 12.4], [-3.9, 8.6], [-4.3, 3.6]];
 const PE_FRENTE = [[-3.6, 0], [3.6, 0], [4.4, 3.8], [6.6, 7.2], [5.8, 9], [-4.2, 9], [-5, 7], [-4.4, 3.6]];
@@ -433,26 +370,14 @@ function criarSilhueta(svg) {
     const centros = (v, chave) => centrosDe(v, chave, formas[v]);
 
     /** Ajusta as duas vistas à silhueta do aluno (perfil vindo de perfilDe). */
-    let contornos = null; // { atual, outro, outroNome }: perfis do contorno desta avaliação e da outra (tracejado)
-    function ajustar(perfil, contorno = null) {
+    function ajustar(perfil) {
         formas = { frente: formaDe('frente', perfil), costas: formaDe('costas', perfil) };
-        contornos = contorno;
     }
 
     /** regioes = { chave: classe }; forca = { chave: intensidade de 0 a 1 } (cor mais forte quanto maior a variação). */
     function desenhar(regioes, forca = {}) {
         svg.replaceChildren();
         usarArea();
-        // Contorno do corpo atrás dos músculos; o da outra avaliação fica tracejado, para comparar
-        if (contornos) {
-            if (contornos.outro) {
-                const outro = noSvg('path', { d: contornoDe(vista, contornos.outro), class: 'mapa-contorno mapa-contorno-outro' });
-                outro.append(noSvg('title', {}));
-                outro.firstChild.textContent = `Contorno na ${contornos.outroNome}`;
-                svg.appendChild(outro);
-            }
-            svg.appendChild(noSvg('path', { d: contornoDe(vista, contornos.atual), class: 'mapa-contorno' }));
-        }
         for (const item of formas[vista]) {
             const chave = CHAVE_DO_MUSCULO[vista][item.muscle];
             const classe = chave && regioes[chave] ? ` medido ${regioes[chave]}` : '';
@@ -1061,13 +986,7 @@ function iniciar() {
         const perfil = perfilDe(a, momento);
         avisoAltura.hidden = !a || !perfil.alturaPadrao;
         silhueta.trocarVista(vistaEscolhida);
-        const comDuas = a && a.avaliacoes > 1;
-        const outroMomento = momento === 'primeira' ? 'ultima' : 'primeira';
-        silhueta.ajustar(perfil, a ? {
-            atual: perfilContorno(a, momento),
-            outro: comDuas ? perfilContorno(a, outroMomento) : null,
-            outroNome: outroMomento === 'primeira' ? 'primeira avaliação' : 'última avaliação'
-        } : null);
+        silhueta.ajustar(perfil);
         silhueta.desenhar(regioesComClasse(), intensidades());
     }
 
