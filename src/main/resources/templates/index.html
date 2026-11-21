@@ -417,6 +417,7 @@
             <div class="small mb-2" style="color:var(--text-secondary);"><i class="bi bi-shield-lock text-success me-1"></i>Perfil: <span th:text="${perfil}"></span></div>
             <div class="small" style="color:var(--text-secondary);"><i class="bi bi-envelope me-1"></i><a href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=suportegymsync@gmail.com&amp;su=Suporte%20GymSync" target="_blank" rel="noopener" class="link-acao">suportegymsync@gmail.com</a></div>
             <div class="small mt-1"><a th:href="@{/privacidade}" class="link-privacidade"><i class="bi bi-shield-check me-1"></i>Privacidade</a></div>
+            <div class="small mt-1"><button type="button" class="link-tour" id="btnVerTour"><i class="ph ph-compass me-1"></i>Ver o tour de novo</button></div>
         </div>
     </aside>
 
@@ -452,6 +453,7 @@
                 </div>
                 <!-- SININHO: fim -->
                 <button th:if="${(perfil == 'ALUNO' or perfil == 'PROFESSOR') and visitante != true}" type="button" class="btn-theme" data-bs-toggle="modal" data-bs-target="#modalMinhaSenha"><i class="bi bi-key"></i> Minha Senha</button>
+                <button type="button" class="btn-theme btn-ajuda" id="btnAjudaTela" aria-label="Dica sobre esta tela" aria-haspopup="dialog" title="Dica sobre esta tela">?</button>
                 <button type="button" class="btn-theme" id="btnTema"><i class="bi bi-sun-fill" id="iconeTema"></i> <span id="textoTema">Modo Claro</span></button>
                 <form th:action="@{/logout}" method="post" class="d-inline"><button type="submit" class="btn-theme text-danger"><i class="bi bi-box-arrow-right"></i> Sair</button></form>
             </div>
@@ -1550,6 +1552,7 @@
 <script th:src="@{/vendor/bootstrap/bootstrap.bundle.min.js}"></script>
 <script th:src="@{/js/gymsync.js}"></script>
 <script th:src="@{/js/sininho.js}"></script>
+<script th:if="${logado}" th:src="@{/js/dicas.js}"></script>
     <!-- Formulários do painel: abrem em modal (o painel fica só para olhar) -->
     <div class="modal fade" id="modalCatraca" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
