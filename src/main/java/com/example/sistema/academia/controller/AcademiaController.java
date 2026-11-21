@@ -56,6 +56,7 @@ public class AcademiaController {
     @Autowired private PasswordEncoder encoder;
     @Autowired private SenhaService senhaService;
     @Autowired private VisitanteService visitanteService;
+    @Autowired private CarteirinhaService carteirinhaService;
 
     @Value("${gymsync.validar-cpf:true}") private boolean validarCpf;
     @Value("${gymsync.recuperacao-por-email:true}") private boolean recuperacaoPorEmail;
@@ -156,6 +157,14 @@ public class AcademiaController {
 
             model.addAttribute("exercicios", exercicioTreinoRepository.findByTreinoAlunoId(usuarioId));
             model.addAttribute("mensalidades", mensalidadeRepository.findByMatriculaAlunoId(usuarioId));
+            String codigoCarteirinha = carteirinhaService.token(usuarioId);
+            String motivoCarteirinha = CarteirinhaService.motivoBloqueio(aluno,
+                    matriculaRepository.existsByAlunoIdAndSituacao(usuarioId, "ATIVA"),
+                    mensalidadeRepository.existsByMatriculaAlunoIdAndSituacao(usuarioId, "ATRASADA"));
+            model.addAttribute("carteirinhaCodigo", codigoCarteirinha);
+            model.addAttribute("carteirinhaQr", carteirinhaService.qrSvg(codigoCarteirinha));
+            model.addAttribute("carteirinhaMotivo", motivoCarteirinha);
+            model.addAttribute("carteirinhaAluno", aluno);
             model.addAttribute("entradas", entradas);
             model.addAttribute("visitasSemana", visitasSemana);
             model.addAttribute("visitas30", visitas30);
@@ -588,22 +597,44 @@ public class AcademiaController {
 
     @PostMapping("/entradas/registrar")
     public String registrarEntrada(@RequestParam Long alunoId, RedirectAttributes redirect) {
+        return liberarCatraca(alunoId, redirect);
+    }
+
+    /** Leitura da carteirinha digital (simulada): o código do QR leva ao mesmo fluxo da catraca. */
+    @PostMapping("/entradas/carteirinha")
+    public String registrarPelaCarteirinha(@RequestParam String codigo,
+                                           @RequestParam(required = false) String origem,
+                                           RedirectAttributes redirect) {
+        // Vindo do leitor pela webcam, volta para ele (próximo aluno); senão, para o painel
+        String volta = "leitor".equals(origem) ? "redirect:/catraca/leitor" : "redirect:/";
+        Optional<Long> alunoId = carteirinhaService.alunoDoToken(codigo);
+        if (alunoId.isEmpty()) {
+            redirect.addFlashAttribute("erro", "Catraca Bloqueada: código da carteirinha inválido.");
+            return volta;
+        }
+        liberarCatraca(alunoId.get(), redirect);
+        return volta;
+    }
+
+    /** Leitor do QR da carteirinha pela webcam (simulado). O vídeo fica no navegador; só o código lido é enviado. */
+    @GetMapping("/catraca/leitor")
+    public String leitorCatraca() {
+        return "catraca-leitor";
+    }
+
+    private String liberarCatraca(Long alunoId, RedirectAttributes redirect) {
         situacaoService.atualizar();
 
         Aluno a = alunoRepository.findById(alunoId).orElse(null);
         if (a == null) {
+            redirect.addFlashAttribute("erro", "Catraca Bloqueada: aluno não encontrado.");
             return "redirect:/";
         }
-        if ("INATIVO".equals(a.getSituacao())) {
-            redirect.addFlashAttribute("erro", "Catraca Bloqueada: o aluno " + a.getNome() + " está com cadastro INATIVO!");
-            return "redirect:/";
-        }
-        if (!matriculaRepository.existsByAlunoIdAndSituacao(alunoId, "ATIVA")) {
-            redirect.addFlashAttribute("erro", "Catraca Bloqueada: o aluno " + a.getNome() + " não possui matrícula ativa!");
-            return "redirect:/";
-        }
-        if (mensalidadeRepository.existsByMatriculaAlunoIdAndSituacao(alunoId, "ATRASADA")) {
-            redirect.addFlashAttribute("erro", "Catraca Bloqueada: o aluno " + a.getNome() + " está com mensalidade em atraso!");
+        String motivo = CarteirinhaService.motivoBloqueio(a,
+                matriculaRepository.existsByAlunoIdAndSituacao(alunoId, "ATIVA"),
+                mensalidadeRepository.existsByMatriculaAlunoIdAndSituacao(alunoId, "ATRASADA"));
+        if (motivo != null) {
+            redirect.addFlashAttribute("erro", "Catraca Bloqueada: o aluno " + a.getNome() + " " + motivo + "!");
             return "redirect:/";
         }
 
