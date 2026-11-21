@@ -1279,3 +1279,29 @@ html:has(.sobre) { scroll-behavior: smooth; }
 .contato-pendente { border-left: 3px solid #f97316; }
 
 .mensalidades-resumo { display: flex; flex-wrap: wrap; gap: 4px 14px; }
+
+/* Painel do admin: gráficos na tela inicial */
+.painel-graficos .vchart { min-height: 180px; }
+.sit-ponto { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; background: var(--text-secondary); }
+.sit-PAGA { background: #10b981; }
+.sit-PENDENTE { background: #f59e0b; }
+.sit-EM_ANALISE { background: #3b82f6; }
+.sit-ATRASADA { background: #ef4444; }
+.sit-VENCIDA { background: #8b5cf6; }
+.painel-graficos .vval { font-size: 0.68rem; }
+@media (max-width: 576px) {
+    .painel-graficos .vval { font-size: 0.56rem; letter-spacing: -0.02em; }
+}
+
+/* Gráficos do painel clicáveis (abrem o detalhe num modal) */
+.grafico-clicavel { position: relative; cursor: pointer; transition: border-color 0.2s, transform 0.2s; }
+.grafico-clicavel:hover { border-color: var(--accent); transform: translateY(-2px); }
+.grafico-clicavel:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.grafico-expandir { position: absolute; right: 10px; bottom: 10px; font-size: 1rem; color: var(--text-secondary); }
+.grafico-clicavel:hover .grafico-expandir { color: var(--accent); }
+.hbar-detalhe { grid-template-columns: minmax(110px, 190px) 1fr auto; }
+.tag-calmo { opacity: 0.75; }
+.var-sobe { color: #10b981; font-weight: 600; }
+.var-desce { color: #ef4444; font-weight: 600; }
+@media (max-width: 576px) { .hbar-detalhe { grid-template-columns: 1fr; gap: 2px; } }
+@media (prefers-reduced-motion: reduce) { .grafico-clicavel { transition: none; } .grafico-clicavel:hover { transform: none; } }

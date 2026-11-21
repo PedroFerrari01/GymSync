@@ -804,3 +804,12 @@ document.addEventListener('show.bs.modal', (e) => {
             .catch(function () { alvo.innerHTML = '<div class="vazio">Não foi possível carregar o progresso.</div>'; });
     });
 })();
+
+/* ===== Painel do admin: gráfico clicável também abre com Enter ou espaço (o clique já é do Bootstrap) ===== */
+document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const card = e.target.closest && e.target.closest('.grafico-clicavel');
+    if (!card || e.target !== card) return;
+    e.preventDefault();
+    card.click();
+});

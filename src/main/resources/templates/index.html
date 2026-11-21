@@ -480,6 +480,57 @@
                         <button type="button" class="btn-theme" data-bs-toggle="modal" data-bs-target="#modalRegistrosCatraca"><i class="bi bi-clock-history me-1"></i> Registros da catraca</button>
                     </div>
 
+                    <div class="row g-4 mb-4 painel-graficos" th:if="${relReceita != null}">
+                        <div class="col-lg-4">
+                            <div class="panel-card h-100 grafico-clicavel" role="button" tabindex="0" data-bs-toggle="modal" data-bs-target="#modalGrafFat" aria-label="Ver detalhes: Faturamento"><i class="ph ph-arrows-out-simple grafico-expandir" aria-hidden="true"></i>
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <h5 class="panel-title">Faturamento</h5>
+                                    <span class="tag-pill">6 meses</span>
+                                </div>
+                                <p class="small mb-2" style="color:var(--text-secondary);">Mensalidades pagas por mês.</p>
+                                <div class="vchart">
+                                    <div class="vcol" th:each="b : ${relReceita}">
+                                        <span class="vval" th:text="${b.texto}"></span>
+                                        <div class="vtrack"><div class="vbar" th:style="|height:${b.percentual}%|"></div></div>
+                                        <span class="vlbl" th:text="${b.rotulo}"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="panel-card h-100 grafico-clicavel" role="button" tabindex="0" data-bs-toggle="modal" data-bs-target="#modalGrafDias" aria-label="Ver detalhes: Entradas por dia"><i class="ph ph-arrows-out-simple grafico-expandir" aria-hidden="true"></i>
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <h5 class="panel-title">Entradas por dia</h5>
+                                    <span class="tag-pill">30 dias</span>
+                                </div>
+                                <p class="small mb-2" style="color:var(--text-secondary);">
+                                    <span th:if="${relDiaPico != null}" th:text="|Mais movimentado: ${relDiaPico}|"></span>
+                                    <span th:if="${relDiaPico == null}">Sem entradas no período.</span>
+                                </p>
+                                <div class="vchart">
+                                    <div class="vcol" th:each="b : ${relDias}">
+                                        <span class="vval" th:text="${b.texto}"></span>
+                                        <div class="vtrack"><div class="vbar" th:style="|height:${b.percentual}%|"></div></div>
+                                        <span class="vlbl" th:text="${b.rotulo}"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="panel-card h-100 grafico-clicavel" role="button" tabindex="0" data-bs-toggle="modal" data-bs-target="#modalGrafSit" aria-label="Ver detalhes: Mensalidades por situação"><i class="ph ph-arrows-out-simple grafico-expandir" aria-hidden="true"></i>
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <h5 class="panel-title">Mensalidades por situação</h5>
+                                </div>
+                                <p class="small mb-3" style="color:var(--text-secondary);">Quantidade em cada situação.</p>
+                                <div class="hbar-row" th:each="b : ${relSituacoes}">
+                                    <span class="text-truncate"><span class="sit-ponto" th:classappend="${'sit-' + b.rotulo}"></span><span th:text="${@fmt.statusTexto(b.rotulo)}"></span></span>
+                                    <div class="hbar-track"><div class="hbar-fill" th:classappend="${'sit-' + b.rotulo}" th:style="|width:${b.percentual}%|"></div></div>
+                                    <span class="small text-end" th:text="${b.texto}"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row g-4">
                         <div class="col-lg-5">
                             <div class="panel-card">
@@ -1253,6 +1304,95 @@
                         <button type="submit" class="btn-brand">Salvar Alterações</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detalhe dos gráficos do painel (só admin) -->
+    <div class="modal fade" id="modalGrafFat" tabindex="-1" aria-hidden="true" th:if="${relFat != null}">
+        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+            <div class="modal-content p-2">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold"><i class="ph ph-chart-bar me-2" style="color:var(--accent);"></i>Faturamento dos últimos 6 meses</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-2 mb-3">
+                        <div class="col-4"><div class="mini-kpi"><div class="valor" th:text="${'R$ ' + @fmt.dinheiro(relFat.total)}">R$ 0,00</div><div class="rotulo">Total</div></div></div>
+                        <div class="col-4"><div class="mini-kpi"><div class="valor" th:text="${'R$ ' + @fmt.dinheiro(relFat.media)}">R$ 0,00</div><div class="rotulo">Média por mês</div></div></div>
+                        <div class="col-4"><div class="mini-kpi"><div class="valor" th:text="${relFat.melhorMes != null ? relFat.melhorMes : '-'}">-</div><div class="rotulo">Melhor mês</div></div></div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-custom">
+                            <thead><tr><th>Mês</th><th class="text-end">Valor</th><th class="text-end">Variação (R$)</th><th class="text-end">Variação (%)</th></tr></thead>
+                            <tbody>
+                                <tr th:each="m : ${relFat.meses}">
+                                    <td class="fw-semibold"><span th:text="${m.rotulo}"></span> <span th:if="${m.melhor}" class="tag-pill">melhor</span></td>
+                                    <td class="text-end text-nowrap" th:text="${'R$ ' + @fmt.dinheiro(m.valor)}"></td>
+                                    <td class="text-end text-nowrap" th:if="${m.variacaoValor != null}" th:classappend="${m.variacaoValor.signum() > 0 ? 'var-sobe' : (m.variacaoValor.signum() < 0 ? 'var-desce' : '')}" th:text="${(m.variacaoValor.signum() > 0 ? '+R$ ' : (m.variacaoValor.signum() < 0 ? '-R$ ' : 'R$ ')) + @fmt.dinheiro(m.variacaoValor.abs())}"></td>
+                                    <td class="text-end" th:if="${m.variacaoValor == null}">-</td>
+                                    <td class="text-end text-nowrap" th:if="${m.variacaoPct != null}" th:classappend="${m.variacaoPct > 0 ? 'var-sobe' : (m.variacaoPct < 0 ? 'var-desce' : '')}" th:text="${(m.variacaoPct > 0 ? '+' : '') + @fmt.numero(m.variacaoPct, 1) + '%'}"></td>
+                                    <td class="text-end" th:if="${m.variacaoPct == null}">-</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="small mb-0" style="color:var(--text-secondary);">Soma das mensalidades pagas em cada mês. A variação compara com o mês anterior.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalGrafDias" tabindex="-1" aria-hidden="true" th:if="${relDiasDetalhe != null}">
+        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+            <div class="modal-content p-2">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold"><i class="ph ph-calendar-blank me-2" style="color:var(--accent);"></i>Entradas por dia da semana (30 dias)</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="hbar-row hbar-detalhe" th:each="d : ${relDiasDetalhe}">
+                        <span class="fw-semibold">
+                            <span th:text="${d.rotulo}"></span>
+                            <span th:if="${d.pico}" class="tag-pill">mais movimentado</span>
+                            <span th:if="${d.vazio}" class="tag-pill tag-calmo">mais vazio</span>
+                        </span>
+                        <div class="hbar-track"><div class="hbar-fill" th:style="|width:${d.pct}%|"></div></div>
+                        <span class="small text-end text-nowrap"><span th:text="${d.entradas}"></span> (<span th:text="${d.pct}"></span>%)</span>
+                    </div>
+                    <p class="small mt-3 mb-0" style="color:var(--text-secondary);">A porcentagem é a participação do dia no total de entradas da catraca nos últimos 30 dias.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalGrafSit" tabindex="-1" aria-hidden="true" th:if="${relSituacoesDetalhe != null}">
+        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+            <div class="modal-content p-2">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold"><i class="ph ph-receipt me-2" style="color:var(--accent);"></i>Mensalidades por situação</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="hbar-row hbar-detalhe" th:each="s : ${relSituacoesDetalhe}">
+                        <span class="fw-semibold"><span class="sit-ponto" th:classappend="${'sit-' + s.situacao}"></span><span th:text="${@fmt.statusTexto(s.situacao)}"></span></span>
+                        <div class="hbar-track"><div class="hbar-fill" th:classappend="${'sit-' + s.situacao}" th:style="|width:${s.pct}%|"></div></div>
+                        <span class="small text-end text-nowrap"><span th:text="${s.quantidade}"></span> · <span th:text="${s.pct}"></span>%</span>
+                    </div>
+                    <div class="table-responsive mt-3">
+                        <table class="table table-custom">
+                            <thead><tr><th>Situação</th><th class="text-end">Quantidade</th><th class="text-end">Valor</th><th class="text-end">%</th></tr></thead>
+                            <tbody>
+                                <tr th:each="s : ${relSituacoesDetalhe}">
+                                    <td class="fw-semibold" th:text="${@fmt.statusTexto(s.situacao)}"></td>
+                                    <td class="text-end" th:text="${s.quantidade}"></td>
+                                    <td class="text-end text-nowrap" th:text="${'R$ ' + @fmt.dinheiro(s.valor)}"></td>
+                                    <td class="text-end" th:text="${s.pct + '%'}"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
