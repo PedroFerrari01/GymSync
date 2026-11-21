@@ -1,6 +1,7 @@
 package com.example.sistema.academia.controller;
 
 import com.example.sistema.academia.dto.Acompanhamento;
+import com.example.sistema.academia.dto.Aviso;
 import com.example.sistema.academia.model.*;
 import com.example.sistema.academia.repository.*;
 import com.example.sistema.academia.service.*;
@@ -49,6 +50,7 @@ public class AcademiaController {
     @Autowired private FrequenciaService frequenciaService;
     @Autowired private EvolucaoService evolucaoService;
     @Autowired private AcompanhamentoService acompanhamentoService;
+    @Autowired private SininhoService sininhoService;
     @Autowired private com.example.sistema.academia.service.VisaoEquipeService visaoEquipeService;
     @Autowired private com.example.sistema.academia.service.AlunosDoProfessorService alunosDoProfessor;
     @Autowired private PasswordEncoder encoder;
@@ -97,6 +99,22 @@ public class AcademiaController {
             l.setLinkWhatsapp(fichaService.linkWhatsapp(l.getContato(), texto));
         }
         return linhas;
+    }
+
+    /** "Spinning, seg 18:00 (23/11)" para cada aula que o aluno reservou (dados que o AulaService já pôs no model). */
+    @SuppressWarnings("unchecked")
+    private List<String> aulasReservadasTexto(Model model) {
+        List<AulaColetiva> aulas = (List<AulaColetiva>) model.asMap().get("aulas");
+        Set<Long> reservadas = (Set<Long>) model.asMap().get("aulasReservadas");
+        Map<Long, LocalDate> datas = (Map<Long, LocalDate>) model.asMap().get("proximasDatas");
+        List<String> textos = new ArrayList<>();
+        if (aulas == null || reservadas == null || datas == null) return textos;
+        for (AulaColetiva a : aulas) {
+            if (!reservadas.contains(a.getId()) || a.getHorario() == null) continue;
+            textos.add(a.getNome() + ", " + a.getDiaSemanaPt() + " " + a.getHorario()
+                    + " (" + datas.get(a.getId()).format(java.time.format.DateTimeFormatter.ofPattern("dd/MM")) + ")");
+        }
+        return textos;
     }
 
     @GetMapping("/")
@@ -155,6 +173,8 @@ public class AcademiaController {
             model.addAttribute("linkWhatsappFicha", fichaService.linkWhatsapp(aluno.getContato(), fichaService.textoAluno(aluno)));
             model.addAttribute("naoLidas", mensagemRepository.countByAlunoIdAndRemetenteAndLidaFalse(usuarioId, "PROFESSOR"));
             aulaService.preencher(model, usuarioId);
+            model.addAttribute("sininho", sininhoService.paraAluno(avisoService.paraAluno(usuarioId),
+                    mensagemRepository.countByAlunoIdAndRemetenteAndLidaFalse(usuarioId, "PROFESSOR"), aulasReservadasTexto(model)));
             return "index";
         }
 
@@ -211,6 +231,7 @@ public class AcademiaController {
             model.addAttribute("professorId", usuarioId);
             model.addAttribute("meusTreinos", meusTreinos);
             model.addAttribute("naoLidas", mensagemRepository.countByProfessorIdAndRemetenteAndLidaFalse(usuarioId, "ALUNO"));
+            model.addAttribute("sininho", sininhoService.paraProfessor((List<Acompanhamento>) model.asMap().get("acompanhamento")));
             return "index";
         }
 
@@ -228,7 +249,9 @@ public class AcademiaController {
         }
         model.addAttribute("matriculas", matriculaRepository.findAll());
         model.addAttribute("mensalidades", mensalidadeRepository.findAll());
-        model.addAttribute("avisos", avisoService.paraAdmin());
+        List<Aviso> avisosAdmin = avisoService.paraAdmin();
+        model.addAttribute("avisos", avisosAdmin);
+        model.addAttribute("sininho", sininhoService.paraAdmin(avisosAdmin, (List<Acompanhamento>) model.asMap().get("acompanhamento")));
         model.addAttribute("equipamentos", equipamentoRepository.findAll());
         model.addAttribute("equipamentosComFoto", equipamentoImagemRepository.idsComImagem());
         model.addAttribute("manutencoes", manutencaoRepository.findAllByOrderByDataManutencaoDescIdDesc());

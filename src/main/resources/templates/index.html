@@ -432,6 +432,25 @@
                 </div>
             </div>
             <div class="d-flex align-items-center gap-2">
+                <!-- SININHO: início (js/sininho.js; "lida" fica no navegador) -->
+                <div class="sininho ocultar-impressao" id="sininho" th:data-usuario="${perfil + ':' + nomeUsuario}">
+                    <button type="button" class="btn-theme sininho-botao" id="sininhoBotao" aria-label="Notificações" aria-expanded="false" aria-controls="sininhoPainel">
+                        <i class="ph ph-bell"></i><span class="sininho-contagem" id="sininhoContagem" hidden>0</span>
+                    </button>
+                    <div class="sininho-painel" id="sininhoPainel" hidden>
+                        <div class="sininho-topo">
+                            <strong>Notificações</strong>
+                            <button type="button" class="sininho-limpar" id="sininhoLimpar">Marcar tudo como lido</button>
+                        </div>
+                        <ul class="sininho-lista" id="sininhoLista">
+                            <li th:each="n : ${sininho}" class="sininho-item" th:classappend="|sininho-${n.tipo}|">
+                                <a class="sininho-link" th:href="${n.href != null ? n.href : '#'}" th:data-chave="${n.chave}" th:data-aba="${n.aba}" th:data-alvo="${n.alvo}"><span class="sininho-ponto"></span><span th:text="${n.texto}"></span></a>
+                            </li>
+                        </ul>
+                        <div class="sininho-vazio" id="sininhoVazio" hidden>Nada de novo por aqui.</div>
+                    </div>
+                </div>
+                <!-- SININHO: fim -->
                 <button th:if="${(perfil == 'ALUNO' or perfil == 'PROFESSOR') and visitante != true}" type="button" class="btn-theme" data-bs-toggle="modal" data-bs-target="#modalMinhaSenha"><i class="bi bi-key"></i> Minha Senha</button>
                 <button type="button" class="btn-theme" id="btnTema"><i class="bi bi-sun-fill" id="iconeTema"></i> <span id="textoTema">Modo Claro</span></button>
                 <form th:action="@{/logout}" method="post" class="d-inline"><button type="submit" class="btn-theme text-danger"><i class="bi bi-box-arrow-right"></i> Sair</button></form>
@@ -1390,6 +1409,7 @@
 
 <script th:src="@{/vendor/bootstrap/bootstrap.bundle.min.js}"></script>
 <script th:src="@{/js/gymsync.js}"></script>
+<script th:src="@{/js/sininho.js}"></script>
     <!-- Formulários do painel: abrem em modal (o painel fica só para olhar) -->
     <div class="modal fade" id="modalCatraca" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
