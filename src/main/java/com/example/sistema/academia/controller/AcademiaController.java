@@ -50,6 +50,7 @@ public class AcademiaController {
     @Autowired private EvolucaoService evolucaoService;
     @Autowired private AcompanhamentoService acompanhamentoService;
     @Autowired private com.example.sistema.academia.service.VisaoEquipeService visaoEquipeService;
+    @Autowired private com.example.sistema.academia.service.AlunosDoProfessorService alunosDoProfessor;
     @Autowired private PasswordEncoder encoder;
     @Autowired private SenhaService senhaService;
     @Autowired private VisitanteService visitanteService;
@@ -188,6 +189,25 @@ public class AcademiaController {
         aulaService.preencher(model, null);
 
         if (professor) {
+            // LGPD: o professor só vê fichas, avaliações, entradas e WhatsApp dos próprios alunos.
+            // A lista "alunos" continua inteira só para os campos de escolha (nome), para ele montar a 1ª ficha.
+            java.util.Set<Long> meus = alunosDoProfessor.ids(usuarioId);
+            java.util.Set<Long> idsMeusTreinos = new java.util.HashSet<>();
+            for (Treino t : meusTreinos) idsMeusTreinos.add(t.getId());
+            Map<Long, String> meusLinks = new HashMap<>();
+            linksWhatsapp.forEach((treinoId, link) -> { if (idsMeusTreinos.contains(treinoId)) meusLinks.put(treinoId, link); });
+            List<Entrada> entradasMeus = todasEntradas.stream()
+                    .filter(e -> e.getAluno() != null && meus.contains(e.getAluno().getId())).toList();
+            model.addAttribute("treinos", meusTreinos);
+            model.addAttribute("exercicios", todosExercicios.stream()
+                    .filter(ex -> ex.getTreino() != null && idsMeusTreinos.contains(ex.getTreino().getId())).toList());
+            model.addAttribute("entradas", entradasMeus);
+            model.addAttribute("entradasRecentes", entradasMeus.stream().limit(30).toList());
+            model.addAttribute("avaliacoes", avaliacaoFisicaRepository.findAllByOrderByDataAvaliacaoDescIdDesc().stream()
+                    .filter(av -> av.getAluno() != null && meus.contains(av.getAluno().getId())).toList());
+            model.addAttribute("ultimosRegistros", ultimosRegistros(todosRegistros.stream()
+                    .filter(r -> r.getAluno() != null && meus.contains(r.getAluno().getId())).toList()));
+            model.addAttribute("linksWhatsapp", meusLinks);
             model.addAttribute("professorId", usuarioId);
             model.addAttribute("meusTreinos", meusTreinos);
             model.addAttribute("naoLidas", mensagemRepository.countByProfessorIdAndRemetenteAndLidaFalse(usuarioId, "ALUNO"));

@@ -27,6 +27,7 @@ public class MensagemController {
     @Autowired private ProfessorRepository professorRepository;
     @Autowired private MensagemRepository mensagemRepository;
     @Autowired private FichaService fichaService;
+    @Autowired private com.example.sistema.academia.service.AlunosDoProfessorService alunosDoProfessor;
 
     @GetMapping("/mensagens")
     public String pagina(@RequestParam(required = false) Long com, Model model, HttpSession session) {
@@ -42,7 +43,8 @@ public class MensagemController {
                 contatos.add(new Contato(p.getId(), p.getNome(), p.getEspecialidade(), novas, zap));
             }
         } else {
-            for (Aluno a : alunoRepository.findAll()) {
+            java.util.Set<Long> meus = alunosDoProfessor.ids(id);
+            for (Aluno a : alunoRepository.findAllById(meus)) {
                 long novas = mensagemRepository.countByAlunoIdAndProfessorIdAndRemetenteAndLidaFalse(a.getId(), id, "ALUNO");
                 String zap = fichaService.linkWhatsapp(a.getContato(), "Olá, " + a.getNome() + "! Aqui é o professor " + session.getAttribute("nomeUsuario") + ".");
                 contatos.add(new Contato(a.getId(), a.getNome(), a.getEmail(), novas, zap));
@@ -114,7 +116,8 @@ public class MensagemController {
 
         Aluno a = alunoRepository.findById(aluno ? id : destinoId).orElse(null);
         Professor p = professorRepository.findById(aluno ? destinoId : id).orElse(null);
-        if (a == null || p == null) {
+        // Professor só escreve para os próprios alunos (ficha dele ou conversa já aberta pelo aluno)
+        if (a == null || p == null || (!aluno && !alunosDoProfessor.ids(id).contains(a.getId()))) {
             redirect.addFlashAttribute("erro", "Destinatário não encontrado.");
             return "redirect:/mensagens";
         }
