@@ -804,3 +804,150 @@ document.addEventListener('show.bs.modal', (e) => {
             .catch(function () { alvo.innerHTML = '<div class="vazio">Não foi possível carregar o progresso.</div>'; });
     });
 })();
+
+/* Busca rápida (Ctrl+K): usa só o que já está nas abas e tabelas da tela do perfil logado */
+(function () {
+    const campoBusca = document.getElementById('inputBuscaGlobal');
+    const menu = document.getElementById('menuAbas');
+    if (!campoBusca || !menu) return;
+
+    campoBusca.placeholder = 'Pesquisar registros... (Ctrl+K)';
+
+    const caixa = document.createElement('div');
+    caixa.className = 'paleta-fundo';
+    caixa.hidden = true;
+    caixa.innerHTML =
+        '<div class="paleta" role="dialog" aria-modal="true" aria-label="Busca rápida">' +
+        '<input type="text" class="paleta-campo" placeholder="Buscar aluno, professor, plano ou ir para uma tela..." autocomplete="off" aria-label="Busca rápida">' +
+        '<ul class="paleta-lista" role="listbox"></ul>' +
+        '<div class="paleta-rodape">↑ ↓ navegar · Enter abrir · Esc fechar</div></div>';
+    document.body.appendChild(caixa);
+    const campo = caixa.querySelector('.paleta-campo');
+    const lista = caixa.querySelector('.paleta-lista');
+    let itens = [];
+    let atual = 0;
+    let indice = [];
+
+    function limpar(t) { return (t || '').replace(/\s+/g, ' ').trim(); }
+    function norm(t) { return limpar(t).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); }
+
+    function montarIndice() {
+        const resultado = [];
+        menu.querySelectorAll('button.nav-link[data-bs-target], a.nav-link[href]').forEach(function (el) {
+            const nome = limpar(el.textContent.replace(/\d+$/, ''));
+            if (nome) resultado.push({ tipo: 'Tela', titulo: nome, detalhe: 'Ir para esta tela', el: el, chave: norm(nome) });
+        });
+        document.querySelectorAll('.tab-pane').forEach(function (painel) {
+            const botao = menu.querySelector('[data-bs-target="#' + painel.id + '"]');
+            if (!botao) return;
+            const vistos = new Set();
+            painel.querySelectorAll('.tabela-filtravel').forEach(function (tabela) {
+                const cartao = tabela.closest('.panel-card');
+                const titulo = cartao && cartao.querySelector('.panel-title');
+                const categoria = titulo ? limpar(titulo.textContent) : limpar(botao.textContent);
+                tabela.querySelectorAll('tbody tr').forEach(function (tr) {
+                    const celulas = tr.querySelectorAll('td');
+                    if (celulas.length < 2) return;
+                    const nome = limpar(celulas[0].textContent);
+                    if (!nome) return;
+                    const detalhe = Array.prototype.slice.call(celulas, 1, 4)
+                        .map(function (c) { return limpar(c.textContent); })
+                        .filter(Boolean).join(' · ');
+                    const id = categoria + '|' + nome + '|' + detalhe;
+                    if (vistos.has(id)) return;
+                    vistos.add(id);
+                    resultado.push({ tipo: categoria, titulo: nome, detalhe: detalhe, botao: botao, tr: tr, chave: norm(nome + ' ' + detalhe) });
+                });
+            });
+        });
+        return resultado;
+    }
+
+    function desenhar() {
+        lista.textContent = '';
+        if (!itens.length) {
+            const vazio = document.createElement('li');
+            vazio.className = 'paleta-vazio';
+            vazio.textContent = 'Nada encontrado.';
+            lista.appendChild(vazio);
+            return;
+        }
+        itens.forEach(function (item, i) {
+            const li = document.createElement('li');
+            li.className = 'paleta-item' + (i === atual ? ' ativo' : '');
+            li.setAttribute('role', 'option');
+            const tipo = document.createElement('span');
+            tipo.className = 'paleta-tipo';
+            tipo.textContent = item.tipo;
+            const titulo = document.createElement('span');
+            titulo.className = 'paleta-titulo';
+            titulo.textContent = item.titulo;
+            const det = document.createElement('span');
+            det.className = 'paleta-detalhe';
+            det.textContent = item.detalhe;
+            li.append(tipo, titulo, det);
+            li.addEventListener('mousedown', function (e) { e.preventDefault(); escolher(item); });
+            lista.appendChild(li);
+        });
+        const ativo = lista.querySelector('.ativo');
+        if (ativo) ativo.scrollIntoView({ block: 'nearest' });
+    }
+
+    function filtrar() {
+        const termos = norm(campo.value).split(' ').filter(Boolean);
+        const base = termos.length
+            ? indice.filter(function (it) { return termos.every(function (t) { return it.chave.indexOf(t) !== -1; }); })
+            : indice.filter(function (it) { return it.tipo === 'Tela'; });
+        // No máximo 3 por categoria, para a lista de mensalidades não cobrir alunos e planos
+        const porTipo = {};
+        itens = base.filter(function (it) {
+            porTipo[it.tipo] = (porTipo[it.tipo] || 0) + 1;
+            return it.tipo === 'Tela' || porTipo[it.tipo] <= 3;
+        }).slice(0, 12);
+        atual = 0;
+        desenhar();
+    }
+
+    function abrir() {
+        indice = montarIndice();
+        caixa.hidden = false;
+        campo.value = '';
+        filtrar();
+        campo.focus();
+    }
+    function fechar() { caixa.hidden = true; }
+
+    function escolher(item) {
+        fechar();
+        if (item.tipo === 'Tela') {
+            if (campoBusca.value) { campoBusca.value = ''; campoBusca.dispatchEvent(new Event('input', { bubbles: true })); }
+            item.el.click();
+            return;
+        }
+        if (window.bootstrap) bootstrap.Tab.getOrCreateInstance(item.botao).show();
+        campoBusca.value = item.titulo;
+        campoBusca.dispatchEvent(new Event('input', { bubbles: true }));
+        setTimeout(function () {
+            if (item.tr && item.tr.isConnected) {
+                item.tr.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                item.tr.classList.add('paleta-destaque');
+                setTimeout(function () { item.tr.classList.remove('paleta-destaque'); }, 2200);
+            }
+        }, 250);
+    }
+
+    campo.addEventListener('input', filtrar);
+    caixa.addEventListener('mousedown', function (e) { if (e.target === caixa) fechar(); });
+    campo.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowDown') { e.preventDefault(); atual = Math.min(atual + 1, itens.length - 1); desenhar(); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); atual = Math.max(atual - 1, 0); desenhar(); }
+        else if (e.key === 'Enter') { e.preventDefault(); if (itens[atual]) escolher(itens[atual]); }
+        else if (e.key === 'Escape') { e.preventDefault(); fechar(); }
+    });
+    document.addEventListener('keydown', function (e) {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+            e.preventDefault();
+            if (caixa.hidden) abrir(); else fechar();
+        }
+    });
+})();
