@@ -1294,3 +1294,295 @@ html:has(.sobre) { scroll-behavior: smooth; }
 .paleta-vazio { padding: 16px; color: var(--text-secondary); text-align: center; }
 .paleta-rodape { padding: 8px 14px; border-top: 1px solid var(--border-color); color: var(--text-secondary); font-size: 0.75rem; }
 tr.paleta-destaque td { background: var(--accent-soft) !important; transition: background 0.3s; }
+
+/* ===== SININHO (notificações do topo) ===== */
+.sininho { position: relative; }
+.sininho-botao { position: relative; font-size: 1.15rem; }
+.sininho-contagem { position: absolute; top: -6px; right: -6px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px;
+    background: var(--accent); color: #fff; font-size: .68rem; font-weight: 700; line-height: 18px; text-align: center; }
+.sininho-painel { position: absolute; right: 0; top: calc(100% + 8px); width: 360px; max-width: calc(100vw - 32px); z-index: 1050;
+    background: var(--bg-card); color: inherit; border: 1px solid var(--border-color); border-radius: 12px;
+    box-shadow: 0 12px 32px rgba(0,0,0,.25); overflow: hidden; }
+.sininho-painel[hidden], .sininho-contagem[hidden], .sininho-vazio[hidden] { display: none; }
+.sininho-topo { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 10px 14px; border-bottom: 1px solid var(--border-color); }
+.sininho-limpar { background: none; border: 0; color: var(--accent); font-size: .8rem; font-weight: 600; padding: 0; }
+.sininho-limpar:hover { text-decoration: underline; }
+.sininho-lista { list-style: none; margin: 0; padding: 0; max-height: 60vh; overflow-y: auto; }
+.sininho-item + .sininho-item { border-top: 1px solid var(--border-color); }
+.sininho-link { display: flex; gap: 10px; align-items: flex-start; padding: 10px 14px; color: inherit; text-decoration: none; font-size: .86rem; line-height: 1.35; }
+.sininho-link:hover { background: var(--accent-soft, rgba(249,115,22,.1)); color: inherit; }
+.sininho-ponto { flex: 0 0 9px; height: 9px; margin-top: 5px; border-radius: 50%; background: #0ea5e9; }
+.sininho-warning .sininho-ponto { background: #f59e0b; }
+.sininho-danger .sininho-ponto { background: #ef4444; }
+.sininho-item.lida .sininho-link { opacity: .55; }
+.sininho-item.lida .sininho-ponto { background: transparent; border: 1px solid currentColor; }
+.sininho-vazio { padding: 22px 14px; text-align: center; font-size: .86rem; opacity: .7; }
+@media (max-width: 575.98px) {
+    .sininho { position: static; }
+    .sininho-painel { position: fixed; left: 16px; right: 16px; width: auto; max-width: none; top: 62px; }
+}
+/* Painel do admin: gráficos na tela inicial */
+.painel-graficos .vchart { min-height: 180px; }
+.sit-ponto { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; background: var(--text-secondary); }
+.sit-PAGA { background: #10b981; }
+.sit-PENDENTE { background: #f59e0b; }
+.sit-EM_ANALISE { background: #3b82f6; }
+.sit-ATRASADA { background: #ef4444; }
+.sit-VENCIDA { background: #8b5cf6; }
+.painel-graficos .vval { font-size: 0.68rem; }
+@media (max-width: 576px) {
+    .painel-graficos .vval { font-size: 0.56rem; letter-spacing: -0.02em; }
+}
+
+/* Gráficos do painel clicáveis (abrem o detalhe num modal) */
+.grafico-clicavel { position: relative; cursor: pointer; transition: border-color 0.2s, transform 0.2s; }
+.grafico-clicavel:hover { border-color: var(--accent); transform: translateY(-2px); }
+.grafico-clicavel:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.grafico-expandir { position: absolute; right: 10px; bottom: 10px; font-size: 1rem; color: var(--text-secondary); }
+.grafico-clicavel:hover .grafico-expandir { color: var(--accent); }
+.hbar-detalhe { grid-template-columns: minmax(110px, 190px) 1fr auto; }
+.tag-calmo { opacity: 0.75; }
+.var-sobe { color: #10b981; font-weight: 600; }
+.var-desce { color: #ef4444; font-weight: 600; }
+@media (max-width: 576px) { .hbar-detalhe { grid-template-columns: 1fr; gap: 2px; } }
+@media (prefers-reduced-motion: reduce) { .grafico-clicavel { transition: none; } .grafico-clicavel:hover { transform: none; } }
+/* ===== Dicas guiadas (tour + "?") — js/dicas.js ===== */
+.btn-ajuda { width: 36px; padding-left: 0; padding-right: 0; font-weight: 700; justify-content: center; }
+.link-tour { background: none; border: 0; padding: 0; color: var(--text-secondary); font-size: inherit; cursor: pointer; }
+.link-tour:hover, .link-tour:focus-visible { color: var(--accent); text-decoration: underline; }
+.tour-alvo { position: relative; z-index: 1;
+    outline: 2px solid var(--accent); outline-offset: 3px; border-radius: var(--raio);
+    box-shadow: 0 0 0 6px var(--accent-soft); }
+.tour-balao, .tour-dica { position: fixed; z-index: 2000; width: min(320px, calc(100vw - 24px));
+    background: var(--bg-card); color: inherit; border: 1px solid var(--accent); border-radius: var(--raio);
+    padding: 14px 16px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    animation: tour-entra 0.22s cubic-bezier(0.22, 1, 0.36, 1); }
+.tour-balao:focus { outline: none; }
+.tour-balao.tour-livre { left: 12px; right: 12px; top: auto; bottom: 12px; width: auto; }
+.tour-dica { font-size: 0.9rem; line-height: 1.45; border-color: var(--border-color); }
+.tour-topo { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.tour-conta { font-size: 0.75rem; color: var(--text-secondary); }
+.tour-pular { background: none; border: 0; color: var(--text-secondary); font-size: 0.8rem; cursor: pointer; padding: 2px 4px; }
+.tour-pular:hover { color: var(--accent); }
+.tour-titulo { font-size: 1rem; font-weight: 700; margin: 0 0 4px; }
+.tour-texto { font-size: 0.88rem; line-height: 1.45; margin: 0 0 12px; color: var(--text-secondary); }
+.tour-botoes { display: flex; justify-content: flex-end; gap: 8px; }
+.tour-btn { border: 1px solid var(--border-color); background: transparent; color: inherit; border-radius: 8px;
+    padding: 6px 14px; font-size: 0.85rem; cursor: pointer; }
+.tour-btn:hover:not(:disabled) { background: var(--accent-soft); }
+.tour-btn:disabled { opacity: 0.4; cursor: default; }
+.tour-btn-prim { background: var(--accent); border-color: var(--accent); color: #fff; }
+.tour-btn-prim:hover:not(:disabled) { background: var(--accent-hover); }
+.tour-btn:focus-visible, .tour-pular:focus-visible, .link-tour:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@keyframes tour-entra { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.tour-balao.sem-anim, .tour-dica.sem-anim { animation: none; }
+@media (prefers-reduced-motion: reduce) { .tour-balao, .tour-dica { animation: none; } }
+@media print { .tour-balao, .tour-dica, .btn-ajuda { display: none !important; } }
+/* ===== Carteirinha digital (simulada) ===== */
+.carteirinha { display: flex; flex-wrap: wrap; gap: 1.25rem; align-items: center; justify-content: space-between; border-left: 4px solid var(--accent, #f97316); }
+.carteirinha-dados { flex: 1 1 240px; min-width: 0; }
+.carteirinha-topo { display: flex; gap: .75rem; align-items: center; }
+.carteirinha-avatar { width: 48px; height: 48px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.25rem; background: var(--accent, #f97316); color: #fff; flex-shrink: 0; }
+.carteirinha-codigo { display: block; margin-top: .5rem; word-break: break-all; color: var(--text-secondary); }
+.carteirinha-qr { width: 160px; flex-shrink: 0; background: #fff; padding: 6px; border-radius: 8px; }
+.carteirinha-qr svg { display: block; width: 100%; height: auto; }
+/* No celular o QR desce para baixo dos dados: centralizado e maior, para a leitura na recepção */
+@media (max-width: 576px) {
+    .carteirinha { justify-content: center; }
+    .carteirinha-qr { width: min(240px, 100%); }
+}
+
+/* ===== Leitor da carteirinha pela webcam (catraca simulada) ===== */
+.leitor-pagina { max-width: 640px; margin: 0 auto; padding: 24px 16px; }
+.leitor-video { position: relative; aspect-ratio: 4 / 3; background: #000; border-radius: 12px; overflow: hidden; }
+.leitor-video video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.leitor-mira { position: absolute; inset: 18%; border: 3px solid var(--accent, #f97316); border-radius: 12px; box-shadow: 0 0 0 9999px rgba(0, 0, 0, .35); pointer-events: none; }
+/* ===== Mapa do corpo (aba Avaliações Físicas): manequim 3D com as medidas por região =====
+   As cores do 3D são lidas destas variáveis pelo mapa-corpo.js. Para tirar a tela, apague este bloco,
+   o fragmento mapa-corpo.html e o mapa-corpo.js. */
+.mapa-corpo {
+    --mapa-pele: #a3a9b7;
+    --mapa-chao: #ffffff;
+    --mapa-melhorou: #34d399;
+    --mapa-piorou: #f87171;
+    --mapa-neutro: #e2e8f0;
+    --mapa-destaque: #f8fafc;
+    height: auto;
+}
+:root[data-theme="light"] .mapa-corpo {
+    --mapa-pele: #b4bac6;
+    --mapa-chao: #111827;
+    --mapa-melhorou: #047857;
+    --mapa-piorou: #b91c1c;
+    --mapa-neutro: #475569;
+    --mapa-destaque: #94a3b8;
+}
+.mapa-topo { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: var(--s3); margin-bottom: var(--s3); }
+.mapa-controles { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2); }
+.mapa-controles .mapa-aluno { width: auto; min-width: 180px; max-width: 260px; }
+.mapa-alternar { display: inline-flex; border: 1px solid var(--border-color); border-radius: 10px; overflow: hidden; }
+.mapa-alternar[hidden] { display: none; }
+.mapa-alternar button {
+    border: 0;
+    background: transparent;
+    color: var(--text-secondary);
+    font: inherit;
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 7px 12px;
+    transition: background-color 200ms, color 200ms;
+}
+.mapa-alternar button:hover:not(:disabled) { color: var(--text-primary); }
+.mapa-alternar button.active { background: var(--accent-soft); color: var(--accent); }
+.mapa-alternar button:disabled { opacity: 0.45; cursor: not-allowed; }
+.mapa-alternar button:focus-visible, .mapa-canvas:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.mapa-rotulo:focus-visible { outline: 2px solid var(--mapa-destaque); outline-offset: -2px; }
+
+.mapa-grade { display: grid; gap: var(--s4); }
+@media (min-width: 1200px) {
+    .mapa-grade { grid-template-columns: minmax(0, 1.75fr) minmax(230px, 1fr); align-items: center; }
+}
+.mapa-palco-caixa { container-type: inline-size; min-width: 0; }
+.mapa-palco {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 290px) minmax(0, 1fr);
+    height: clamp(420px, 58vh, 540px);
+    max-width: 780px;
+    margin: 0 auto;
+}
+.mapa-figura { position: relative; min-width: 0; background: radial-gradient(closest-side at 50% 46%, var(--accent-soft), transparent 78%); }
+.mapa-silhueta, .mapa-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.mapa-canvas { visibility: hidden; cursor: grab; touch-action: pan-y; border-radius: var(--raio); }
+.mapa-canvas.arrastando { cursor: grabbing; }
+.mapa-em-3d .mapa-canvas { visibility: visible; }
+.mapa-em-3d .mapa-silhueta { visibility: hidden; }
+/* Mapa dos músculos (2D): cor base, e a cor da medida nos músculos ligados a ela */
+/* Contorno de 1,5px na cor do cartão separa os músculos (cabeça e mãos também); a força da cor vem do fill-opacity (intensidade) */
+.mapa-musculo { fill: var(--mapa-pele); fill-opacity: 0.55; stroke: var(--bg-card); stroke-width: 1.5px; vector-effect: non-scaling-stroke; stroke-linejoin: round; transition: fill-opacity 200ms, stroke 200ms; }
+.mapa-musculo.medido { fill-opacity: 0.9; }
+.mapa-musculo.melhorou { fill: var(--mapa-melhorou); }
+.mapa-musculo.piorou { fill: var(--mapa-piorou); }
+.mapa-musculo.medido { cursor: pointer; }
+.mapa-musculo.ativo { stroke: var(--mapa-destaque); stroke-width: 2.5px; }
+/* Mãos e pés: só contorno do corpo, sempre no tom neutro (não têm medida) */
+.mapa-musculo.mapa-extremidade { fill-opacity: 0.4; pointer-events: none; }
+/* Troca Frente/Costas: some e volta em 200 ms no total */
+.mapa-silhueta, .mapa-linhas { transition: opacity 100ms ease; }
+.mapa-trocando .mapa-silhueta, .mapa-trocando .mapa-linhas { opacity: 0; }
+/* Dica ao passar o mouse num músculo */
+.mapa-dica-musculo {
+    position: absolute; z-index: 2; pointer-events: none; user-select: none; white-space: nowrap;
+    padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 600;
+    background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-color); border-left: 3px solid var(--mapa-neutro);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+}
+.mapa-dica-musculo[hidden] { display: none; }
+.mapa-dica-musculo.melhorou { border-left-color: var(--mapa-melhorou); }
+.mapa-dica-musculo.piorou { border-left-color: var(--mapa-piorou); }
+.mapa-rotulo.fora-da-vista { opacity: 0.5; }
+.mapa-comparando { color: var(--text-secondary); white-space: nowrap; user-select: none; }
+.mapa-comparando:empty { display: none; }
+.mapa-corpo:not(.mapa-em-3d) .mapa-nota-3d { display: none; }
+.mapa-rotulos, .mapa-legenda, .mapa-resumo, .mapa-alternar { user-select: none; -webkit-user-select: none; }
+.mapa-dica {
+    position: absolute;
+    left: 50%;
+    bottom: 2px;
+    transform: translateX(-50%);
+    display: none;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    pointer-events: none;
+    transition: opacity 400ms;
+}
+.mapa-em-3d .mapa-dica { display: inline-flex; }
+.mapa-ja-girou .mapa-dica { opacity: 0; }
+
+.mapa-rotulos { position: relative; list-style: none; margin: 0; padding: 0; min-width: 0; }
+.mapa-rotulo {
+    position: absolute;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 8px;
+    max-width: calc(100% - 22px);
+    padding: 6px 10px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    cursor: default;
+    transition: background-color 200ms, border-color 200ms;
+}
+.mapa-esq .mapa-rotulo { right: 22px; justify-content: flex-end; text-align: right; }
+.mapa-dir .mapa-rotulo { left: 22px; }
+.mapa-rotulo:hover, .mapa-rotulo.ativo { background: var(--bg-input); border-color: var(--border-color); }
+.mapa-rotulo-nome {
+    flex-basis: 100%;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.7px;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+}
+.mapa-rotulo-tipo { margin-left: 1px; font-weight: 500; letter-spacing: 0.2px; text-transform: none; opacity: 0.8; }
+.mapa-rotulo-valor { font-weight: 700; font-size: 1.02rem; color: var(--text-primary); white-space: nowrap; }
+.mapa-rotulo .evo-dif { white-space: nowrap; }
+.mapa-rotulo .evo-dif, .mapa-resumo-item .evo-dif { font-size: 0.85rem; }
+.mapa-rotulo .evo-dif.neutro, .mapa-resumo-item .evo-dif.neutro { color: var(--text-secondary); }
+
+.mapa-linhas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+.mapa-traco { fill: none; stroke: var(--mapa-neutro); stroke-width: 1.25; opacity: 0.75; }
+.mapa-bolinha { fill: var(--mapa-neutro); stroke: var(--bg-card); stroke-width: 2; }
+.mapa-traco.melhorou { stroke: var(--mapa-melhorou); }
+.mapa-traco.piorou { stroke: var(--mapa-piorou); }
+.mapa-bolinha.melhorou { fill: var(--mapa-melhorou); }
+.mapa-bolinha.piorou { fill: var(--mapa-piorou); }
+.mapa-traco.ativo { stroke-width: 2; opacity: 1; }
+
+/* Cartão estreito (celular): a figura em cima e os rótulos embaixo, em duas colunas, sem os traços */
+@container (max-width: 559.98px) {
+    .mapa-palco { grid-template-columns: 1fr 1fr; gap: var(--s2); height: auto; }
+    .mapa-figura { grid-column: 1 / -1; order: -1; height: clamp(360px, 60vh, 460px); }
+    .mapa-rotulos { display: flex; flex-direction: column; gap: var(--s2); }
+    .mapa-rotulo, .mapa-esq .mapa-rotulo, .mapa-dir .mapa-rotulo {
+        position: static;
+        max-width: none;
+        justify-content: flex-start;
+        text-align: left;
+        background: var(--bg-input);
+        border-left: 3px solid var(--mapa-neutro);
+    }
+    .mapa-rotulo.melhorou { border-left-color: var(--mapa-melhorou); }
+    .mapa-rotulo.piorou { border-left-color: var(--mapa-piorou); }
+    .mapa-rotulo.ativo { border-color: var(--mapa-destaque); }
+    .mapa-linhas { display: none; }
+}
+
+.mapa-lateral { display: flex; flex-direction: column; gap: var(--s3); min-width: 0; }
+.mapa-resumo { display: grid; grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)); gap: var(--s2); }
+.mapa-resumo:empty { display: none; }
+.mapa-resumo-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 8px;
+    padding: 12px 14px;
+    border-radius: var(--raio);
+    background: var(--bg-input);
+}
+.mapa-resumo-valor { font-weight: 700; font-size: 1.3rem; color: var(--text-primary); white-space: nowrap; }
+.mapa-legenda { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; color: var(--text-secondary); }
+.mapa-legenda li { display: flex; align-items: flex-start; gap: 10px; min-width: 0; }
+.mapa-legenda-grupo + .mapa-legenda-grupo { padding-top: 12px; border-top: 1px solid var(--border-color); }
+.mapa-legenda-corpo { min-width: 0; line-height: 1.6; }
+.mapa-legenda-titulo { font-weight: 700; color: var(--text-primary); margin-right: 2px; }
+.mapa-legenda-item { white-space: nowrap; } /* nome e número da medida nunca se separam */
+.mapa-ponto { flex: none; width: 10px; height: 10px; border-radius: 50%; background: var(--mapa-neutro); margin-top: 0.42em; }
+.mapa-ponto.melhorou { background: var(--mapa-melhorou); }
+.mapa-ponto.piorou { background: var(--mapa-piorou); }
+@media (prefers-reduced-motion: reduce) {
+    .mapa-alternar button, .mapa-rotulo, .mapa-musculo, .mapa-dica, .mapa-silhueta, .mapa-linhas { transition: none; }
+}

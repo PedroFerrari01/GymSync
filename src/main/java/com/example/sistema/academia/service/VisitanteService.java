@@ -74,7 +74,48 @@ public class VisitanteService {
     @Transactional
     public void aoSubir() {
         criarDadosDeExemplo();
+        completarCamposNovos();
         renovarDatas();
+    }
+
+    // Valores de exemplo dos campos que vieram depois (na ordem das avaliações, da mais antiga para a mais nova):
+    // ombro, antebraço, panturrilha, massa muscular e massa gorda. Os mesmos usados em criarDadosDeExemplo.
+    private static final double[][] NOVOS_ANA = {
+            {104.0, 24.5, 35.0, 24.8, 18.7}, {105.0, 25.0, 35.5, 25.3, 17.1}, {106.0, 25.5, 36.0, 25.9, 15.8}};
+    private static final double[][] NOVOS_BRUNO = {{116.0, 29.5, 38.5, 33.0, 17.6}, {114.5, 29.0, 38.0, 32.4, 20.2}};
+    private static final String EMAIL_BRUNO = "bruno.lima@exemplo.gymsync";
+
+    /**
+     * Banco de visitante criado antes da altura, da silhueta, das medidas novas e da bioimpedância: completa a Ana e o
+     * Bruno de exemplo. Só preenche campo vazio de aluno com e-mail @exemplo.gymsync; dado real e valor já salvo não mudam.
+     */
+    @Transactional
+    public void completarCamposNovos() {
+        if (!habilitado) return;
+        for (Aluno a : alunoRepository.findByEmailEndingWithIgnoreCase(SUFIXO_EXEMPLO)) {
+            boolean ehAna = EMAIL_ALUNO.equalsIgnoreCase(a.getEmail());
+            boolean ehBruno = EMAIL_BRUNO.equalsIgnoreCase(a.getEmail());
+            if (!ehAna && !ehBruno) continue;
+            if (a.getAlturaCm() == null) {
+                a.setAlturaCm(ehAna ? 165 : 178);
+                a.setSilhueta(ehAna ? Aluno.SILHUETA_FEMININA : Aluno.SILHUETA_MASCULINA);
+                alunoRepository.save(a);
+                log.info("Visitante: altura e silhueta de exemplo completadas para {}.", a.getNome());
+            }
+            double[][] valores = ehAna ? NOVOS_ANA : NOVOS_BRUNO;
+            List<AvaliacaoFisica> avaliacoes = avaliacaoFisicaRepository.findByAlunoIdOrderByDataAvaliacaoAscIdAsc(a.getId());
+            if (avaliacoes.size() != valores.length) continue; // alguém mexeu nas avaliações de exemplo: não adivinha
+            for (int i = 0; i < valores.length; i++) {
+                AvaliacaoFisica av = avaliacoes.get(i);
+                boolean mudou = false;
+                if (av.getOmbro() == null) { av.setOmbro(valores[i][0]); mudou = true; }
+                if (av.getAntebraco() == null) { av.setAntebraco(valores[i][1]); mudou = true; }
+                if (av.getPanturrilha() == null) { av.setPanturrilha(valores[i][2]); mudou = true; }
+                if (av.getMassaMuscularKg() == null) { av.setMassaMuscularKg(valores[i][3]); mudou = true; }
+                if (av.getMassaGordaKg() == null) { av.setMassaGordaKg(valores[i][4]); mudou = true; }
+                if (mudou) avaliacaoFisicaRepository.save(av);
+            }
+        }
     }
 
     /**
@@ -170,6 +211,13 @@ public class VisitanteService {
 
         Aluno ana = aluno("Ana Souza", EMAIL_ALUNO, LocalDate.of(1998, 4, 12), "ATIVO", 3);
         Aluno bruno = aluno("Bruno Lima", "bruno.lima@exemplo.gymsync", LocalDate.of(1995, 9, 3), "ATIVO", 4);
+        // Altura e silhueta do mapa do corpo (opcionais no cadastro)
+        ana.setAlturaCm(165);
+        ana.setSilhueta(Aluno.SILHUETA_FEMININA);
+        ana = alunoRepository.save(ana);
+        bruno.setAlturaCm(178);
+        bruno.setSilhueta(Aluno.SILHUETA_MASCULINA);
+        bruno = alunoRepository.save(bruno);
         Aluno carlaDias = aluno("Carla Dias", "carla.dias@exemplo.gymsync", LocalDate.of(2001, 1, 22), "INATIVO", 5);
         Aluno diego = aluno("Diego Alves", "diego.alves@exemplo.gymsync", LocalDate.of(1990, 6, 30), "ATIVO", 6);
         Aluno elisa = aluno("Elisa Rocha", "elisa.rocha@exemplo.gymsync", LocalDate.of(2003, 11, 8), "ATIVO", 7);
@@ -235,9 +283,13 @@ public class VisitanteService {
         }
 
         // Avaliações da Ana: o peso e o percentual de gordura caem aos poucos
-        avaliacao(ana, marcos, hoje.minusDays(90), 68.0, 27.5, 76.0);
-        avaliacao(ana, marcos, hoje.minusDays(45), 66.4, 25.8, 73.5);
-        avaliacao(ana, marcos, hoje.minusDays(5), 65.1, 24.2, 71.0);
+        // Medidas: cintura, quadril, peito, braço, coxa, ombro, antebraço e panturrilha (aparecem no mapa do corpo)
+        bio(avaliacao(ana, marcos, hoje.minusDays(90), 1.65, 68.0, 27.5, 76.0, 100.0, 91.0, 27.5, 55.0, 104.0, 24.5, 35.0), 24.8, 18.7);
+        bio(avaliacao(ana, marcos, hoje.minusDays(45), 1.65, 66.4, 25.8, 73.5, 98.5, 90.0, 28.0, 55.5, 105.0, 25.0, 35.5), 25.3, 17.1);
+        bio(avaliacao(ana, marcos, hoje.minusDays(5), 1.65, 65.1, 24.2, 71.0, 97.0, 89.5, 28.5, 56.0, 106.0, 25.5, 36.0), 25.9, 15.8);
+        // Bruno parou de treinar: a cintura e a gordura subiram, ombro, antebraço e panturrilha perderam um pouco
+        bio(avaliacao(bruno, marcos, hoje.minusDays(75), 1.78, 84.0, 21.0, 88.0, 101.0, 102.0, 35.0, 58.0, 116.0, 29.5, 38.5), 33.0, 17.6);
+        bio(avaliacao(bruno, marcos, hoje.minusDays(14), 1.78, 86.5, 23.4, 91.5, 102.0, 101.0, 34.5, 57.5, 114.5, 29.0, 38.0), 32.4, 20.2);
 
         aula("Spinning", carla, DayOfWeek.MONDAY, LocalTime.of(18, 0), 12);
         aula("Funcional", carla, DayOfWeek.WEDNESDAY, LocalTime.of(7, 0), 10);
@@ -335,20 +387,33 @@ public class VisitanteService {
         registroExercicioRepository.save(r);
     }
 
-    private void avaliacao(Aluno aluno, Professor professor, LocalDate data, double peso, double gordura, double cintura) {
+    /** Bioimpedância de exemplo (massa muscular e massa gorda, em kg). */
+    private void bio(AvaliacaoFisica a, double massaMuscularKg, double massaGordaKg) {
+        a.setMassaMuscularKg(massaMuscularKg);
+        a.setMassaGordaKg(massaGordaKg);
+        avaliacaoFisicaRepository.save(a);
+    }
+
+    private AvaliacaoFisica avaliacao(Aluno aluno, Professor professor, LocalDate data, double altura, double peso, double gordura,
+                           double cintura, double quadril, double peito, double braco, double coxa,
+                           double ombro, double antebraco, double panturrilha) {
         AvaliacaoFisica a = new AvaliacaoFisica();
         a.setAluno(aluno);
         a.setProfessorId(professor.getId());
         a.setRegistradoPor(professor.getNome());
         a.setDataAvaliacao(data);
         a.setPeso(peso);
-        a.setAltura(1.65);
+        a.setAltura(altura);
         a.setPercentualGordura(gordura);
         a.setCintura(cintura);
-        a.setQuadril(98.0);
-        a.setBraco(28.0);
-        a.setCoxa(55.0);
-        avaliacaoFisicaRepository.save(a);
+        a.setQuadril(quadril);
+        a.setPeito(peito);
+        a.setBraco(braco);
+        a.setCoxa(coxa);
+        a.setOmbro(ombro);
+        a.setAntebraco(antebraco);
+        a.setPanturrilha(panturrilha);
+        return a; // quem chama completa a bioimpedância e salva
     }
 
     private void aula(String nome, Professor professor, DayOfWeek dia, LocalTime horario, int vagas) {

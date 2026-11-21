@@ -1,6 +1,7 @@
 package com.example.sistema.academia.controller;
 
 import com.example.sistema.academia.dto.Acompanhamento;
+import com.example.sistema.academia.dto.Aviso;
 import com.example.sistema.academia.model.*;
 import com.example.sistema.academia.repository.*;
 import com.example.sistema.academia.service.*;
@@ -49,11 +50,13 @@ public class AcademiaController {
     @Autowired private FrequenciaService frequenciaService;
     @Autowired private EvolucaoService evolucaoService;
     @Autowired private AcompanhamentoService acompanhamentoService;
+    @Autowired private SininhoService sininhoService;
     @Autowired private com.example.sistema.academia.service.VisaoEquipeService visaoEquipeService;
     @Autowired private com.example.sistema.academia.service.AlunosDoProfessorService alunosDoProfessor;
     @Autowired private PasswordEncoder encoder;
     @Autowired private SenhaService senhaService;
     @Autowired private VisitanteService visitanteService;
+    @Autowired private CarteirinhaService carteirinhaService;
 
     @Value("${gymsync.validar-cpf:true}") private boolean validarCpf;
     @Value("${gymsync.recuperacao-por-email:true}") private boolean recuperacaoPorEmail;
@@ -62,7 +65,7 @@ public class AcademiaController {
     // Os cadastros recebem a entidade inteira: só estes campos podem vir do formulário (nada de id, situacao etc.)
     @InitBinder("aluno")
     void camposAluno(WebDataBinder binder) {
-        binder.setAllowedFields("nome", "cpf", "email", "dataNascimento", "contato", "senha");
+        binder.setAllowedFields("nome", "cpf", "email", "dataNascimento", "contato", "senha", "alturaCm", "silhueta");
     }
 
     @InitBinder("professor")
@@ -97,6 +100,22 @@ public class AcademiaController {
             l.setLinkWhatsapp(fichaService.linkWhatsapp(l.getContato(), texto));
         }
         return linhas;
+    }
+
+    /** "Spinning, seg 18:00 (23/11)" para cada aula que o aluno reservou (dados que o AulaService já pôs no model). */
+    @SuppressWarnings("unchecked")
+    private List<String> aulasReservadasTexto(Model model) {
+        List<AulaColetiva> aulas = (List<AulaColetiva>) model.asMap().get("aulas");
+        Set<Long> reservadas = (Set<Long>) model.asMap().get("aulasReservadas");
+        Map<Long, LocalDate> datas = (Map<Long, LocalDate>) model.asMap().get("proximasDatas");
+        List<String> textos = new ArrayList<>();
+        if (aulas == null || reservadas == null || datas == null) return textos;
+        for (AulaColetiva a : aulas) {
+            if (!reservadas.contains(a.getId()) || a.getHorario() == null) continue;
+            textos.add(a.getNome() + ", " + a.getDiaSemanaPt() + " " + a.getHorario()
+                    + " (" + datas.get(a.getId()).format(java.time.format.DateTimeFormatter.ofPattern("dd/MM")) + ")");
+        }
+        return textos;
     }
 
     @GetMapping("/")
@@ -138,6 +157,14 @@ public class AcademiaController {
 
             model.addAttribute("exercicios", exercicioTreinoRepository.findByTreinoAlunoId(usuarioId));
             model.addAttribute("mensalidades", mensalidadeRepository.findByMatriculaAlunoId(usuarioId));
+            String codigoCarteirinha = carteirinhaService.token(usuarioId);
+            String motivoCarteirinha = CarteirinhaService.motivoBloqueio(aluno,
+                    matriculaRepository.existsByAlunoIdAndSituacao(usuarioId, "ATIVA"),
+                    mensalidadeRepository.existsByMatriculaAlunoIdAndSituacao(usuarioId, "ATRASADA"));
+            model.addAttribute("carteirinhaCodigo", codigoCarteirinha);
+            model.addAttribute("carteirinhaQr", carteirinhaService.qrSvg(codigoCarteirinha));
+            model.addAttribute("carteirinhaMotivo", motivoCarteirinha);
+            model.addAttribute("carteirinhaAluno", aluno);
             model.addAttribute("entradas", entradas);
             model.addAttribute("visitasSemana", visitasSemana);
             model.addAttribute("visitas30", visitas30);
@@ -152,9 +179,13 @@ public class AcademiaController {
             model.addAttribute("resumoPeso", relatorioService.resumoPeso(avaliacoes));
             model.addAttribute("barrasGordura", evolucaoService.barrasGordura(avaliacoes));
             model.addAttribute("comparacao", evolucaoService.comparacao(avaliacoes));
+            model.addAttribute("mapasCorpo", avaliacoes.isEmpty() ? List.of()
+                    : List.of(evolucaoService.mapaCorpo(aluno.getId(), aluno.getNome(), avaliacoes)));
             model.addAttribute("linkWhatsappFicha", fichaService.linkWhatsapp(aluno.getContato(), fichaService.textoAluno(aluno)));
             model.addAttribute("naoLidas", mensagemRepository.countByAlunoIdAndRemetenteAndLidaFalse(usuarioId, "PROFESSOR"));
             aulaService.preencher(model, usuarioId);
+            model.addAttribute("sininho", sininhoService.paraAluno(avisoService.paraAluno(usuarioId),
+                    mensagemRepository.countByAlunoIdAndRemetenteAndLidaFalse(usuarioId, "PROFESSOR"), aulasReservadasTexto(model)));
             return "index";
         }
 
@@ -179,7 +210,9 @@ public class AcademiaController {
         model.addAttribute("exercicios", todosExercicios);
         model.addAttribute("entradas", todasEntradas);
         model.addAttribute("entradasRecentes", todasEntradas.stream().limit(30).toList());
-        model.addAttribute("avaliacoes", avaliacaoFisicaRepository.findAllByOrderByDataAvaliacaoDescIdDesc());
+        List<AvaliacaoFisica> todasAvaliacoes = avaliacaoFisicaRepository.findAllByOrderByDataAvaliacaoDescIdDesc();
+        model.addAttribute("avaliacoes", todasAvaliacoes);
+        model.addAttribute("mapasCorpo", evolucaoService.mapasCorpo(todasAvaliacoes));
         model.addAttribute("ultimosRegistros", ultimosRegistros(todosRegistros));
         model.addAttribute("linksWhatsapp", linksWhatsapp);
         model.addAttribute("acompanhamento", acompanhamento(meusTreinos, todosExercicios, todasEntradas, todosRegistros,
@@ -211,6 +244,7 @@ public class AcademiaController {
             model.addAttribute("professorId", usuarioId);
             model.addAttribute("meusTreinos", meusTreinos);
             model.addAttribute("naoLidas", mensagemRepository.countByProfessorIdAndRemetenteAndLidaFalse(usuarioId, "ALUNO"));
+            model.addAttribute("sininho", sininhoService.paraProfessor((List<Acompanhamento>) model.asMap().get("acompanhamento")));
             return "index";
         }
 
@@ -228,7 +262,9 @@ public class AcademiaController {
         }
         model.addAttribute("matriculas", matriculaRepository.findAll());
         model.addAttribute("mensalidades", mensalidadeRepository.findAll());
-        model.addAttribute("avisos", avisoService.paraAdmin());
+        List<Aviso> avisosAdmin = avisoService.paraAdmin();
+        model.addAttribute("avisos", avisosAdmin);
+        model.addAttribute("sininho", sininhoService.paraAdmin(avisosAdmin, (List<Acompanhamento>) model.asMap().get("acompanhamento")));
         model.addAttribute("equipamentos", equipamentoRepository.findAll());
         model.addAttribute("equipamentosComFoto", equipamentoImagemRepository.idsComImagem());
         model.addAttribute("manutencoes", manutencaoRepository.findAllByOrderByDataManutencaoDescIdDesc());
@@ -248,12 +284,18 @@ public class AcademiaController {
         return nascimento == null || nascimento.isAfter(LocalDate.now()) || nascimento.getYear() < 1900;
     }
 
+    /** Altura do aluno é opcional; quando vem, fica entre 100 e 250 cm. */
+    static boolean alturaInvalida(Integer alturaCm) {
+        return alturaCm != null && (alturaCm < 100 || alturaCm > 250);
+    }
+
     @PostMapping("/alunos/salvar")
     public String salvarAluno(Aluno aluno, RedirectAttributes redirect) {
         String erro = validarPessoa(aluno.getNome(), aluno.getCpf(), aluno.getEmail(), aluno.getContato());
         if (erro == null && nascimentoInvalido(aluno.getDataNascimento())) {
             erro = "Data de nascimento inválida.";
         }
+        if (erro == null && alturaInvalida(aluno.getAlturaCm())) erro = "Altura inválida (use centímetros, entre 100 e 250).";
         if (erro == null && alunoRepository.existsByEmailIgnoreCase(aluno.getEmail().trim())) {
             erro = "Já existe um aluno cadastrado com este e-mail.";
         }
@@ -287,6 +329,8 @@ public class AcademiaController {
                               @RequestParam String email,
                               @RequestParam String contato,
                               @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataNascimento,
+                              @RequestParam(required = false) Integer alturaCm,
+                              @RequestParam(required = false) String silhueta,
                               RedirectAttributes redirect) {
         Aluno aluno = alunoRepository.findById(id).orElse(null);
         if (aluno == null) {
@@ -295,6 +339,7 @@ public class AcademiaController {
         }
         String erro = validarPessoa(nome, null, email, contato);
         if (erro == null && nascimentoInvalido(dataNascimento)) erro = "Data de nascimento inválida.";
+        if (erro == null && alturaInvalida(alturaCm)) erro = "Altura inválida (use centímetros, entre 100 e 250).";
         if (erro == null && alunoRepository.existsByEmailIgnoreCaseAndIdNot(email.trim(), id)) {
             erro = "Já existe outro aluno com este e-mail.";
         }
@@ -306,6 +351,8 @@ public class AcademiaController {
         aluno.setEmail(email.trim());
         aluno.setContato(contato);
         aluno.setDataNascimento(dataNascimento);
+        aluno.setAlturaCm(alturaCm);
+        aluno.setSilhueta(silhueta);
         alunoRepository.save(aluno);
         redirect.addFlashAttribute("sucesso", "Dados do aluno atualizados!");
         return "redirect:/";
@@ -565,22 +612,44 @@ public class AcademiaController {
 
     @PostMapping("/entradas/registrar")
     public String registrarEntrada(@RequestParam Long alunoId, RedirectAttributes redirect) {
+        return liberarCatraca(alunoId, redirect);
+    }
+
+    /** Leitura da carteirinha digital (simulada): o código do QR leva ao mesmo fluxo da catraca. */
+    @PostMapping("/entradas/carteirinha")
+    public String registrarPelaCarteirinha(@RequestParam String codigo,
+                                           @RequestParam(required = false) String origem,
+                                           RedirectAttributes redirect) {
+        // Vindo do leitor pela webcam, volta para ele (próximo aluno); senão, para o painel
+        String volta = "leitor".equals(origem) ? "redirect:/catraca/leitor" : "redirect:/";
+        Optional<Long> alunoId = carteirinhaService.alunoDoToken(codigo);
+        if (alunoId.isEmpty()) {
+            redirect.addFlashAttribute("erro", "Catraca Bloqueada: código da carteirinha inválido.");
+            return volta;
+        }
+        liberarCatraca(alunoId.get(), redirect);
+        return volta;
+    }
+
+    /** Leitor do QR da carteirinha pela webcam (simulado). O vídeo fica no navegador; só o código lido é enviado. */
+    @GetMapping("/catraca/leitor")
+    public String leitorCatraca() {
+        return "catraca-leitor";
+    }
+
+    private String liberarCatraca(Long alunoId, RedirectAttributes redirect) {
         situacaoService.atualizar();
 
         Aluno a = alunoRepository.findById(alunoId).orElse(null);
         if (a == null) {
+            redirect.addFlashAttribute("erro", "Catraca Bloqueada: aluno não encontrado.");
             return "redirect:/";
         }
-        if ("INATIVO".equals(a.getSituacao())) {
-            redirect.addFlashAttribute("erro", "Catraca Bloqueada: o aluno " + a.getNome() + " está com cadastro INATIVO!");
-            return "redirect:/";
-        }
-        if (!matriculaRepository.existsByAlunoIdAndSituacao(alunoId, "ATIVA")) {
-            redirect.addFlashAttribute("erro", "Catraca Bloqueada: o aluno " + a.getNome() + " não possui matrícula ativa!");
-            return "redirect:/";
-        }
-        if (mensalidadeRepository.existsByMatriculaAlunoIdAndSituacao(alunoId, "ATRASADA")) {
-            redirect.addFlashAttribute("erro", "Catraca Bloqueada: o aluno " + a.getNome() + " está com mensalidade em atraso!");
+        String motivo = CarteirinhaService.motivoBloqueio(a,
+                matriculaRepository.existsByAlunoIdAndSituacao(alunoId, "ATIVA"),
+                mensalidadeRepository.existsByMatriculaAlunoIdAndSituacao(alunoId, "ATRASADA"));
+        if (motivo != null) {
+            redirect.addFlashAttribute("erro", "Catraca Bloqueada: o aluno " + a.getNome() + " " + motivo + "!");
             return "redirect:/";
         }
 

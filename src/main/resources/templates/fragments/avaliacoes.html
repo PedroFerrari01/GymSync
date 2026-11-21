@@ -1,6 +1,6 @@
 <div th:fragment="aba" class="tab-pane fade" id="aba-avaliacoes" role="tabpanel">
 
-    <div th:if="${perfil == 'ADMIN' or perfil == 'PROFESSOR'}" class="row g-4">
+    <div th:if="${perfil == 'ADMIN' or perfil == 'PROFESSOR'}" class="row g-4 mb-4">
         <div class="col-lg-4">
             <div class="panel-card">
                 <div class="d-flex justify-content-between align-items-center mb-3"><span class="tag-pill">Evolução</span><i class="bi bi-rulers fs-5"></i></div>
@@ -27,6 +27,16 @@
                         <div class="col"><label class="form-label">Peito (cm)</label><input type="number" step="0.1" min="1" max="300" name="peito" class="form-control"></div>
                         <div class="col"><label class="form-label">Braço (cm)</label><input type="number" step="0.1" min="1" max="150" name="braco" class="form-control"></div>
                         <div class="col"><label class="form-label">Coxa (cm)</label><input type="number" step="0.1" min="1" max="200" name="coxa" class="form-control"></div>
+                    </div>
+                    <div class="row g-2 mb-2">
+                        <div class="col"><label class="form-label">Ombro (cm)</label><input type="number" step="0.1" min="1" max="200" name="ombro" class="form-control"></div>
+                        <div class="col"><label class="form-label">Antebraço (cm)</label><input type="number" step="0.1" min="1" max="100" name="antebraco" class="form-control"></div>
+                        <div class="col"><label class="form-label">Panturrilha (cm)</label><input type="number" step="0.1" min="1" max="100" name="panturrilha" class="form-control"></div>
+                    </div>
+                    <label class="form-label mb-1">Bioimpedância (opcional)</label>
+                    <div class="row g-2 mb-2">
+                        <div class="col"><label class="form-label small">Massa muscular (kg)</label><input type="number" step="0.1" min="0.1" max="500" name="massaMuscularKg" class="form-control"></div>
+                        <div class="col"><label class="form-label small">Massa gorda (kg)</label><input type="number" step="0.1" min="0.1" max="500" name="massaGordaKg" class="form-control"></div>
                     </div>
                     <label class="form-label">Observações</label>
                     <textarea name="observacao" class="form-control mb-3" rows="2" maxlength="300"></textarea>
@@ -62,6 +72,14 @@
                 <div th:if="${#lists.isEmpty(avaliacoes)}" class="vazio">Nenhuma avaliação registrada ainda.</div>
             </div>
         </div>
+    </div>
+
+    <div th:if="${perfil == 'ADMIN' or perfil == 'PROFESSOR'}" class="row g-4">
+        <div class="col-12"><div th:replace="~{fragments/mapa-corpo :: mapa}"></div></div>
+    </div>
+
+    <div th:if="${perfil == 'ALUNO'}" class="row g-4 mb-4">
+        <div class="col-12"><div th:replace="~{fragments/mapa-corpo :: mapa}"></div></div>
     </div>
 
     <div th:if="${perfil == 'ALUNO'}" class="row g-4 mb-4">
@@ -130,7 +148,7 @@
                 <h5 class="panel-title mb-3">Minhas avaliações</h5>
                 <div class="table-responsive">
                     <table class="table table-custom">
-                        <thead><tr><th>Data</th><th>Peso</th><th>IMC</th><th>% Gord.</th><th>Cintura</th><th>Quadril</th><th>Peito</th><th>Braço</th><th>Coxa</th></tr></thead>
+                        <thead><tr><th>Data</th><th>Peso</th><th>IMC</th><th>% Gord.</th><th>Cintura</th><th>Quadril</th><th>Peito</th><th>Braço</th><th>Coxa</th><th>Ombro</th><th>Antebraço</th><th>Panturrilha</th></tr></thead>
                         <tbody>
                             <tr th:each="av : ${avaliacoes}">
                                 <td th:text="${av.dataAvaliacao != null ? #temporals.format(av.dataAvaliacao, 'dd/MM/yyyy') : '-'}"></td>
@@ -142,6 +160,9 @@
                                 <td th:text="${@fmt.numero(av.peito, 1)}"></td>
                                 <td th:text="${@fmt.numero(av.braco, 1)}"></td>
                                 <td th:text="${@fmt.numero(av.coxa, 1)}"></td>
+                                <td th:text="${@fmt.numero(av.ombro, 1)}"></td>
+                                <td th:text="${@fmt.numero(av.antebraco, 1)}"></td>
+                                <td th:text="${@fmt.numero(av.panturrilha, 1)}"></td>
                             </tr>
                         </tbody>
                     </table>

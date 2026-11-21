@@ -145,4 +145,35 @@ class RegrasAcessoTest {
     void respeitaAsPermissoesDeCadaPerfil(String perfil, String caminho, boolean esperado) {
         assertEquals(esperado, RegrasAcesso.permitido(perfil, caminho));
     }
+
+    @Test
+    void carteirinhaNaCatracaEhSoDoAdminENaoDoVisitante() {
+        assertTrue(RegrasAcesso.permitido("ADMIN", "/entradas/carteirinha"));
+        assertFalse(RegrasAcesso.permitido("ALUNO", "/entradas/carteirinha"));
+        assertFalse(RegrasAcesso.permitido("PROFESSOR", "/entradas/carteirinha"));
+        assertFalse(RegrasAcesso.permitido(null, "/entradas/carteirinha"));
+        assertFalse(RegrasAcesso.visitantePode("POST", "/entradas/carteirinha"));
+    }
+
+    @Test
+    void leitorPelaWebcamEhSoDoAdmin() {
+        assertTrue(RegrasAcesso.permitido("ADMIN", "/catraca/leitor"));
+        assertFalse(RegrasAcesso.permitido("ALUNO", "/catraca/leitor"));
+        assertFalse(RegrasAcesso.permitido("PROFESSOR", "/catraca/leitor"));
+        assertFalse(RegrasAcesso.permitido(null, "/catraca/leitor"));
+    }
+
+    @Test
+    void cameraSoNoLeitorDaCatraca() {
+        assertTrue(SegurancaConfig.politicaPermissoes("/catraca/leitor").contains("camera=(self)"));
+        for (String caminho : new String[] {"/", "/aluno/meus-dados", "/catraca/leitor/", "/catraca/leitorx", "/mensagens"}) {
+            String politica = SegurancaConfig.politicaPermissoes(caminho);
+            assertTrue(politica.contains("camera=()"), caminho);
+            assertFalse(politica.contains("camera=(self)"), caminho);
+        }
+        // Microfone, localização e pagamento continuam bloqueados até no leitor
+        assertTrue(SegurancaConfig.politicaPermissoes("/catraca/leitor").contains("microphone=()"));
+        assertTrue(SegurancaConfig.politicaPermissoes("/catraca/leitor").contains("geolocation=()"));
+        assertTrue(SegurancaConfig.politicaPermissoes("/catraca/leitor").contains("payment=()"));
+    }
 }

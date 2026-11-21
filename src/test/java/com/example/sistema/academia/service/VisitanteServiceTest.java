@@ -130,6 +130,27 @@ class VisitanteServiceTest {
     }
 
     @Test
+    void completaAlturaSilhuetaEMedidasNovasDaAnaEmBancoAntigo() {
+        AvaliacaoFisicaRepository avaliacoes = (AvaliacaoFisicaRepository) ReflectionTestUtils.getField(servico, "avaliacaoFisicaRepository");
+        AvaliacaoFisica a1 = new AvaliacaoFisica(), a2 = new AvaliacaoFisica(), a3 = new AvaliacaoFisica();
+        a3.setOmbro(110.0); // valor já salvo não muda
+        when(avaliacoes.findByAlunoIdOrderByDataAvaliacaoAscIdAsc(1L)).thenReturn(List.of(a1, a2, a3));
+        when(alunos.findByEmailEndingWithIgnoreCase("@exemplo.gymsync")).thenReturn(List.of(ana, real));
+
+        servico.completarCamposNovos();
+
+        assertEquals(165, ana.getAlturaCm());
+        assertEquals(Aluno.SILHUETA_FEMININA, ana.getSilhueta());
+        assertEquals(104.0, a1.getOmbro());
+        assertEquals(24.8, a1.getMassaMuscularKg());
+        assertEquals(15.8, a3.getMassaGordaKg());
+        assertEquals(110.0, a3.getOmbro());
+        // O aluno real não é tocado
+        assertEquals(null, real.getAlturaCm());
+        verify(avaliacoes, never()).findByAlunoIdOrderByDataAvaliacaoAscIdAsc(99L);
+    }
+
+    @Test
     void renovarDatasDesligadoNaoFazNada() {
         ReflectionTestUtils.setField(servico, "habilitado", false);
         servico.renovarDatas();
