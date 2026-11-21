@@ -34,6 +34,26 @@ public class Aluno {
     /** Quando o aluno aceitou a política de privacidade (LGPD). Null = ainda não aceitou. */
     private LocalDateTime aceitePrivacidade;
 
+    /** Altura em centímetros, opcional. Só serve para desenhar o mapa do corpo na proporção certa. */
+    private Integer alturaCm;
+
+    /**
+     * Desenho-base do mapa do corpo: MASCULINA, FEMININA ou NAO_INFORMADA (padrão). Opcional e só visual;
+     * o nome é "silhueta" de propósito, para não ser confundido com sexo ou identidade de gênero.
+     */
+    @Column(length = 20)
+    private String silhueta = SILHUETA_NAO_INFORMADA;
+
+    public static final String SILHUETA_MASCULINA = "MASCULINA";
+    public static final String SILHUETA_FEMININA = "FEMININA";
+    public static final String SILHUETA_NAO_INFORMADA = "NAO_INFORMADA";
+
+    /** Qualquer valor fora da lista (ou vazio, ou de aluno antigo sem a coluna) vira "não informada". */
+    public static String silhuetaValida(String valor) {
+        if (SILHUETA_MASCULINA.equals(valor) || SILHUETA_FEMININA.equals(valor)) return valor;
+        return SILHUETA_NAO_INFORMADA;
+    }
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -63,4 +83,10 @@ public class Aluno {
 
     public LocalDateTime getAceitePrivacidade() { return aceitePrivacidade; }
     public void setAceitePrivacidade(LocalDateTime aceitePrivacidade) { this.aceitePrivacidade = aceitePrivacidade; }
+
+    public Integer getAlturaCm() { return alturaCm; }
+    public void setAlturaCm(Integer alturaCm) { this.alturaCm = alturaCm; }
+
+    public String getSilhueta() { return silhuetaValida(silhueta); }
+    public void setSilhueta(String silhueta) { this.silhueta = silhuetaValida(silhueta); }
 }

@@ -100,6 +100,8 @@ public class PrivacidadeController {
         cadastro.put("cpf", a.getCpf());
         cadastro.put("email", a.getEmail());
         cadastro.put("telefone", a.getContato());
+        cadastro.put("alturaCm", a.getAlturaCm());
+        cadastro.put("silhuetaDoMapa", a.getSilhueta());
         cadastro.put("nascimento", data(a.getDataNascimento()));
         cadastro.put("situacao", a.getSituacao());
         cadastro.put("aceitePrivacidade", dataHora(a.getAceitePrivacidade()));
@@ -137,6 +139,11 @@ public class PrivacidadeController {
             l.put("peitoCm", av.getPeito());
             l.put("bracoCm", av.getBraco());
             l.put("coxaCm", av.getCoxa());
+            l.put("ombroCm", av.getOmbro());
+            l.put("antebracoCm", av.getAntebraco());
+            l.put("panturrilhaCm", av.getPanturrilha());
+            l.put("massaMuscularKg", av.getMassaMuscularKg());
+            l.put("massaGordaKg", av.getMassaGordaKg());
             l.put("observacao", av.getObservacao());
             return l;
         }).toList());

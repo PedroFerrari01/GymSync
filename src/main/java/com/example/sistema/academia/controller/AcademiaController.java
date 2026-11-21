@@ -65,7 +65,7 @@ public class AcademiaController {
     // Os cadastros recebem a entidade inteira: só estes campos podem vir do formulário (nada de id, situacao etc.)
     @InitBinder("aluno")
     void camposAluno(WebDataBinder binder) {
-        binder.setAllowedFields("nome", "cpf", "email", "dataNascimento", "contato", "senha");
+        binder.setAllowedFields("nome", "cpf", "email", "dataNascimento", "contato", "senha", "alturaCm", "silhueta");
     }
 
     @InitBinder("professor")
@@ -179,6 +179,8 @@ public class AcademiaController {
             model.addAttribute("resumoPeso", relatorioService.resumoPeso(avaliacoes));
             model.addAttribute("barrasGordura", evolucaoService.barrasGordura(avaliacoes));
             model.addAttribute("comparacao", evolucaoService.comparacao(avaliacoes));
+            model.addAttribute("mapasCorpo", avaliacoes.isEmpty() ? List.of()
+                    : List.of(evolucaoService.mapaCorpo(aluno.getId(), aluno.getNome(), avaliacoes)));
             model.addAttribute("linkWhatsappFicha", fichaService.linkWhatsapp(aluno.getContato(), fichaService.textoAluno(aluno)));
             model.addAttribute("naoLidas", mensagemRepository.countByAlunoIdAndRemetenteAndLidaFalse(usuarioId, "PROFESSOR"));
             aulaService.preencher(model, usuarioId);
@@ -208,7 +210,9 @@ public class AcademiaController {
         model.addAttribute("exercicios", todosExercicios);
         model.addAttribute("entradas", todasEntradas);
         model.addAttribute("entradasRecentes", todasEntradas.stream().limit(30).toList());
-        model.addAttribute("avaliacoes", avaliacaoFisicaRepository.findAllByOrderByDataAvaliacaoDescIdDesc());
+        List<AvaliacaoFisica> todasAvaliacoes = avaliacaoFisicaRepository.findAllByOrderByDataAvaliacaoDescIdDesc();
+        model.addAttribute("avaliacoes", todasAvaliacoes);
+        model.addAttribute("mapasCorpo", evolucaoService.mapasCorpo(todasAvaliacoes));
         model.addAttribute("ultimosRegistros", ultimosRegistros(todosRegistros));
         model.addAttribute("linksWhatsapp", linksWhatsapp);
         model.addAttribute("acompanhamento", acompanhamento(meusTreinos, todosExercicios, todasEntradas, todosRegistros,
@@ -280,12 +284,18 @@ public class AcademiaController {
         return nascimento == null || nascimento.isAfter(LocalDate.now()) || nascimento.getYear() < 1900;
     }
 
+    /** Altura do aluno é opcional; quando vem, fica entre 100 e 250 cm. */
+    static boolean alturaInvalida(Integer alturaCm) {
+        return alturaCm != null && (alturaCm < 100 || alturaCm > 250);
+    }
+
     @PostMapping("/alunos/salvar")
     public String salvarAluno(Aluno aluno, RedirectAttributes redirect) {
         String erro = validarPessoa(aluno.getNome(), aluno.getCpf(), aluno.getEmail(), aluno.getContato());
         if (erro == null && nascimentoInvalido(aluno.getDataNascimento())) {
             erro = "Data de nascimento inválida.";
         }
+        if (erro == null && alturaInvalida(aluno.getAlturaCm())) erro = "Altura inválida (use centímetros, entre 100 e 250).";
         if (erro == null && alunoRepository.existsByEmailIgnoreCase(aluno.getEmail().trim())) {
             erro = "Já existe um aluno cadastrado com este e-mail.";
         }
@@ -319,6 +329,8 @@ public class AcademiaController {
                               @RequestParam String email,
                               @RequestParam String contato,
                               @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataNascimento,
+                              @RequestParam(required = false) Integer alturaCm,
+                              @RequestParam(required = false) String silhueta,
                               RedirectAttributes redirect) {
         Aluno aluno = alunoRepository.findById(id).orElse(null);
         if (aluno == null) {
@@ -327,6 +339,7 @@ public class AcademiaController {
         }
         String erro = validarPessoa(nome, null, email, contato);
         if (erro == null && nascimentoInvalido(dataNascimento)) erro = "Data de nascimento inválida.";
+        if (erro == null && alturaInvalida(alturaCm)) erro = "Altura inválida (use centímetros, entre 100 e 250).";
         if (erro == null && alunoRepository.existsByEmailIgnoreCaseAndIdNot(email.trim(), id)) {
             erro = "Já existe outro aluno com este e-mail.";
         }
@@ -338,6 +351,8 @@ public class AcademiaController {
         aluno.setEmail(email.trim());
         aluno.setContato(contato);
         aluno.setDataNascimento(dataNascimento);
+        aluno.setAlturaCm(alturaCm);
+        aluno.setSilhueta(silhueta);
         alunoRepository.save(aluno);
         redirect.addFlashAttribute("sucesso", "Dados do aluno atualizados!");
         return "redirect:/";
