@@ -140,10 +140,101 @@ public class RelatorioService {
             receita.add(new Barra(rotulos.get(i), dinheiro(valores.get(i)), percentual(valores.get(i).doubleValue(), maxReceita)));
         }
         model.addAttribute("relReceita", receita);
+        model.addAttribute("relSituacoes", porSituacao(mensalidades));
+        model.addAttribute("relSituacoesDetalhe", detalheSituacoes(mensalidades));
+        FaturamentoDetalhe fat = detalheFaturamento(rotulos, valores);
+        model.addAttribute("relFat", fat);
+        model.addAttribute("relDiasDetalhe", detalheDias(porDia));
 
         model.addAttribute("relMesAMes", mesAMes(hoje, entradas, matriculaRepository.findAll(), mensalidades));
         model.addAttribute("relMesAMesTitulo", "Dia 1 a " + hoje.getDayOfMonth() + " de cada mês");
         model.addAttribute("historico", historicoAcaoRepository.findTop50ByOrderByDataHoraDescIdDesc());
+    }
+
+    private static final String[] SITUACOES = {"PAGA", "PENDENTE", "EM_ANALISE", "ATRASADA", "VENCIDA"};
+
+    /** Quantidade de mensalidades em cada situação (barra proporcional à maior). */
+    public List<Barra> porSituacao(List<Mensalidade> mensalidades) {
+        long[] total = new long[SITUACOES.length];
+        for (Mensalidade m : mensalidades) {
+            for (int i = 0; i < SITUACOES.length; i++) {
+                if (SITUACOES[i].equals(m.getSituacao())) total[i]++;
+            }
+        }
+        long max = Arrays.stream(total).max().orElse(0);
+        List<Barra> lista = new ArrayList<>();
+        for (int i = 0; i < SITUACOES.length; i++) {
+            lista.add(new Barra(SITUACOES[i], String.valueOf(total[i]), percentual(total[i], max)));
+        }
+        return lista;
+    }
+
+    public record MesFaturamento(String rotulo, BigDecimal valor, BigDecimal variacaoValor, Double variacaoPct, boolean melhor) {}
+    public record FaturamentoDetalhe(List<MesFaturamento> meses, BigDecimal total, BigDecimal media, String melhorMes) {}
+    public record DiaDetalhe(String rotulo, long entradas, int pct, boolean pico, boolean vazio) {}
+    public record SituacaoDetalhe(String situacao, long quantidade, BigDecimal valor, int pct) {}
+
+    /** Mês a mês: variação em relação ao anterior (nula quando não há base), melhor mês, total e média. */
+    public FaturamentoDetalhe detalheFaturamento(List<String> rotulos, List<BigDecimal> valores) {
+        BigDecimal total = BigDecimal.ZERO;
+        int idxMelhor = -1;
+        for (int i = 0; i < valores.size(); i++) {
+            total = total.add(valores.get(i));
+            if (valores.get(i).signum() > 0 && (idxMelhor < 0 || valores.get(i).compareTo(valores.get(idxMelhor)) > 0)) idxMelhor = i;
+        }
+        List<MesFaturamento> meses = new ArrayList<>();
+        for (int i = 0; i < valores.size(); i++) {
+            BigDecimal v = valores.get(i);
+            BigDecimal difValor = null;
+            Double difPct = null;
+            if (i > 0) {
+                BigDecimal ant = valores.get(i - 1);
+                difValor = v.subtract(ant);
+                if (ant.signum() > 0) difPct = difValor.doubleValue() / ant.doubleValue() * 100;
+            }
+            meses.add(new MesFaturamento(rotulos.get(i), v, difValor, difPct, i == idxMelhor));
+        }
+        BigDecimal media = valores.isEmpty() ? BigDecimal.ZERO
+                : total.divide(BigDecimal.valueOf(valores.size()), 2, java.math.RoundingMode.HALF_UP);
+        return new FaturamentoDetalhe(meses, total, media, idxMelhor < 0 ? null : rotulos.get(idxMelhor));
+    }
+
+    /** Entradas por dia da semana, com a participação de cada dia e o mais e o menos movimentado. */
+    public List<DiaDetalhe> detalheDias(long[] porDia) {
+        long total = Arrays.stream(porDia).sum();
+        long max = Arrays.stream(porDia).max().orElse(0);
+        long min = Arrays.stream(porDia).min().orElse(0);
+        int idxPico = -1, idxVazio = -1;
+        for (int d = 0; d < porDia.length; d++) {
+            if (total > 0 && idxPico < 0 && porDia[d] == max) idxPico = d;
+            if (total > 0 && idxVazio < 0 && porDia[d] == min) idxVazio = d;
+        }
+        List<DiaDetalhe> lista = new ArrayList<>();
+        for (int d = 0; d < porDia.length; d++) {
+            lista.add(new DiaDetalhe(DIAS[d], porDia[d], percentual(porDia[d], total), d == idxPico, d == idxVazio && idxVazio != idxPico));
+        }
+        return lista;
+    }
+
+    /** Quantidade e valor em R$ de cada situação de mensalidade. */
+    public List<SituacaoDetalhe> detalheSituacoes(List<Mensalidade> mensalidades) {
+        long[] qtd = new long[SITUACOES.length];
+        BigDecimal[] valor = new BigDecimal[SITUACOES.length];
+        Arrays.fill(valor, BigDecimal.ZERO);
+        for (Mensalidade m : mensalidades) {
+            for (int i = 0; i < SITUACOES.length; i++) {
+                if (SITUACOES[i].equals(m.getSituacao())) {
+                    qtd[i]++;
+                    valor[i] = valor[i].add(valorOuZero(m));
+                }
+            }
+        }
+        long total = Arrays.stream(qtd).sum();
+        List<SituacaoDetalhe> lista = new ArrayList<>();
+        for (int i = 0; i < SITUACOES.length; i++) {
+            lista.add(new SituacaoDetalhe(SITUACOES[i], qtd[i], valor[i], percentual(qtd[i], total)));
+        }
+        return lista;
     }
 
     /** Números de um mês, do dia 1 até {@code ateDia} (para comparar períodos iguais). */
