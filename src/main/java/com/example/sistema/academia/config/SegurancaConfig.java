@@ -26,8 +26,8 @@ public class SegurancaConfig {
      */
     static final String CSP = "default-src 'self'; "
             + "script-src 'self'; "
-            + "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
-            + "font-src 'self' https://fonts.gstatic.com; "
+            + "style-src 'self' 'unsafe-inline'; "
+            + "font-src 'self'; "
             + "img-src 'self' data: blob:; "
             + "connect-src 'self'; "
             + "frame-src https://www.youtube-nocookie.com; " // só o vídeo do "Quem somos", depois do clique

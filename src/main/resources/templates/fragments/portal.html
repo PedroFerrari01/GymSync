@@ -2,7 +2,7 @@
 
     <th:block th:replace="~{fragments/avisos :: lista}"></th:block>
 
-    <!-- Instalar no celular: o gymsync.js mostra este cartão só quando o navegador permite instalar (ou no iPhone) -->
+    <!--/* Instalar no celular: o gymsync.js mostra este cartão só quando o navegador permite instalar (ou no iPhone) */-->
     <div class="instalar-app panel-card mb-4 ocultar-impressao" hidden>
         <span class="brand-logo"><img th:src="@{/img/logo-simbolo-fundo-escuro.png}" class="logo-fundo-escuro" alt="" height="44"><img th:src="@{/img/logo-simbolo-fundo-claro.png}" class="logo-fundo-claro" alt="" height="44"></span>
         <div class="flex-grow-1">
@@ -13,7 +13,7 @@
         <button type="button" class="btn-close instalar-fechar" aria-label="Agora não"></button>
     </div>
 
-    <!-- Carteirinha digital (simulada): o QR leva um código assinado, não o CPF -->
+    <!--/* Carteirinha digital (simulada): o QR leva um código assinado, não o CPF */-->
     <div class="panel-card carteirinha mb-4 ocultar-impressao" id="carteirinha" th:if="${carteirinhaCodigo != null}" th:data-restante="${carteirinhaRestante}" th:data-url="@{/aluno/carteirinha/codigo}">
         <div class="carteirinha-dados">
             <div class="carteirinha-topo">
@@ -181,7 +181,7 @@
                 </div>
             </div>
 
-    <!-- Todas as mensalidades do aluno, com abas por situação (filtro feito no gymsync.js) -->
+    <!--/* Todas as mensalidades do aluno, com abas por situação (filtro feito no gymsync.js) */-->
     <div class="modal fade" id="modalTodasMensalidades" tabindex="-1" aria-hidden="true" th:if="${!#lists.isEmpty(mensalidades)}">
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content">

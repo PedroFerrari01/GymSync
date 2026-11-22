@@ -1,3 +1,12 @@
+/* Fonte Outfit local (licença SIL OFL em vendor/outfit/OFL.txt): não depende do Google Fonts */
+@font-face {
+    font-family: 'Outfit';
+    src: url('../vendor/outfit/Outfit-Variable.ttf') format('truetype');
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+}
+
 /* GymSync - tema sóbrio
    Regras: cartões sólidos, uma cor de destaque, contraste real,
    espaçamento em escala fixa (4, 8, 16, 24) e movimento mínimo.

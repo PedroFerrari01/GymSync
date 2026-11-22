@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
+    <title>GymSync — Página não encontrada</title>
+    <link rel="stylesheet" th:href="@{/vendor/bootstrap/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/vendor/bootstrap-icons/bootstrap-icons.min.css}">
+    <link rel="stylesheet" th:href="@{/css/gymsync.css}">
+    <link rel="stylesheet" th:href="@{/css/gymsync-tema.css}">
+    <link rel="icon" type="image/png" th:href="@{/img/favicon.png}">
+</head>
+<body>
+<main class="d-flex align-items-center justify-content-center min-vh-100 p-3">
+    <div class="login-card text-center">
+        <div class="login-logo"><img th:src="@{/img/logo-completo-fundo-escuro.png}" class="logo-fundo-escuro" alt="GymSync" height="120"><img th:src="@{/img/logo-completo-fundo-claro.png}" class="logo-fundo-claro" alt="GymSync" height="120"></div>
+        <h5 class="fw-bold mb-2"><i class="bi bi-compass me-2"></i>Não encontramos esta página</h5>
+        <p class="texto-apoio mb-4">O endereço pode estar errado, ou você não tem acesso a ela. Se o problema continuar, procure a recepção.</p>
+        <a th:href="@{/}" class="btn-brand w-100 d-block text-center text-decoration-none">Voltar ao início</a>
+    </div>
+</main>
+</body>
+</html>

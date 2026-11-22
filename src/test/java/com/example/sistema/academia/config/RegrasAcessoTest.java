@@ -32,6 +32,7 @@ class RegrasAcessoTest {
         assertTrue(RegrasAcesso.permitido(null, "/sitemap.xml"));
         // LGPD: a política é pública; aceite e "baixar meus dados" são só do aluno logado
         assertTrue(RegrasAcesso.permitido(null, "/privacidade"));
+        assertTrue(RegrasAcesso.permitido(null, "/error"));
         assertFalse(RegrasAcesso.permitido(null, "/aluno/meus-dados"));
         assertTrue(RegrasAcesso.permitido("ALUNO", "/aluno/meus-dados"));
         assertTrue(RegrasAcesso.permitido("ALUNO", "/aluno/aceitar-privacidade"));

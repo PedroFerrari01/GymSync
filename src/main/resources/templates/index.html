@@ -21,7 +21,6 @@
     <link rel="preload" as="font" type="font/woff2" crossorigin th:href="@{'/vendor/bootstrap-icons/fonts/bootstrap-icons.woff2?dd67030699838ea613ee6dbda90effa6'}">
     <link rel="stylesheet" th:href="@{/vendor/bootstrap-icons/bootstrap-icons.min.css}">
     <link rel="stylesheet" th:href="@{/vendor/phosphor/regular/style.css}">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/gymsync.css}">
     <link rel="stylesheet" th:href="@{/css/gymsync-tema.css}">
     <link rel="icon" type="image/png" th:href="@{/img/favicon.png}">
@@ -90,7 +89,7 @@
             </div>
 
             <button type="submit" class="btn-brand w-100"><i class="bi bi-box-arrow-in-right me-2"></i>Entrar no Sistema</button>
-            <!-- Visitante: entra com o perfil escolhido acima, dados de exemplo e nada é salvo (gymsync.visitante) -->
+            <!--/* Visitante: entra com o perfil escolhido acima, dados de exemplo e nada é salvo (gymsync.visitante) */-->
             <button th:if="${visitanteHabilitado}" type="submit" class="btn-theme btn-visitante w-100 mt-2" th:formaction="@{/visitante}" formnovalidate>
                 <i class="bi bi-eye me-2"></i>Testar como visitante
             </button>
@@ -105,7 +104,7 @@
     <a href="#sobre" class="sobre-convite">Conheça o GymSync <i class="ph ph-arrow-down"></i></a>
 </div>
 
-<!-- Quem somos: apresentação do sistema abaixo do login (animações em gymsync.js) -->
+<!--/* Quem somos: apresentação do sistema abaixo do login (animações em gymsync.js) */-->
 <div th:if="${!logado}" class="sobre" id="sobre">
 
     <section class="abertura" aria-labelledby="tituloAbertura">
@@ -159,7 +158,7 @@
 
             <div class="jornada-visual" aria-hidden="true">
                 <div class="jornada-barra"><span></span></div>
-                <!-- Cada cena se monta quando o passo fica ativo (classes cena-* em gymsync-tema.css) -->
+                <!--/* Cada cena se monta quando o passo fica ativo (classes cena-* em gymsync-tema.css) */-->
                 <div class="visual-item">
                     <span class="cena-numero">01</span>
                     <div class="cena">
@@ -233,7 +232,7 @@
                 <div class="galeria-item" data-nome="Aulas coletivas" data-quem="Aluno" data-dica="Reserve a última vaga do Funcional e veja a aula lotar."><th:block th:replace="~{fragments/demonstracoes :: aulas}"></th:block></div>
                 <div class="galeria-item" data-nome="Horário de pico" data-quem="Administrador" data-dica="Troque entre 7 e 30 dias e veja as barras mudarem."><th:block th:replace="~{fragments/demonstracoes :: relatorio}"></th:block></div>
             </div>
-            <!-- Legenda do cartão da frente e atalhos: preenchidos pelo gymsync.js enquanto a órbita gira -->
+            <!--/* Legenda do cartão da frente e atalhos: preenchidos pelo gymsync.js enquanto a órbita gira */-->
             <div class="galeria-legenda" aria-live="polite">
                 <p class="galeria-quem"><i class="ph ph-user" aria-hidden="true"></i><span></span></p>
                 <h3 class="galeria-nome"></h3>
@@ -252,7 +251,7 @@
             <button type="button" class="perfil-btn" data-perfil="ADMIN" aria-pressed="false">Administrador</button>
         </div>
         <div class="perfis-palco">
-            <!-- Réplica do menu lateral real: data-perfis diz quem vê cada item (mesmas regras do index logado) -->
+            <!--/* Réplica do menu lateral real: data-perfis diz quem vê cada item (mesmas regras do index logado) */-->
             <div class="menu-demo" aria-hidden="true">
                 <div class="brand-box menu-demo-marca">
                     <span class="brand-logo"><img th:src="@{/img/logo-simbolo-fundo-escuro.png}" class="logo-fundo-escuro" alt="" height="40"><img th:src="@{/img/logo-simbolo-fundo-claro.png}" class="logo-fundo-claro" alt="" height="40"></span>
@@ -314,8 +313,8 @@
         </div>
     </section>
 
-    <!-- Vídeo de apresentação: por padrão toca o arquivo do próprio site (static/video), que só carrega no clique.
-         Com gymsync.video-youtube preenchido (o código do vídeo no YouTube), abre pelo YouTube (gymsync.js). -->
+    <!--/* Vídeo de apresentação: por padrão toca o arquivo do próprio site (static/video), que só carrega no clique.
+         Com gymsync.video-youtube preenchido (o código do vídeo no YouTube), abre pelo YouTube (gymsync.js). */-->
     <section id="video" class="sobre-bloco sobre-video" aria-labelledby="tituloVideo">
         <h2 id="tituloVideo" class="sobre-titulo">O GymSync em funcionamento</h2>
         <p class="video-sub">Um passeio pelo sistema, do cadastro do aluno ao treino do dia.</p>
@@ -737,7 +736,7 @@
                 </div>
 
                 <div th:if="${perfil == 'ADMIN' or perfil == 'PROFESSOR'}" class="tab-pane fade" th:classappend="${perfil == 'PROFESSOR' ? 'show active' : ''}" id="aba-treinos" role="tabpanel">
-                    <!-- Acompanhamento: alunos ativos com ficha (do professor logado; todos para o admin) -->
+                    <!--/* Acompanhamento: alunos ativos com ficha (do professor logado; todos para o admin) */-->
                     <div th:if="${acompanhamento != null and !#lists.isEmpty(acompanhamento)}" class="row g-4 mb-4">
                         <div class="col-lg-5 align-self-start">
                             <div class="panel-card">
@@ -784,7 +783,7 @@
                         </div>
                     </div>
 
-                    <!-- Visão geral da equipe: só o admin -->
+                    <!--/* Visão geral da equipe: só o admin */-->
                     <div th:if="${perfil == 'ADMIN' and equipe != null and !#lists.isEmpty(equipe)}" class="panel-card mb-4">
                         <div class="d-flex justify-content-between align-items-center mb-1">
                             <h5 class="panel-title">Visão geral da equipe</h5>
@@ -813,7 +812,7 @@
                         </div>
                     </div>
 
-                    <!-- Pendências da equipe: admin vê todos; professor vê só o que é dele -->
+                    <!--/* Pendências da equipe: admin vê todos; professor vê só o que é dele */-->
                     <div class="row g-4 mb-4" th:if="${painel != null}">
                         <div th:if="${perfil == 'ADMIN'}" class="col-lg-6">
                             <div class="panel-card h-100">
@@ -1149,7 +1148,7 @@
     </div>
 </div>
 
-<!-- LGPD: o aluno aceita a política no primeiro acesso (não aparece para visitante nem durante a troca de senha) -->
+<!--/* LGPD: o aluno aceita a política no primeiro acesso (não aparece para visitante nem durante a troca de senha) */-->
 <div th:if="${logado and perfil == 'ALUNO' and pedirAceite == true}" class="modal fade" id="modalPrivacidade" tabindex="-1" aria-hidden="true"
      data-obrigatorio="true" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-dialog-centered">
@@ -1351,7 +1350,7 @@
         </div>
     </div>
 
-    <!-- Detalhe dos gráficos do painel (só admin) -->
+    <!--/* Detalhe dos gráficos do painel (só admin) */-->
     <div class="modal fade" id="modalGrafFat" tabindex="-1" aria-hidden="true" th:if="${relFat != null}">
         <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
             <div class="modal-content p-2">
@@ -1501,7 +1500,7 @@
     </div>
 </th:block>
 
-<!-- Progresso do aluno (admin e professor): o botão com o nome do aluno abre este modal -->
+<!--/* Progresso do aluno (admin e professor): o botão com o nome do aluno abre este modal */-->
 <th:block th:if="${logado and (perfil == 'ADMIN' or perfil == 'PROFESSOR')}">
     <div class="modal fade" id="modalProgresso" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
@@ -1577,7 +1576,7 @@
 <script th:src="@{/js/sininho.js}"></script>
 <script th:if="${logado}" th:src="@{/js/dicas.js}"></script>
 <script th:if="${logado}" type="module" th:src="@{/js/mapa-corpo.js}"></script>
-    <!-- Formulários do painel: abrem em modal (o painel fica só para olhar) -->
+    <!--/* Formulários do painel: abrem em modal (o painel fica só para olhar) */-->
     <div class="modal fade" id="modalCatraca" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">

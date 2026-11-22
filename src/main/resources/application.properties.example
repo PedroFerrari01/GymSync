@@ -39,6 +39,9 @@ spring.jpa.show-sql=false
 server.servlet.session.tracking-modes=cookie
 # Cookie de sessão não vai em requisições de outros sites (protege contra CSRF, junto com o token)
 server.servlet.session.cookie.same-site=lax
+# No site publicado (HTTPS), o perfil prod já liga estas duas; aqui ficam comentadas porque o computador usa http:
+# server.servlet.session.cookie.secure=true
+# server.forward-headers-strategy=framework
 
 # Durante o desenvolvimento, para o HTML atualizar sem reiniciar:
 # spring.thymeleaf.cache=false
