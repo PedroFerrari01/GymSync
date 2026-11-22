@@ -480,7 +480,14 @@
                 <div class="boas-data" id="boasData"></div>
             </div>
 
-            <div th:if="${perfil == 'ADMIN' or perfil == 'PROFESSOR'}" class="row g-3 mb-4 kpi-row">
+            <!--/* KPIS-PROFESSOR: início (só números dos próprios alunos) */-->
+            <div th:if="${perfil == 'PROFESSOR'}" class="row g-3 mb-4 kpi-row">
+                <div class="col-6 col-xl-4"><div class="kpi-card"><div><div class="kpi-val" th:text="${kpiMeusAlunos}">0</div><div class="kpi-lbl">Meus alunos</div></div><div class="kpi-ico"><i class="ph ph-users"></i></div></div></div>
+                <div class="col-6 col-xl-4"><div class="kpi-card"><div><div class="kpi-val" th:text="${#lists.size(treinos)}">0</div><div class="kpi-lbl">Fichas de treino</div></div><div class="kpi-ico"><i class="ph ph-barbell"></i></div></div></div>
+                <div class="col-12 col-xl-4"><div class="kpi-card"><div><div class="kpi-val" th:text="${#lists.size(entradas)}">0</div><div class="kpi-lbl">Acessos dos meus alunos</div></div><div class="kpi-ico"><i class="ph ph-fingerprint"></i></div></div></div>
+            </div>
+            <!--/* KPIS-PROFESSOR: fim */-->
+            <div th:if="${perfil == 'ADMIN'}" class="row g-3 mb-4 kpi-row">
                 <div class="col-6 col-xl-3"><div class="kpi-card"><div><div class="kpi-val" th:text="${#lists.size(alunos)}">0</div><div class="kpi-lbl">Alunos</div></div><div class="kpi-ico"><i class="ph ph-users"></i></div></div></div>
                 <div class="col-6 col-xl-3"><div class="kpi-card"><div><div class="kpi-val" th:text="${#lists.size(professores)}">0</div><div class="kpi-lbl">Professores</div></div><div class="kpi-ico"><i class="ph ph-identification-badge"></i></div></div></div>
                 <div class="col-6 col-xl-3"><div class="kpi-card"><div><div class="kpi-val" th:text="${#lists.size(planos)}">0</div><div class="kpi-lbl">Planos</div></div><div class="kpi-ico"><i class="ph ph-medal"></i></div></div></div>
@@ -558,11 +565,11 @@
                                 <h5 class="panel-title mb-3">Alunos Ativos e Inativos</h5>
                                 <div class="table-responsive tabela-scroll">
                                     <table class="table table-custom tabela-filtravel">
-                                        <thead><tr><th>Nome</th><th>CPF</th><th>Situação</th><th class="text-end">Ações</th></tr></thead>
+                                        <thead><tr><th>Nome</th><th class="d-none d-sm-table-cell">CPF</th><th>Situação</th><th class="text-end">Ações</th></tr></thead>
                                         <tbody>
                                             <tr th:each="a : ${alunos}" th:id="${'aluno-' + a.id}">
                                                 <td class="fw-semibold" th:text="${a.nome}"></td>
-                                                <td th:text="${a.cpf}"></td>
+                                                <td class="d-none d-sm-table-cell" th:text="${a.cpf}"></td>
                                                 <td><span th:text="${a.situacao}" th:classappend="${a.situacao == 'ATIVO' ? 'status-ok' : 'status-off'}"></span></td>
                                                 <td class="text-end text-nowrap">
                                                     <form th:action="@{/alunos/status/{id}(id=${a.id})}" method="post" class="d-inline">
@@ -599,14 +606,14 @@
                                     <span class="status-err"><strong th:text="${#lists.size(atrasadas)}">0</strong> atrasada(s)</span>
                                 </div>
                                 <div class="table-responsive tabela-scroll">
-                                    <table class="table table-custom tabela-filtravel">
-                                        <thead><tr><th>Aluno</th><th class="d-none d-md-table-cell">Plano</th><th>Valor</th><th>Vencimento</th><th>Status</th><th class="text-end">Ações</th></tr></thead>
+                                    <table class="table table-custom tabela-filtravel tabela-mens">
+                                        <thead><tr><th>Aluno</th><th class="d-none d-md-table-cell">Plano</th><th>Valor</th><th class="d-none d-sm-table-cell">Vencimento</th><th>Status</th><th class="text-end">Ações</th></tr></thead>
                                         <tbody>
                                             <tr th:each="m : ${mensalidades}" th:attr="data-status=${m.situacao}" th:data-aluno="${m.matricula.aluno.id}" th:id="${'mensalidade-' + m.id}">
                                                 <td class="fw-semibold" th:text="${m.matricula.aluno.nome}"></td>
                                                 <td class="d-none d-md-table-cell" th:text="${m.matricula.plano.nome}"></td>
                                                 <td class="cel-valor" th:text="|R$ ${@fmt.dinheiro(m.valor)}|"></td>
-                                                <td th:text="${@fmt.data(m.vencimento)}"></td>
+                                                <td class="d-none d-sm-table-cell" th:text="${@fmt.data(m.vencimento)}"></td>
                                                 <td><span th:text="${@fmt.statusTexto(m.situacao)}" th:class="${@fmt.statusClasse(m.situacao)}"></span></td>
                                                 <td class="text-end text-nowrap">
                                                     <form th:if="${m.situacao == 'PENDENTE' or m.situacao == 'ATRASADA'}" th:action="@{/mensalidades/pagar/{id}(id=${m.id})}" method="post" class="d-inline" data-confirm="Confirmar o recebimento desta mensalidade?">
