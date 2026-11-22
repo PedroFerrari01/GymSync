@@ -35,8 +35,8 @@
                 <tbody>
                     <tr th:each="c : ${relMesAMes}">
                         <td class="fw-semibold" th:text="${c.rotulo}"></td>
-                        <td th:text="${c.primeira}"></td>
-                        <td th:text="${c.ultima}"></td>
+                        <td class="cel-valor" th:text="${c.primeira}"></td>
+                        <td class="cel-valor" th:text="${c.ultima}"></td>
                         <td class="text-end"><span class="evo-dif" th:classappend="${c.classe}" th:text="${c.diferenca}"></span></td>
                     </tr>
                 </tbody>

@@ -14,7 +14,7 @@
     </div>
 
     <!-- Carteirinha digital (simulada): o QR leva um código assinado, não o CPF -->
-    <div class="panel-card carteirinha mb-4 ocultar-impressao" th:if="${carteirinhaCodigo != null}">
+    <div class="panel-card carteirinha mb-4 ocultar-impressao" id="carteirinha" th:if="${carteirinhaCodigo != null}" th:data-restante="${carteirinhaRestante}" th:data-url="@{/aluno/carteirinha/codigo}">
         <div class="carteirinha-dados">
             <div class="carteirinha-topo">
                 <span class="carteirinha-avatar" th:text="${#strings.toUpperCase(#strings.substring(carteirinhaAluno.nome, 0, 1))}">A</span>
@@ -23,14 +23,15 @@
                     <div class="fw-bold fs-5" th:text="${carteirinhaAluno.nome}">Nome</div>
                 </div>
             </div>
-            <div class="mt-3">
+            <div class="mt-3 carteirinha-situacao">
                 <span th:if="${carteirinhaMotivo == null}" class="status-ok">Acesso liberado</span>
                 <span th:if="${carteirinhaMotivo != null}" class="status-err" th:text="|Bloqueada: ${carteirinhaMotivo}|"></span>
             </div>
             <div class="small texto-apoio mt-2">Mostre o QR na recepção para entrar. Simulação: não há catraca real.</div>
-            <code class="carteirinha-codigo small" th:text="${carteirinhaCodigo}"></code>
+            <div class="small mt-2"><i class="bi bi-hourglass-split me-1"></i><span id="carteirinhaValidade" class="texto-apoio" aria-live="off">Válido por 5:00</span></div>
+            <code class="carteirinha-codigo small" id="carteirinhaCodigo" th:text="${carteirinhaCodigo}"></code>
         </div>
-        <div class="carteirinha-qr" th:utext="${carteirinhaQr}"></div>
+        <div class="carteirinha-qr" id="carteirinhaQr" th:utext="${carteirinhaQr}"></div>
     </div>
 
     <div class="cabecalho-impressao">

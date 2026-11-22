@@ -26,6 +26,10 @@ spring.jpa.show-sql=false
 # cria dados de exemplo. Deixe desligado num sistema com dados reais.
 # gymsync.visitante=false
 
+# Chave que assina os códigos das carteirinhas (QR). Texto longo e aleatório.
+# Sem ela, o sistema sorteia uma a cada partida (aviso no log).
+# gymsync.carteirinha.chave=
+
 # Bloqueio de login: erros seguidos por conta e por endereço de IP, e minutos de espera
 # gymsync.login.max-falhas=5
 # gymsync.login.max-falhas-ip=30

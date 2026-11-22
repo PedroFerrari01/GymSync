@@ -164,6 +164,7 @@ public class AcademiaController {
             model.addAttribute("carteirinhaCodigo", codigoCarteirinha);
             model.addAttribute("carteirinhaQr", carteirinhaService.qrSvg(codigoCarteirinha));
             model.addAttribute("carteirinhaMotivo", motivoCarteirinha);
+            model.addAttribute("carteirinhaRestante", CarteirinhaService.VALIDADE_SEGUNDOS);
             model.addAttribute("carteirinhaAluno", aluno);
             model.addAttribute("entradas", entradas);
             model.addAttribute("visitasSemana", visitasSemana);
@@ -622,12 +623,12 @@ public class AcademiaController {
                                            RedirectAttributes redirect) {
         // Vindo do leitor pela webcam, volta para ele (próximo aluno); senão, para o painel
         String volta = "leitor".equals(origem) ? "redirect:/catraca/leitor" : "redirect:/";
-        Optional<Long> alunoId = carteirinhaService.alunoDoToken(codigo);
-        if (alunoId.isEmpty()) {
-            redirect.addFlashAttribute("erro", "Catraca Bloqueada: código da carteirinha inválido.");
+        CarteirinhaService.Leitura leitura = carteirinhaService.ler(codigo);
+        if (!leitura.valido()) {
+            redirect.addFlashAttribute("erro", "Catraca Bloqueada: " + leitura.motivoRecusa());
             return volta;
         }
-        liberarCatraca(alunoId.get(), redirect);
+        liberarCatraca(leitura.alunoId(), redirect);
         return volta;
     }
 

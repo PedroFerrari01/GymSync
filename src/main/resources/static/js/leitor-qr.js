@@ -35,7 +35,7 @@
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const qr = window.jsQR ? window.jsQR(img.data, img.width, img.height, { inversionAttempts: 'dontInvert' }) : null;
-            if (qr && /^GS1\.[0-9]{1,18}\.[A-Za-z0-9_-]{22}$/.test(qr.data.trim())) {
+            if (qr && /^GS[12](\.[A-Za-z0-9_-]{1,22}){2,3}$/.test(qr.data.trim())) {
                 campo.value = qr.data.trim();
                 avisar('Carteirinha lida. Validando...');
                 desligar();

@@ -453,7 +453,6 @@
                 </div>
                 <!-- SININHO: fim -->
                 <button th:if="${(perfil == 'ALUNO' or perfil == 'PROFESSOR') and visitante != true}" type="button" class="btn-theme" data-bs-toggle="modal" data-bs-target="#modalMinhaSenha"><i class="bi bi-key"></i> Minha Senha</button>
-                <button type="button" class="btn-theme btn-ajuda" id="btnAjudaTela" aria-label="Dica sobre esta tela" aria-haspopup="dialog" title="Dica sobre esta tela">?</button>
                 <button type="button" class="btn-theme" id="btnTema"><i class="bi bi-sun-fill" id="iconeTema"></i> <span id="textoTema">Modo Claro</span></button>
                 <form th:action="@{/logout}" method="post" class="d-inline"><button type="submit" class="btn-theme text-danger"><i class="bi bi-box-arrow-right"></i> Sair</button></form>
             </div>
@@ -605,7 +604,7 @@
                                             <tr th:each="m : ${mensalidades}" th:attr="data-status=${m.situacao}" th:data-aluno="${m.matricula.aluno.id}" th:id="${'mensalidade-' + m.id}">
                                                 <td class="fw-semibold" th:text="${m.matricula.aluno.nome}"></td>
                                                 <td class="d-none d-md-table-cell" th:text="${m.matricula.plano.nome}"></td>
-                                                <td th:text="|R$ ${@fmt.dinheiro(m.valor)}|"></td>
+                                                <td class="cel-valor" th:text="|R$ ${@fmt.dinheiro(m.valor)}|"></td>
                                                 <td th:text="${@fmt.data(m.vencimento)}"></td>
                                                 <td><span th:text="${@fmt.statusTexto(m.situacao)}" th:class="${@fmt.statusClasse(m.situacao)}"></span></td>
                                                 <td class="text-end text-nowrap">
@@ -1088,8 +1087,8 @@
                                             <tr th:each="p : ${planos}">
                                                 <td class="fw-semibold" th:text="${p.nome}"></td>
                                                 <td class="d-none d-md-table-cell" th:text="|${p.duracaoMeses} ${p.duracaoMeses == 1 ? 'mês' : 'meses'}|"></td>
-                                                <td class="fw-bold" style="color:var(--accent);" th:text="|R$ ${@fmt.dinheiro(p.valor)}|"></td>
-                                                <td class="d-none d-md-table-cell" th:text="|≈ R$ ${@fmt.dinheiro(p.valor / p.duracaoMeses)}|"></td>
+                                                <td class="fw-bold cel-valor" style="color:var(--accent);" th:text="|R$ ${@fmt.dinheiro(p.valor)}|"></td>
+                                                <td class="d-none d-md-table-cell cel-valor" th:text="|≈ R$ ${@fmt.dinheiro(p.valor / p.duracaoMeses)}|"></td>
                                                 <td class="text-end text-nowrap">
                                                     <button type="button" class="action-btn action-toggle me-1 btn-fill" title="Editar plano"
                                                             data-bs-toggle="modal" data-bs-target="#modalEditarPlano" data-form="formEditarPlano"
@@ -1574,6 +1573,7 @@
 
 <script th:src="@{/vendor/bootstrap/bootstrap.bundle.min.js}"></script>
 <script th:src="@{/js/gymsync.js}"></script>
+<script th:src="@{/js/carteirinha.js}"></script>
 <script th:src="@{/js/sininho.js}"></script>
 <script th:if="${logado}" th:src="@{/js/dicas.js}"></script>
 <script th:if="${logado}" type="module" th:src="@{/js/mapa-corpo.js}"></script>
@@ -1595,7 +1595,7 @@
                 <form th:action="@{/entradas/carteirinha}" method="post" class="border-top">
                     <div class="modal-body">
                         <label class="form-label" for="codigoCarteirinha"><i class="bi bi-qr-code-scan me-1"></i>Ler carteirinha digital</label>
-                        <input id="codigoCarteirinha" name="codigo" class="form-control" required autocomplete="off" placeholder="Cole ou digite o código do QR (GS1...)">
+                        <input id="codigoCarteirinha" name="codigo" class="form-control" required autocomplete="off" placeholder="Cole ou digite o código do QR (GS2...)">
                         <div class="form-text">Simulação: o leitor da catraca envia o código lido do QR da carteirinha do aluno.</div>
                     </div>
                     <div class="modal-footer">

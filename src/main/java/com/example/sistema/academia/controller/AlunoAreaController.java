@@ -30,6 +30,34 @@ public class AlunoAreaController {
     @Autowired private EmailService emailService;
     @Autowired private com.example.sistema.academia.service.LimiteEnvioEmailService limiteEmail;
 
+    @Autowired private com.example.sistema.academia.repository.MatriculaRepository matriculaRepository;
+    @Autowired private com.example.sistema.academia.service.CarteirinhaService carteirinhaService;
+
+    /**
+     * Código novo da carteirinha do próprio aluno (a tela chama antes do atual vencer).
+     * Só GET, só do aluno logado (rota /aluno/**); o visitante também consegue, porque não grava nada.
+     */
+    @org.springframework.web.bind.annotation.GetMapping("/aluno/carteirinha/codigo")
+    public org.springframework.http.ResponseEntity<java.util.Map<String, Object>> novoCodigoCarteirinha(HttpSession session) {
+        Long alunoId = (Long) session.getAttribute("usuarioId");
+        Aluno aluno = alunoId != null ? alunoRepository.findById(alunoId).orElse(null) : null;
+        if (aluno == null) {
+            return org.springframework.http.ResponseEntity.status(404).build();
+        }
+        String codigo = carteirinhaService.token(alunoId);
+        String motivo = com.example.sistema.academia.service.CarteirinhaService.motivoBloqueio(aluno,
+                matriculaRepository.existsByAlunoIdAndSituacao(alunoId, "ATIVA"),
+                mensalidadeRepository.existsByMatriculaAlunoIdAndSituacao(alunoId, "ATRASADA"));
+        java.util.Map<String, Object> corpo = new java.util.LinkedHashMap<>();
+        corpo.put("codigo", codigo);
+        corpo.put("qr", carteirinhaService.qrSvg(codigo));
+        corpo.put("motivo", motivo);
+        corpo.put("restante", com.example.sistema.academia.service.CarteirinhaService.VALIDADE_SEGUNDOS);
+        return org.springframework.http.ResponseEntity.ok()
+                .cacheControl(org.springframework.http.CacheControl.noStore())
+                .body(corpo);
+    }
+
     @PostMapping("/aluno/mensalidades/informar/{id}")
     public String informarPagamento(@PathVariable Long id, HttpSession session, RedirectAttributes redirect) {
         Long alunoId = (Long) session.getAttribute("usuarioId");

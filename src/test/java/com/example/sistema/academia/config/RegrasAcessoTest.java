@@ -156,6 +156,18 @@ class RegrasAcessoTest {
     }
 
     @Test
+    void codigoNovoDaCarteirinhaEhSoDoAlunoEFuncionaParaVisitante() {
+        String caminho = "/aluno/carteirinha/codigo";
+        assertTrue(RegrasAcesso.permitido("ALUNO", caminho));
+        assertFalse(RegrasAcesso.permitido("PROFESSOR", caminho));
+        assertFalse(RegrasAcesso.permitido("ADMIN", caminho));
+        assertFalse(RegrasAcesso.permitido(null, caminho));
+        // O visitante só faz GET, e é o que a tela usa para renovar o QR
+        assertTrue(RegrasAcesso.visitantePode("GET", caminho));
+        assertFalse(RegrasAcesso.visitantePode("POST", caminho));
+    }
+
+    @Test
     void leitorPelaWebcamEhSoDoAdmin() {
         assertTrue(RegrasAcesso.permitido("ADMIN", "/catraca/leitor"));
         assertFalse(RegrasAcesso.permitido("ALUNO", "/catraca/leitor"));

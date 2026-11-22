@@ -1,4 +1,4 @@
-/* Dicas guiadas: tour da primeira entrada por perfil e "?" por tela.
+/* Dicas guiadas: tour da primeira entrada por perfil.
    Tudo no navegador: nenhuma requisição. "Já viu" fica no localStorage (chave por perfil). */
 (function () {
     'use strict';
@@ -33,7 +33,7 @@
             { alvo: '#btn-aba-portal', titulo: 'Minha Área', texto: 'Sua ficha de treino, mensalidades, calendário de frequência e avisos de vencimento.' },
             { alvo: '#btn-aba-avaliacoes', titulo: 'Avaliações Físicas', texto: 'Veja sua evolução: primeira avaliação contra a última, com gráfico.' },
             { alvo: '#btn-aba-aulas', titulo: 'Aulas Coletivas', texto: 'Escolha uma aula e reserve sua vaga.' },
-            { alvo: '#btnTema', titulo: 'Modo claro ou escuro', texto: 'Troque o visual quando quiser. O "?" ao lado dá uma dica de cada tela.' }
+            { alvo: '#btnTema', titulo: 'Modo claro ou escuro', texto: 'Troque o visual quando quiser.' }
         ]
     };
 
@@ -148,42 +148,15 @@
 
     function iniciar() {
         fechar(false);
-        closeDica();
         passos = PASSOS[perfil];
         i = 0;
         anterior = document.activeElement;
         mostrar();
     }
 
-    /* "?" por tela */
-    var dica = null;
-    function closeDica() {
-        if (dica) { dica.remove(); dica = null; }
-    }
-    function abrirDica(botao) {
-        if (dica) { closeDica(); return; }
-        var aba = document.querySelector('.tab-pane.active');
-        var texto = (aba && DICAS[aba.id]) || 'Use o menu à esquerda para trocar de tela.';
-        dica = document.createElement('div');
-        dica.className = 'tour-dica' + (reduzir ? ' sem-anim' : '');
-        dica.setAttribute('role', 'dialog');
-        dica.setAttribute('aria-label', 'Dica sobre esta tela');
-        dica.textContent = texto;
-        document.body.appendChild(dica);
-        var r = botao.getBoundingClientRect();
-        var w = dica.offsetWidth;
-        dica.style.top = (r.bottom + 8) + 'px';
-        dica.style.left = Math.max(12, Math.min(r.right - w, window.innerWidth - w - 12)) + 'px';
-    }
-
     document.addEventListener('click', function (e) {
-        var ajuda = e.target.closest('#btnAjudaTela');
-        if (ajuda) { abrirDica(ajuda); return; }
         if (e.target.closest('#btnVerTour')) { iniciar(); return; }
-        if (dica && !e.target.closest('.tour-dica')) closeDica();
     });
-    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeDica(); });
-    document.addEventListener('shown.bs.tab', closeDica);
 
     if (!lerVisto()) setTimeout(iniciar, 700);
 })();

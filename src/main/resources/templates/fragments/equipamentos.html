@@ -79,7 +79,7 @@
                                 <td><span class="status-off" th:text="${man.tipo}"></span></td>
                                 <td class="small" th:text="${man.descricao}"></td>
                                 <td class="small" th:text="${man.responsavel != null and man.responsavel != '' ? man.responsavel : '-'}"></td>
-                                <td th:text="${man.custo != null ? 'R$ ' + @fmt.dinheiro(man.custo) : '-'}"></td>
+                                <td class="cel-valor" th:text="${man.custo != null ? 'R$ ' + @fmt.dinheiro(man.custo) : '-'}"></td>
                                 <td class="text-end">
                                     <form th:action="@{/equipamentos/manutencao/excluir/{id}(id=${man.id})}" method="post" class="d-inline" data-confirm="Excluir este registro de manutenção?">
                                         <button type="submit" class="action-btn" title="Excluir"><i class="bi bi-trash"></i></button>
