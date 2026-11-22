@@ -1243,7 +1243,7 @@ html:has(.sobre) { scroll-behavior: smooth; }
 
 /* "Seus dados": compacto, texto e botões lado a lado */
 .meus-dados { padding: var(--s2, .5rem) var(--s3, .75rem); }
-.meus-dados-botoes { flex-shrink: 0; }
+.meus-dados-botoes { flex-shrink: 1; min-width: 0; max-width: 100%; }
 
 /* Instalar no celular: ícone com fundo no tema claro */
 /* Alerta de mensalidade do aluno: botão com cor do texto (abre a janela de mensalidades) */
@@ -1745,3 +1745,75 @@ button.aula-card:focus-visible { outline: 2px solid var(--accent); outline-offse
     #aba-relatorios .pdf-barra i { display: block; height: 100%; background: #f97316; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
 /* PDF DETALHADO: fim */
+
+/* ===== MODO TREINO: início ===== */
+body.mt-aberto { overflow: hidden; }
+:root[data-theme="light"] .mt-overlay { color: #18181b; }
+.mt-overlay { box-sizing: border-box; position: fixed; inset: 0; z-index: 2000; background: var(--bg-body, #0d0d10); color: #f4f4f5; display: flex; flex-direction: column; padding: max(14px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom)); overflow-y: auto; }
+.mt-overlay[hidden], .mt-overlay [hidden] { display: none !important; }
+.mt-topo { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.mt-sair { width: 48px; height: 48px; border-radius: 14px; border: 1px solid rgba(128,128,128,.35); background: transparent; color: inherit; font-size: 1.4rem; }
+.mt-contador { font-weight: 700; font-size: 1.1rem; }
+.mt-tempo { font-variant-numeric: tabular-nums; opacity: .75; min-width: 48px; text-align: right; }
+.mt-barra { height: 8px; border-radius: 99px; background: rgba(128,128,128,.25); margin: 14px 0 10px; overflow: hidden; }
+.mt-barra span { display: block; height: 100%; width: 0; background: var(--accent, #f97316); transition: width .3s ease; }
+.mt-aviso-visitante { text-align: center; font-size: .9rem; padding: 8px; border-radius: 10px; background: rgba(249,115,22,.15); color: var(--accent, #f97316); margin-bottom: 8px; }
+.mt-corpo { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 14px; max-width: 560px; width: 100%; margin: 0 auto; }
+.mt-nome { font-size: clamp(1.7rem, 7vw, 2.4rem); font-weight: 800; line-height: 1.15; text-align: center; }
+.mt-meta { text-align: center; font-size: 1.3rem; color: var(--accent, #f97316); font-weight: 700; }
+.mt-carga { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1rem; }
+.mt-carga input { width: 110px; height: 48px; font-size: 1.2rem; text-align: center; border-radius: 12px; border: 1px solid rgba(128,128,128,.4); background: transparent; color: inherit; }
+.mt-series { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; }
+.mt-serie { min-height: 76px; border-radius: 16px; border: 2px solid rgba(128,128,128,.4); background: transparent; color: inherit; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; transition: background .15s, border-color .15s; }
+.mt-serie-n { font-weight: 700; font-size: 1.1rem; }
+.mt-serie-r { font-size: .9rem; opacity: .8; }
+.mt-serie.proxima { border-color: var(--accent, #f97316); }
+.mt-serie.feita { background: var(--accent, #f97316); border-color: var(--accent, #f97316); color: #fff; }
+.mt-serie.feita .mt-serie-r { opacity: 1; }
+.mt-dica { text-align: center; font-size: .95rem; opacity: .7; }
+.mt-rodape { display: flex; gap: 12px; max-width: 560px; width: 100%; margin: 14px auto 0; }
+.mt-btn { flex: 1; min-height: 60px; border-radius: 16px; border: 2px solid rgba(128,128,128,.4); background: transparent; color: inherit; font-size: 1.15rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 18px; }
+.mt-btn:disabled { opacity: .35; }
+.mt-btn-forte { background: var(--accent, #f97316); border-color: var(--accent, #f97316); color: #fff; }
+.mt-descanso { position: fixed; inset: 0; box-sizing: border-box; z-index: 2; background: var(--bg-body, #0d0d10); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 24px; }
+.mt-descanso-rotulo { font-size: 1.2rem; opacity: .7; letter-spacing: .08em; text-transform: uppercase; }
+.mt-descanso-tempo { font-size: clamp(5rem, 28vw, 9rem); font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1; }
+.mt-descanso-tempo.acabando { color: var(--accent, #f97316); }
+.mt-descanso-botoes { display: flex; gap: 12px; width: 100%; max-width: 420px; }
+.mt-resumo { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; text-align: center; max-width: 560px; width: 100%; margin: 0 auto; }
+.mt-resumo-icone { font-size: 4rem; color: var(--accent, #f97316); }
+.mt-resumo-titulo { font-size: 2rem; font-weight: 800; }
+.mt-resumo-grade { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; }
+.mt-resumo-grade div { border: 1px solid rgba(128,128,128,.35); border-radius: 14px; padding: 14px 6px; display: flex; flex-direction: column; gap: 4px; }
+.mt-resumo-grade strong { font-size: 1.4rem; }
+.mt-resumo-grade span { font-size: .8rem; opacity: .7; }
+.mt-resumo .mt-btn { flex: none; width: 100%; }
+@media (prefers-reduced-motion: reduce) { .mt-barra span, .mt-serie { transition: none; } }
+/* ===== MODO TREINO: fim ===== */
+
+/* ===== FICHA PARA IMPRESSÃO: início ===== */
+.ficha-papel { display: none; }
+@media print {
+    @page { size: A4; margin: 12mm; }
+    body.imprimindo-ficha > *:not(#fichaImpressao) { display: none !important; }
+    body.imprimindo-ficha { background: #fff !important; }
+    body.imprimindo-ficha #fichaImpressao { display: block !important; color: #111; font-size: 12pt; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .fp-topo { display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid #f97316; padding-bottom: 8px; margin-bottom: 12px; }
+    .fp-logo { height: 20mm; }
+    .fp-titulo { font-size: 20pt; font-weight: 800; letter-spacing: .02em; }
+    .fp-dados { display: flex; gap: 32px; margin-bottom: 14px; }
+    .fp-dados span { display: block; font-size: 9pt; text-transform: uppercase; color: #52525b; }
+    .fp-dados strong { font-size: 13pt; }
+    .fp-tabela { width: 100%; border-collapse: collapse; }
+    .fp-tabela th { white-space: nowrap; background: #f4f4f5 !important; text-align: left; font-size: 9.5pt; text-transform: uppercase; color: #3f3f46; padding: 6px 8px; border: 1px solid #a1a1aa; }
+    .fp-tabela td { border: 1px solid #a1a1aa; padding: 0 8px; height: 16mm; vertical-align: middle; }
+    .fp-tabela tr { break-inside: avoid; }
+    .fp-tabela .fp-treino td { height: auto; padding: 6px 8px; background: #fff1e6 !important; font-weight: 700; color: #9a3412; }
+    .fp-nome { font-weight: 700; font-size: 12.5pt; width: 32%; }
+    .fp-tabela th:nth-child(4) { width: 24mm; }
+    .fp-tabela th:nth-child(5) { width: 32%; }
+    .fp-centro { text-align: center; white-space: nowrap; }
+    .fp-quad { display: inline-block; width: 5mm; height: 5mm; border: 1.5px solid #3f3f46; margin: 0 1.5mm; border-radius: 1mm; }
+    .fp-rodape { margin-top: 12mm; display: flex; justify-content: space-between; font-size: 9pt; color: #52525b; border-top: 1px solid #d4d4d8; padding-top: 6px; }
+}
+/* ===== FICHA PARA IMPRESSÃO: fim ===== */

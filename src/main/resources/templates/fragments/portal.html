@@ -52,7 +52,10 @@
                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
                     <h5 class="panel-title">Minha Ficha de Treino</h5>
                     <div class="d-flex flex-wrap gap-2 ocultar-impressao">
-                        <button type="button" class="btn-theme" data-imprimir><i class="bi bi-printer"></i> Imprimir</button>
+                        <!--/* MODO TREINO: início */-->
+                        <button type="button" class="btn-brand btn-modo-treino" id="btnModoTreino" th:if="${!#lists.isEmpty(exercicios)}" th:data-visitante="${visitante == true}"><i class="ph ph-barbell"></i> Modo treino</button>
+                        <!--/* MODO TREINO: fim */-->
+                        <button type="button" class="btn-theme" data-imprimir-ficha><i class="bi bi-printer"></i> Imprimir</button>
                         <a th:if="${linkWhatsappFicha != null}" th:href="${linkWhatsappFicha}" target="_blank" rel="noopener" class="btn-theme"><i class="bi bi-whatsapp"></i> WhatsApp</a>
                         <form th:action="@{/aluno/ficha/email}" method="post" class="d-inline">
                             <button type="submit" class="btn-theme"><i class="bi bi-envelope"></i> E-mail</button>
@@ -70,7 +73,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr th:each="ex : ${exercicios}">
+                            <tr th:each="ex : ${exercicios}" class="linha-exercicio" th:data-id="${ex.id}" th:data-nome="${ex.exercicio}" th:data-series="${ex.series}" th:data-reps="${ex.repeticoes}" th:data-carga="${ultimosRegistros[ex.id]?.carga}">
                                 <td th:text="|${ex.treino.descricao} (${ex.treino.professor.nome})|"></td>
                                 <td class="fw-semibold cel-exercicio" th:text="${ex.exercicio}"></td>
                                 <td><span class="status-ok" th:text="|${ex.series} x ${ex.repeticoes}|"></span></td>
@@ -180,6 +183,84 @@
                     </form>
                 </div>
             </div>
+
+    <!--/* FICHA PARA IMPRESSÃO: início (só aparece no papel; o modo-treino.js a leva para o body ao imprimir) */-->
+    <div id="fichaImpressao" class="ficha-papel" aria-hidden="true">
+        <div class="fp-topo">
+            <img th:src="@{/img/logo-completo-fundo-claro.png}" alt="GymSync" class="fp-logo">
+            <div class="fp-titulo">Ficha de treino</div>
+        </div>
+        <div class="fp-dados">
+            <div><span>Aluno(a)</span><strong th:text="${nomeUsuario}">Aluno</strong></div>
+            <div><span>Data</span><strong th:text="${#temporals.format(#temporals.createNow(), 'dd/MM/yyyy')}">01/01/2026</strong></div>
+        </div>
+        <table class="fp-tabela">
+            <thead><tr><th>Exercício</th><th>Séries x Reps</th><th>Séries feitas</th><th>Carga (kg)</th><th>Anotações</th></tr></thead>
+            <tbody th:each="ex, st : ${exercicios}">
+                <tr class="fp-treino" th:if="${st.first or ex.treino.id != exercicios[st.index - 1].treino.id}">
+                    <td colspan="5" th:text="|${ex.treino.descricao} · Prof. ${ex.treino.professor.nome}|">Treino</td>
+                </tr>
+                <tr>
+                    <td class="fp-nome" th:text="${ex.exercicio}">Exercício</td>
+                    <td class="fp-centro" th:text="|${ex.series} x ${ex.repeticoes}|">3 x 12</td>
+                    <td class="fp-centro"><span class="fp-quad" th:each="n : ${#numbers.sequence(1, ex.series)}"></span></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="fp-rodape"><span>GymSync · Sistema de gestão de academia</span><span>Professor responsável: ______________________</span></div>
+    </div>
+    <!--/* FICHA PARA IMPRESSÃO: fim */-->
+
+    <!--/* MODO TREINO: início (o modo-treino.js move este bloco para o body ao abrir, para a tela cheia) */-->
+    <div class="mt-overlay" id="modoTreino" hidden role="dialog" aria-modal="true" aria-label="Modo treino">
+        <form th:action="@{/aluno/exercicios/registrar}" method="post" id="formModoTreino" hidden>
+            <input type="hidden" name="exercicioId"><input type="hidden" name="carga"><input type="hidden" name="observacao">
+        </form>
+        <div class="mt-topo">
+            <button type="button" class="mt-sair" data-mt="sair" aria-label="Sair do modo treino"><i class="ph ph-x"></i></button>
+            <div class="mt-contador" id="mtContador">1 / 1</div>
+            <div class="mt-tempo" id="mtTempo">0:00</div>
+        </div>
+        <div class="mt-barra"><span id="mtBarra"></span></div>
+        <div class="mt-aviso-visitante" id="mtVisitante" hidden>Modo visitante: o treino não é salvo.</div>
+
+        <div class="mt-corpo" id="mtExercicio">
+            <div class="mt-nome" id="mtNome">Exercício</div>
+            <div class="mt-meta" id="mtMeta">3 x 12</div>
+            <label class="mt-carga">Carga (kg)<input type="number" inputmode="decimal" step="0.5" min="0" max="1000" id="mtCarga" placeholder="opcional"></label>
+            <div class="mt-series" id="mtSeries"></div>
+            <div class="mt-dica" id="mtDica">Toque numa série ao terminá-la.</div>
+        </div>
+
+        <div class="mt-descanso" id="mtDescanso" hidden>
+            <div class="mt-descanso-rotulo">Descanso</div>
+            <div class="mt-descanso-tempo" id="mtDescansoTempo">1:00</div>
+            <div class="mt-descanso-botoes">
+                <button type="button" class="mt-btn" data-mt="mais15">+15 s</button>
+                <button type="button" class="mt-btn mt-btn-forte" data-mt="pular">Pular</button>
+            </div>
+        </div>
+
+        <div class="mt-resumo" id="mtResumo" hidden>
+            <i class="ph ph-trophy mt-resumo-icone"></i>
+            <div class="mt-resumo-titulo">Treino concluído!</div>
+            <div class="mt-resumo-grade">
+                <div><strong id="mtResExercicios">0</strong><span>exercícios</span></div>
+                <div><strong id="mtResSeries">0</strong><span>séries</span></div>
+                <div><strong id="mtResTempo">0:00</strong><span>tempo total</span></div>
+            </div>
+            <div class="mt-dica" id="mtResMsg"></div>
+            <button type="button" class="mt-btn mt-btn-forte" data-mt="fechar">Fechar</button>
+        </div>
+
+        <div class="mt-rodape" id="mtRodape">
+            <button type="button" class="mt-btn" data-mt="anterior"><i class="ph ph-caret-left"></i> Anterior</button>
+            <button type="button" class="mt-btn mt-btn-forte" data-mt="proximo" id="mtProximo">Próximo <i class="ph ph-caret-right"></i></button>
+        </div>
+    </div>
+    <!--/* MODO TREINO: fim */-->
 
     <!--/* Todas as mensalidades do aluno, com abas por situação (filtro feito no gymsync.js) */-->
     <div class="modal fade" id="modalTodasMensalidades" tabindex="-1" aria-hidden="true" th:if="${!#lists.isEmpty(mensalidades)}">
