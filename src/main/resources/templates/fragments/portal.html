@@ -170,6 +170,26 @@
         </div>
     </div>
 
+<!--/* CONQUISTAS: início */-->
+    <div class="panel-card mt-4 conquistas ocultar-impressao" id="conquistas" th:if="${conquistas != null and !#lists.isEmpty(conquistas)}">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <h5 class="panel-title mb-0">Minhas conquistas</h5>
+            <span class="small texto-apoio" th:text="${#lists.size(conquistas.?[conquistada])} + ' de ' + ${#lists.size(conquistas)} + ' conquistadas'"></span>
+        </div>
+        <div class="conquistas-grade">
+            <div th:each="c : ${conquistas}" class="conquista" th:classappend="${c.conquistada ? 'ganha' : 'bloqueada'}">
+                <div class="conquista-icone"><i th:class="${'ph ' + c.icone}"></i></div>
+                <div class="conquista-texto">
+                    <div class="conquista-nome" th:text="${c.nome}"></div>
+                    <div class="conquista-desc" th:text="${c.descricao}"></div>
+                    <div class="conquista-prog" th:text="${c.progresso}"></div>
+                    <div class="conquista-barra" th:if="${!c.conquistada}"><span th:style="${'width:' + c.percentual + '%'}"></span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+<!--/* CONQUISTAS: fim */-->
+
             <div class="panel-card mt-4 meus-dados ocultar-impressao">
                 <div>
                     <div class="fw-semibold"><i class="bi bi-shield-check me-1 icone-destaque"></i>Seus dados</div>

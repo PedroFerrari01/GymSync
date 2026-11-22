@@ -1960,3 +1960,20 @@ body.mt-aberto { overflow: hidden; }
     .mural-item { flex-direction: column; gap: 6px; }
 }
 /* MURAL DA ACADEMIA: fim */
+
+/* CONQUISTAS: início */
+.conquistas-grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 0.75rem; }
+.conquista { display: flex; gap: 0.75rem; align-items: flex-start; padding: 0.8rem; border: 1px solid var(--border-color); border-radius: 12px; }
+.conquista-icone { flex: 0 0 auto; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.35rem; background: rgba(128, 128, 128, 0.14); color: var(--text-secondary); }
+.conquista-texto { min-width: 0; flex: 1; }
+.conquista-nome { font-weight: 600; line-height: 1.25; }
+.conquista-desc { font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.1rem; }
+.conquista-prog { font-size: 0.8rem; font-weight: 600; margin-top: 0.35rem; color: var(--text-secondary); }
+.conquista-barra { height: 4px; border-radius: 2px; background: rgba(128, 128, 128, 0.22); margin-top: 0.35rem; overflow: hidden; }
+.conquista-barra span { display: block; height: 100%; background: var(--text-secondary); border-radius: 2px; }
+.conquista.bloqueada { opacity: 0.85; }
+.conquista.ganha { border-color: var(--accent); }
+.conquista.ganha .conquista-icone { background: var(--accent-soft); color: var(--accent); }
+.conquista.ganha .conquista-prog { color: var(--accent); }
+@media (max-width: 575.98px) { .conquistas-grade { grid-template-columns: 1fr; } }
+/* CONQUISTAS: fim */
