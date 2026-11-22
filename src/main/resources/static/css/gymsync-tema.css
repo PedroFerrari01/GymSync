@@ -1595,3 +1595,17 @@ tr.paleta-destaque td { background: var(--accent-soft) !important; transition: b
 @media (prefers-reduced-motion: reduce) {
     .mapa-alternar button, .mapa-rotulo, .mapa-musculo, .mapa-dica, .mapa-silhueta, .mapa-linhas { transition: none; }
 }
+
+
+/* PIX-QR: início */
+.pix-aviso-simulado { display: flex; gap: .5rem; align-items: center; padding: .6rem .8rem; margin-bottom: .9rem; border-radius: .75rem; font-weight: 600; font-size: .9rem; color: var(--text, inherit); background: color-mix(in srgb, var(--accent) 16%, transparent); border: 1px solid var(--accent); }
+.pix-aviso-simulado i { color: var(--accent); font-size: 1.2rem; flex: none; }
+.pix-qr-area { display: flex; flex-direction: column; align-items: center; gap: .25rem; margin-bottom: .9rem; text-align: center; }
+.pix-qr { width: min(240px, 68vw); aspect-ratio: 1; background: #fff; padding: 8px; border-radius: .75rem; border: 1px solid rgba(128,128,128,.35); display: flex; align-items: center; justify-content: center; }
+.pix-qr svg { width: 100%; height: 100%; display: block; }
+.pix-qr-carregando { color: #555; font-size: .8rem; padding: .5rem; }
+.pix-qr-valor { font-size: 1.35rem; font-weight: 700; margin-top: .35rem; }
+.pix-qr-venc { font-size: .85rem; opacity: .85; }
+.pix-nota { font-size: .8rem; opacity: .85; margin-bottom: .6rem; }
+.pix-codigo { font-size: .72rem; }
+/* PIX-QR: fim */

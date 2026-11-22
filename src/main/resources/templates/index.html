@@ -1523,8 +1523,16 @@
                 </div>
                 <form id="formPagarPix" th:action="@{/}" method="post">
                     <div class="modal-body">
-                        <div class="alert alert-info py-2 small border-0 rounded-3">Demonstração: nenhum valor é cobrado de verdade. Depois de informar, o pagamento fica EM ANÁLISE até a recepção confirmar.</div>
-                        <div class="row g-2 mb-2">
+                        <!--/* PIX-QR: início */-->
+                        <div class="pix-aviso-simulado" role="note"><i class="ph ph-warning-circle"></i> Pix SIMULADO para demonstração: nenhum pagamento real é feito.</div>
+                        <div class="pix-qr-area">
+                            <div class="pix-qr" id="pixQr" aria-live="polite"><span class="pix-qr-carregando">Gerando QR...</span></div>
+                            <div class="pix-qr-valor" id="pixQrValor"></div>
+                            <div class="pix-qr-venc" id="pixQrVenc"></div>
+                        </div>
+                        <!--/* PIX-QR: fim */-->
+                        <p class="pix-nota">Depois de informar, o pagamento fica EM ANÁLISE até a recepção confirmar.</p>
+                        <div class="row g-2 mb-2 d-none">
                             <div class="col"><label class="form-label">Valor</label><input type="text" name="valor" class="form-control" readonly></div>
                             <div class="col"><label class="form-label">Vencimento</label><input type="text" name="vencimento" class="form-control" readonly></div>
                         </div>

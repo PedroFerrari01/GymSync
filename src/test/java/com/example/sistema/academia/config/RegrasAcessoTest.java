@@ -189,4 +189,13 @@ class RegrasAcessoTest {
         assertTrue(SegurancaConfig.politicaPermissoes("/catraca/leitor").contains("geolocation=()"));
         assertTrue(SegurancaConfig.politicaPermissoes("/catraca/leitor").contains("payment=()"));
     }
+
+    @Test
+    void pixDaMensalidadeEhSoDoAlunoEVisitantePodeVer() {
+        assertTrue(RegrasAcesso.permitido("ALUNO", "/aluno/mensalidades/5/pix"));
+        assertFalse(RegrasAcesso.permitido("PROFESSOR", "/aluno/mensalidades/5/pix"));
+        assertFalse(RegrasAcesso.permitido("ADMIN", "/aluno/mensalidades/5/pix"));
+        assertFalse(RegrasAcesso.permitido(null, "/aluno/mensalidades/5/pix"));
+        assertTrue(RegrasAcesso.visitantePode("GET", "/aluno/mensalidades/5/pix"));
+    }
 }

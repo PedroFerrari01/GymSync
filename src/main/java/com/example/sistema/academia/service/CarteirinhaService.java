@@ -129,6 +129,11 @@ public class CarteirinhaService {
 
     /** QR em SVG (gerado no servidor, sem script). */
     public String qrSvg(String conteudo) {
+        return qrSvg(conteudo, "QR code da carteirinha");
+    }
+
+    /** Mesmo QR, com outro texto de acessibilidade (ex.: Pix). */
+    public String qrSvg(String conteudo, String descricao) {
         try {
             BitMatrix m = new QRCodeWriter().encode(conteudo, BarcodeFormat.QR_CODE, 0, 0,
                     Map.of(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.M, EncodeHintType.MARGIN, 2));
@@ -139,7 +144,7 @@ public class CarteirinhaService {
                 }
             }
             return "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 " + m.getWidth() + " " + m.getHeight()
-                    + "\" shape-rendering=\"crispEdges\" role=\"img\" aria-label=\"QR code da carteirinha\">"
+                    + "\" shape-rendering=\"crispEdges\" role=\"img\" aria-label=\"" + descricao + "\">"
                     + "<rect width=\"100%\" height=\"100%\" fill=\"#fff\"/><path fill=\"#000\" d=\"" + d + "\"/></svg>";
         } catch (WriterException e) {
             throw new IllegalStateException("Não foi possível gerar o QR", e);
