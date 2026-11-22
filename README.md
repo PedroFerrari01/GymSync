@@ -21,7 +21,14 @@ https://github.com/user-attachments/assets/6e4983c2-15bf-4e2f-ae1a-8074b9f34598
 - **Página de apresentação interativa.** Abaixo do login fica um "Quem somos" com um halter em 3D (Three.js), animações de rolagem (GSAP) e réplicas das telas do sistema que dá para clicar: liberar a catraca, pagar uma mensalidade, reservar aula.
 - **Interface pensada para o dia a dia.** Tema claro e escuro, funciona no computador e no celular e pode ser instalada no celular como app (PWA). As bibliotecas ficam no próprio projeto, então roda offline no computador.
 - **Publicado na internet.** Roda no Render (Docker) com MySQL na Aiven, HTTPS, senhas e chaves em variáveis do servidor (nunca no código) e usuário próprio no banco, sem o administrador do serviço.
-- **LGPD.** Política de privacidade, aceite do aluno no primeiro acesso e "Baixar meus dados" em JSON.
+- **LGPD.** Política de privacidade, aceite do aluno no primeiro acesso, "Baixar meus dados" em JSON, revogar consentimento e pedir exclusão dos dados.
+- **Painel do administrador com gráficos.** Faturamento dos últimos 6 meses, entradas por dia da semana e mensalidades por situação,, com detalhe ao clicar, e um mapa de calor dos horários da catraca (dia da semana por hora).
+- **Carteirinha digital com QR.** O aluno mostra o QR (vale 5 minutos) e a tela `/catraca/leitor` lê o código pela webcam, sem enviar vídeo ao servidor. A catraca é simulada.
+- **Mapa do corpo na avaliação física.** Silhueta com as medidas por região e a variação desde a primeira avaliação, com a legenda separada por grupo (melhorou, estável, sem cor).
+- **Reserva de aula em grade semanal** e **Modo treino** no celular: um exercício por vez, séries marcadas e cronômetro de descanso (no visitante não grava).
+- **Pagamento simulado com Pix em QR** e copia-e-cola, e **recibo** das mensalidades pagas.
+- **Mais ferramentas do dia a dia:** sininho de notificações por perfil, busca rápida com Ctrl+K, tour de dicas na primeira entrada, "Melhor horário para treinar" para o aluno, simulador de faturamento para o administrador e relatório com botão "Baixar PDF".
+- **Professor só vê os próprios alunos.**
 
 ## Telas
 
@@ -114,13 +121,13 @@ cd GymSync
 
 **Acesso de teste:** administrador `admin` / `123`. Professores e alunos entram com o CPF ou e-mail cadastrado pelo administrador e a senha inicial `123`. Para cadastrar, use CPFs válidos (o sistema confere os dígitos).
 
-**Testes de acesso** (não precisam do banco):
+**Testes** (não precisam do banco):
 
 ```bash
-./mvnw test -Dtest=RegrasAcessoTest,LimiteTentativasServiceTest,SenhaServiceTest,AuthControllerTest,CamposPermitidosTest,VisitanteServiceTest,FrequenciaServiceTest,EvolucaoServiceTest,AvisoVencimentoTest,AcompanhamentoServiceTest,ExportacaoServiceTest,SituacaoServiceTest,HistoricoConfigTest,ImagemValidadorTest,RespostaAjaxConfigTest
+./mvnw test -Dtest=!SistemaAcademiaApplicationTests
 ```
 
-São 100 testes; não precisam do banco. `SistemaAcademiaApplicationTests` precisa do MySQL ligado.
+São 196 testes; não precisam do banco. `SistemaAcademiaApplicationTests` precisa do MySQL ligado e fica de fora.
 
 | Erro | Solução |
 | :--- | :--- |
@@ -140,6 +147,7 @@ São 100 testes; não precisam do banco. `SistemaAcademiaApplicationTests` preci
 - [ ] Rodar os testes automaticamente a cada envio (GitHub Actions)
 - [ ] Testes de integração com o banco de dados
 - [ ] Varredura de segurança com o OWASP ZAP e correção do que aparecer
+- [ ] Mapa do corpo em 3D: protótipos testados com modelo anatômico (BodyParts3D, CC BY 4.0) e pipeline no Blender, em branches separadas.
 
 ## Autoria
 

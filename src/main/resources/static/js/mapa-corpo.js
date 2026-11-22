@@ -829,12 +829,8 @@ function iniciar() {
     let fixado = null;
     let rotulos = []; // { chave, lado, li, traco, bolinha }
 
-    const guardado = (() => { try { return localStorage.getItem('gymsync-mapa-modo'); } catch (e) { return null; } })();
-    const aparelhoFraco = (navigator.deviceMemory && navigator.deviceMemory <= 2)
-        || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2);
-    // O mapa dos músculos (2D) é o padrão; o 3D fica no botão
-    let modo = guardado === '2d' || guardado === '3d' ? guardado : '2d';
-    if (aparelhoFraco) modo = '2d';
+    // O 3D foi retirado (fica nos "Próximos passos"): o mapa dos músculos (2D) é o único modo
+    const modo = '2d';
     let sem3d = false;
 
     const aluno = () => alunos.get(alunoAtual);
@@ -1191,12 +1187,6 @@ function iniciar() {
         posicionarRotulos();
         fixado = fixadoAntes;
         atualizarFigura(false);
-    }));
-    botoesModo.forEach(botao => botao.addEventListener('click', () => {
-        modo = botao.dataset.modo;
-        try { localStorage.setItem('gymsync-mapa-modo', modo); } catch (e) { /* sem armazenamento: vale só nesta visita */ }
-        aplicarModo();
-        carregar3d();
     }));
     botoesVista.forEach(botao => botao.addEventListener('click', () => {
         mudarVista(botao.dataset.vista);
