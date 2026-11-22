@@ -245,6 +245,7 @@ public class AcademiaController {
             linksWhatsapp.forEach((treinoId, link) -> { if (idsMeusTreinos.contains(treinoId)) meusLinks.put(treinoId, link); });
             List<Entrada> entradasMeus = todasEntradas.stream()
                     .filter(e -> e.getAluno() != null && meus.contains(e.getAluno().getId())).toList();
+            model.addAttribute("kpiMeusAlunos", meus.size());
             model.addAttribute("treinos", meusTreinos);
             model.addAttribute("exercicios", todosExercicios.stream()
                     .filter(ex -> ex.getTreino() != null && idsMeusTreinos.contains(ex.getTreino().getId())).toList());
