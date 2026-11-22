@@ -50,6 +50,7 @@ public class AcademiaController {
     @Autowired private FichaService fichaService;
     @Autowired private FrequenciaService frequenciaService;
     @Autowired private EvolucaoService evolucaoService;
+    @Autowired private com.example.sistema.academia.service.ConquistasService conquistasService; // conquistas do aluno
     @Autowired private AcompanhamentoService acompanhamentoService;
     @Autowired private SininhoService sininhoService;
     @Autowired private com.example.sistema.academia.service.VisaoEquipeService visaoEquipeService;
@@ -172,6 +173,9 @@ public class AcademiaController {
             model.addAttribute("visitasSemana", visitasSemana);
             model.addAttribute("visitas30", visitas30);
             model.addAttribute("calendario", frequenciaService.calendario(entradas, frequenciaService.mesPedido(mes, hoje), hoje));
+            model.addAttribute("conquistas", conquistasService.calcular(entradas, avaliacoes.size(),
+                    mensalidadeRepository.findByMatriculaAlunoId(usuarioId),
+                    registroExercicioRepository.findByAlunoId(usuarioId).size(), hoje));
             model.addAttribute("pedirAceite", aluno.getAceitePrivacidade() == null
                     && !Boolean.TRUE.equals(session.getAttribute("visitante"))
                     && !Boolean.TRUE.equals(session.getAttribute("trocarSenha")));
