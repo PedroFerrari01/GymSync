@@ -220,6 +220,7 @@ document.querySelectorAll('.btn-pagar').forEach(btn => {
         form.elements['valor'].value = btn.dataset.valor || linha.querySelector('.cel-valor').textContent.trim();
         form.elements['vencimento'].value = btn.dataset.vencimento || linha.querySelector('.cel-venc').textContent.trim();
         form.elements['codigo'].value = 'GYMSYNC-PIX-SIMULADO-' + btn.dataset.id;
+        carregarPixQr(btn.dataset.id, form.elements['valor'].value, form.elements['vencimento'].value);
     });
 });
 
@@ -959,3 +960,25 @@ document.addEventListener('keydown', function (e) {
     e.preventDefault();
     card.click();
 });
+
+
+/* PIX-QR: início - QR e copia-e-cola (simulado) do modal de pagamento */
+function carregarPixQr(id, valor, vencimento) {
+    const area = document.getElementById('pixQr');
+    if (!area) return;
+    const campo = document.getElementById('pixCodigo');
+    const vEl = document.getElementById('pixQrValor');
+    const dEl = document.getElementById('pixQrVenc');
+    if (vEl) vEl.textContent = valor || '';
+    if (dEl) dEl.textContent = vencimento ? 'Vencimento: ' + vencimento : '';
+    area.innerHTML = '<span class="pix-qr-carregando">Gerando QR...</span>';
+    fetch('/aluno/mensalidades/' + encodeURIComponent(id) + '/pix', { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' })
+        .then(r => { if (!r.ok) throw new Error('pix'); return r.json(); })
+        .then(d => {
+            if (id !== document.getElementById('formPagarPix').action.split('/').pop()) return;
+            area.innerHTML = d.qr;
+            if (campo) campo.value = d.codigo;
+        })
+        .catch(() => { area.innerHTML = '<span class="pix-qr-carregando">Não foi possível gerar o QR. Feche e abra de novo.</span>'; });
+}
+/* PIX-QR: fim */

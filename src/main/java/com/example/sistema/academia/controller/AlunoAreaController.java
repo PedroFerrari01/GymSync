@@ -32,6 +32,7 @@ public class AlunoAreaController {
 
     @Autowired private com.example.sistema.academia.repository.MatriculaRepository matriculaRepository;
     @Autowired private com.example.sistema.academia.service.CarteirinhaService carteirinhaService;
+    @Autowired private com.example.sistema.academia.service.PixService pixService;
 
     /**
      * Código novo da carteirinha do próprio aluno (a tela chama antes do atual vencer).
@@ -53,6 +54,27 @@ public class AlunoAreaController {
         corpo.put("qr", carteirinhaService.qrSvg(codigo));
         corpo.put("motivo", motivo);
         corpo.put("restante", com.example.sistema.academia.service.CarteirinhaService.VALIDADE_SEGUNDOS);
+        return org.springframework.http.ResponseEntity.ok()
+                .cacheControl(org.springframework.http.CacheControl.noStore())
+                .body(corpo);
+    }
+
+    /**
+     * QR e código "copia e cola" do Pix SIMULADO de uma mensalidade pendente ou atrasada do próprio aluno.
+     * Só GET (o visitante também vê); mensalidade de outro aluno é recusada com 404.
+     */
+    @org.springframework.web.bind.annotation.GetMapping("/aluno/mensalidades/{id}/pix")
+    public org.springframework.http.ResponseEntity<java.util.Map<String, Object>> pixDaMensalidade(@PathVariable Long id, HttpSession session) {
+        Long alunoId = (Long) session.getAttribute("usuarioId");
+        Mensalidade m = mensalidadeRepository.findById(id).orElse(null);
+        if (m == null || alunoId == null || !m.getMatricula().getAluno().getId().equals(alunoId)
+                || (!"PENDENTE".equals(m.getSituacao()) && !"ATRASADA".equals(m.getSituacao()))) {
+            return org.springframework.http.ResponseEntity.status(404).build();
+        }
+        String codigo = pixService.payload(m.getId(), m.getValor());
+        java.util.Map<String, Object> corpo = new java.util.LinkedHashMap<>();
+        corpo.put("codigo", codigo);
+        corpo.put("qr", carteirinhaService.qrSvg(codigo, "QR code do Pix simulado"));
         return org.springframework.http.ResponseEntity.ok()
                 .cacheControl(org.springframework.http.CacheControl.noStore())
                 .body(corpo);

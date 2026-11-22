@@ -201,4 +201,13 @@ class RegrasAcessoTest {
         // Visitante só faz GET, então vê o recibo
         assertTrue(RegrasAcesso.visitantePode("GET", "/mensalidades/5/recibo"));
     }
+
+    @Test
+    void pixDaMensalidadeEhSoDoAlunoEVisitantePodeVer() {
+        assertTrue(RegrasAcesso.permitido("ALUNO", "/aluno/mensalidades/5/pix"));
+        assertFalse(RegrasAcesso.permitido("PROFESSOR", "/aluno/mensalidades/5/pix"));
+        assertFalse(RegrasAcesso.permitido("ADMIN", "/aluno/mensalidades/5/pix"));
+        assertFalse(RegrasAcesso.permitido(null, "/aluno/mensalidades/5/pix"));
+        assertTrue(RegrasAcesso.visitantePode("GET", "/aluno/mensalidades/5/pix"));
+    }
 }
