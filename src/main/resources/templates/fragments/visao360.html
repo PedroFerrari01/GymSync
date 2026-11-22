@@ -1,0 +1,40 @@
+<!--/* VISAO360: fragmento carregado no modal. Só leitura; sem CPF, senha nem texto de mensagem. */-->
+<div th:fragment="conteudo">
+    <div th:if="${visao == null}" class="vazio">Aluno não encontrado.</div>
+    <div th:if="${visao != null}" class="v360">
+        <div class="v360-topo">
+            <div>
+                <h5 class="panel-title mb-1" th:text="${visao.nome}"></h5>
+                <div class="small texto-apoio">
+                    <span th:text="${visao.plano}"></span> ·
+                    <span class="v360-situacao" th:text="${'Matrícula: ' + visao.situacaoMatricula}"></span>
+                </div>
+            </div>
+            <div class="v360-contato small texto-apoio">
+                <div th:if="${visao.email != null and !visao.email.isEmpty()}"><i class="bi bi-envelope"></i> <span th:text="${visao.email}"></span></div>
+                <div th:if="${visao.contato != null and !visao.contato.isEmpty()}"><i class="bi bi-whatsapp"></i> <span th:text="${visao.contato}"></span></div>
+            </div>
+        </div>
+
+        <div class="v360-indicadores">
+            <div class="v360-ind"><span class="v360-num" th:text="${visao.diasTreinados30}"></span><span class="v360-rot">dias treinados em 30 dias</span></div>
+            <div class="v360-ind" th:classappend="${visao.mensalidadesEmAtraso > 0} ? 'v360-alerta'"><span class="v360-num" th:text="${visao.mensalidadesEmAtraso}"></span><span class="v360-rot">mensalidades em atraso</span></div>
+            <div class="v360-ind"><span class="v360-txt" th:text="${visao.ultimaAvaliacao}"></span><span class="v360-rot">última avaliação</span></div>
+            <div class="v360-ind"><span class="v360-txt" th:text="${visao.ultimaEntrada}"></span><span class="v360-rot">última entrada</span></div>
+        </div>
+
+        <h6 class="v360-sub">Linha do tempo</h6>
+        <div th:if="${#lists.isEmpty(visao.linhaDoTempo)}" class="vazio">Este aluno ainda não tem histórico.</div>
+        <ol class="v360-tempo" th:unless="${#lists.isEmpty(visao.linhaDoTempo)}">
+            <li th:each="ev : ${visao.linhaDoTempo}" th:class="${'v360-item v360-' + #strings.toLowerCase(ev.tipo)}">
+                <span class="v360-ponto"><i th:class="${ev.tipo == 'MATRICULA' ? 'bi bi-card-checklist' : ev.tipo == 'PAGAMENTO' ? 'bi bi-check-lg' : ev.tipo == 'ATRASO' ? 'bi bi-exclamation-lg' : ev.tipo == 'ANALISE' ? 'bi bi-hourglass-split' : ev.tipo == 'AVALIACAO' ? 'bi bi-rulers' : ev.tipo == 'ENTRADAS' ? 'bi bi-door-open' : 'bi bi-chat-dots'}"></i></span>
+                <div class="v360-corpo">
+                    <div class="v360-titulo" th:text="${ev.titulo}"></div>
+                    <div class="small texto-apoio" th:if="${ev.detalhe != null and !ev.detalhe.isEmpty()}" th:text="${ev.detalhe}"></div>
+                </div>
+                <time class="v360-data" th:text="${ev.dataTexto}"></time>
+            </li>
+        </ol>
+        <p class="small texto-apoio mt-3 mb-0">Só leitura. Mensagens aparecem sem o texto, por privacidade.</p>
+    </div>
+</div>
