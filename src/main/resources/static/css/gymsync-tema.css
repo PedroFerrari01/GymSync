@@ -1595,3 +1595,90 @@ tr.paleta-destaque td { background: var(--accent-soft) !important; transition: b
 @media (prefers-reduced-motion: reduce) {
     .mapa-alternar button, .mapa-rotulo, .mapa-musculo, .mapa-dica, .mapa-silhueta, .mapa-linhas { transition: none; }
 }
+
+/* PDF: início (recibo de pagamento e relatórios para imprimir / salvar como PDF) */
+.recibo-fundo { background: #f4f4f5 !important; color: #18181b !important; min-height: 100vh; padding: 16px; }
+.recibo-barra { max-width: 760px; margin: 0 auto 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.recibo-folha { max-width: 760px; margin: 0 auto; background: #ffffff; color: #18181b; border: 1px solid #d4d4d8; border-radius: 12px; padding: 32px; }
+.recibo-topo { display: flex; justify-content: space-between; align-items: center; gap: 16px; border-bottom: 2px solid #f97316; padding-bottom: 16px; margin-bottom: 24px; }
+.recibo-logo { height: 64px; width: auto; }
+.recibo-numero { text-align: right; }
+.recibo-rotulo { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: #52525b; }
+.recibo-num { font-size: 1.25rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.recibo-valor-destaque { display: flex; flex-direction: column; gap: 4px; background: #fff7ed; border: 1px solid #fed7aa; border-radius: 10px; padding: 16px 20px; margin-bottom: 24px; }
+.recibo-valor-destaque strong { font-size: 2rem; white-space: nowrap; color: #c2410c; }
+.recibo-dados { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px 24px; margin: 0 0 24px; }
+.recibo-dados dt { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #52525b; font-weight: 600; }
+.recibo-dados dd { margin: 0; font-weight: 600; }
+.recibo-aviso { font-size: 0.85rem; color: #3f3f46; border-left: 3px solid #f97316; padding-left: 12px; margin-bottom: 24px; }
+.recibo-rodape { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 0.78rem; color: #52525b; border-top: 1px solid #d4d4d8; padding-top: 12px; }
+@media (max-width: 575px) {
+    .recibo-folha { padding: 20px; }
+    .recibo-dados { grid-template-columns: 1fr; }
+    .recibo-topo { flex-direction: column; align-items: flex-start; }
+    .recibo-numero { text-align: left; }
+}
+@media print {
+    .recibo-fundo { background: #ffffff !important; padding: 0; }
+    .recibo-barra { display: none !important; }
+    .recibo-folha { border: none; border-radius: 0; padding: 0; max-width: none; }
+    .recibo-valor-destaque, .recibo-topo { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+
+/* Relatórios impressos: cabeçalho com logo, rodapé fixo e numeração de página */
+.impressao-so { display: none; }
+@media print {
+    @page {
+        margin: 16mm 14mm 18mm;
+        background: #ffffff;
+        @bottom-right { content: "Página " counter(page) " de " counter(pages); font-size: 9pt; color: #52525b; }
+    }
+    #aba-relatorios .cabecalho-impressao.relatorio-cabecalho {
+        display: flex !important; justify-content: space-between; align-items: center; gap: 16px;
+        border-bottom: 2px solid #f97316; padding-bottom: 10px; margin-bottom: 16px;
+    }
+    #aba-relatorios .relatorio-cabecalho img { height: 56px; width: auto; }
+    #aba-relatorios .relatorio-cabecalho .relatorio-meta { text-align: right; font-size: 11px; color: #3f3f46; }
+    #aba-relatorios .relatorio-cabecalho h3 { letter-spacing: 0; }
+    #aba-relatorios .impressao-so.relatorio-rodape {
+        display: block !important; position: fixed; bottom: 0; left: 0; font-size: 9pt; color: #52525b;
+    }
+    #aba-relatorios .table-responsive { overflow: visible !important; }
+    #aba-relatorios table { break-inside: auto; }
+    #aba-relatorios tr, #aba-relatorios .mini-kpi, #aba-relatorios .panel-card { break-inside: avoid; page-break-inside: avoid; }
+    #aba-relatorios thead { display: table-header-group; }
+    #aba-relatorios .tag-pill { border: 1px solid #d4d4d8; background: #ffffff !important; color: #000000 !important; }
+    #aba-relatorios .text-danger { color: #b91c1c !important; }
+}
+/* PDF: fim */
+
+/* PDF DETALHADO: início (relatório impresso em 2 a 3 páginas A4; na tela só aparece o relatório normal) */
+.relatorio-pdf { display: none; }
+.botao-indisponivel { opacity: 0.55; cursor: not-allowed; }
+@media print {
+    :root, :root[data-theme], :root[data-theme] body, html, body { background: #ffffff !important; color: #18181b !important; transition: none !important; color-scheme: light !important; }
+    #aba-relatorios > *:not(.relatorio-cabecalho):not(.relatorio-rodape):not(.relatorio-pdf) { display: none !important; }
+    #aba-relatorios .relatorio-pdf { display: block !important; font-size: 10px; color: #18181b; }
+    #aba-relatorios .pdf-bloco { break-inside: avoid; page-break-inside: avoid; margin-bottom: 12px; }
+    #aba-relatorios .pdf-quebra { break-before: page; page-break-before: always; }
+    #aba-relatorios .pdf-bloco h4 { font-size: 12px; font-weight: 700; margin: 0 0 6px; padding-bottom: 3px; border-bottom: 1px solid #f97316; color: #18181b; }
+    #aba-relatorios .pdf-kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    #aba-relatorios .pdf-kpis > div { border: 1px solid #d4d4d8; border-radius: 6px; padding: 6px 8px; display: flex; flex-direction: column; gap: 1px; }
+    #aba-relatorios .pdf-kpis span { font-size: 8.5px; text-transform: uppercase; letter-spacing: 0.04em; color: #52525b; }
+    #aba-relatorios .pdf-kpis strong { font-size: 15px; white-space: nowrap; color: #18181b; }
+    #aba-relatorios .pdf-kpis small { font-size: 8.5px; color: #52525b; }
+    #aba-relatorios .pdf-grafico svg { width: 100%; height: auto; display: block; }
+    #aba-relatorios .pdf-duas { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    #aba-relatorios .pdf-sub { font-weight: 600; margin-bottom: 2px; }
+    #aba-relatorios .pdf-nota { font-size: 9.5px; color: #3f3f46; margin: 4px 0 0; }
+    #aba-relatorios .pdf-tabela { width: 100%; border-collapse: collapse; margin-top: 6px; }
+    #aba-relatorios .pdf-tabela th, #aba-relatorios .pdf-tabela td { border-bottom: 1px solid #e4e4e7; padding: 2px 6px; text-align: left; color: #18181b; background: transparent; }
+    #aba-relatorios .pdf-tabela .d { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    #aba-relatorios .pdf-tabela thead th { font-size: 8.5px; text-transform: uppercase; color: #52525b; border-bottom: 1px solid #a1a1aa; }
+    #aba-relatorios .pdf-tabela tfoot td { font-weight: 700; border-top: 1px solid #a1a1aa; }
+    #aba-relatorios .pdf-tabela-12 td, #aba-relatorios .pdf-tabela-12 th { padding: 1px 6px; }
+    #aba-relatorios .barra-cel { width: 55%; }
+    #aba-relatorios .pdf-barra { display: block; height: 7px; background: #f4f4f5; border-radius: 4px; overflow: hidden; }
+    #aba-relatorios .pdf-barra i { display: block; height: 100%; background: #f97316; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+/* PDF DETALHADO: fim */
