@@ -1595,3 +1595,66 @@ tr.paleta-destaque td { background: var(--accent-soft) !important; transition: b
 @media (prefers-reduced-motion: reduce) {
     .mapa-alternar button, .mapa-rotulo, .mapa-musculo, .mapa-dica, .mapa-silhueta, .mapa-linhas { transition: none; }
 }
+
+/* ===== GRADE-AULAS (reserva em calendário semanal): início ===== */
+.grade-nav { display: flex; align-items: center; gap: 0.5rem; }
+.grade-titulo { font-weight: 600; min-width: 9.5rem; text-align: center; }
+.grade-legenda { display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; color: var(--text-secondary); }
+.grade-bolinha { display: inline-block; width: 0.65rem; height: 0.65rem; border-radius: 50%; margin-right: 0.3rem; background: var(--border-color); }
+.grade-bolinha.b-aberta { background: #22c55e; }
+.grade-bolinha.b-reservada { background: var(--accent); }
+.grade-bolinha.b-lotada { background: #ef4444; }
+.grade-bolinha.b-passou { background: #71717a; }
+
+.grade-tabela { display: block; overflow-x: auto; }
+.grade-cab, .grade-linha { display: grid; grid-template-columns: 3.5rem repeat(7, minmax(7.5rem, 1fr)); gap: 0.35rem; min-width: 60rem; }
+.grade-cab { margin-bottom: 0.35rem; }
+.grade-linha { margin-bottom: 0.35rem; }
+.grade-dia-cab { display: flex; flex-direction: column; align-items: center; padding: 0.35rem 0; border-radius: 0.5rem; background: var(--bg-input); font-size: 0.85rem; }
+.grade-dia-cab span { color: var(--text-secondary); font-size: 0.75rem; }
+.grade-dia-cab.hoje { background: var(--accent); color: #111; }
+.grade-dia-cab.hoje span { color: #111; }
+.grade-hora { font-weight: 600; font-size: 0.85rem; padding-top: 0.5rem; color: var(--text-secondary); }
+.grade-celula { display: flex; flex-direction: column; gap: 0.35rem; min-height: 3rem; border-radius: 0.5rem; padding: 0.15rem; }
+.grade-celula.hoje { background: var(--accent-soft); }
+.grade-form { margin: 0; display: block; }
+
+.aula-card { display: flex; flex-direction: column; gap: 0.1rem; width: 100%; text-align: left; padding: 0.45rem 0.55rem;
+    border-radius: 0.55rem; border: 1px solid var(--border-color); border-left-width: 4px; background: var(--bg-card);
+    color: var(--text-primary); font: inherit; font-size: 0.82rem; line-height: 1.25; }
+button.aula-card { cursor: pointer; transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.18s; }
+button.aula-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+button.aula-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.aula-card.est-aberta { border-left-color: #22c55e; }
+.aula-card.est-reservada { border-left-color: var(--accent); background: var(--accent-soft); }
+.aula-card.est-lotada { border-left-color: #ef4444; }
+.aula-card.est-passou { border-left-color: #71717a; opacity: 0.55; }
+.aula-nome { font-weight: 700; }
+.aula-prof { color: var(--text-secondary); font-size: 0.75rem; }
+.aula-meta { display: flex; justify-content: space-between; gap: 0.5rem; font-size: 0.75rem; color: var(--text-secondary); }
+.aula-estado { font-weight: 600; color: var(--text-primary); }
+
+.grade-lista { display: none; }
+.grade-dia-bloco { padding: 0.6rem; border-radius: 0.6rem; border: 1px solid var(--border-color); margin-bottom: 0.6rem; display: flex; flex-direction: column; gap: 0.35rem; }
+.grade-dia-bloco.hoje { border-color: var(--accent); }
+.grade-dia-titulo em { color: var(--accent); font-style: normal; }
+.grade-dia-titulo span { color: var(--text-secondary); }
+.grade-lista .aula-card .aula-hora { font-weight: 700; color: var(--text-primary); }
+@media (max-width: 767.98px) {
+    .grade-tabela { display: none; }
+    .grade-lista { display: block; }
+    .grade-titulo { min-width: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+    button.aula-card { transition: none; }
+    button.aula-card:hover { transform: none; }
+}
+/* ===== GRADE-AULAS: fim ===== */
+
+/* ===== GRADE-AULAS (ajustes): início ===== */
+.grade-hoje { display: inline-flex; align-items: center; padding: 0.25rem 0.8rem; border-radius: 0.5rem; background: var(--accent);
+    color: #111; font-weight: 700; font-size: 0.85rem; text-decoration: none; border: 1px solid var(--accent); }
+.grade-hoje:hover { filter: brightness(1.08); color: #111; }
+:root[data-theme="light"] .grade-hoje, :root[data-theme="light"] .grade-hoje:hover { color: #fff; }
+.grade-aulas.carregando .grade-tabela, .grade-aulas.carregando .grade-lista { opacity: 0.5; transition: opacity 0.15s; }
+/* ===== GRADE-AULAS (ajustes): fim ===== */

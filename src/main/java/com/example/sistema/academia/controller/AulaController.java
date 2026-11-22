@@ -3,6 +3,7 @@ package com.example.sistema.academia.controller;
 import com.example.sistema.academia.model.*;
 import com.example.sistema.academia.repository.*;
 import com.example.sistema.academia.service.AulaService;
+import com.example.sistema.academia.service.GradeSemanal;
 import com.example.sistema.academia.service.ExclusaoService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Controller
@@ -72,7 +74,8 @@ public class AulaController {
     }
 
     @PostMapping("/aulas/reservar/{id}")
-    public String reservar(@PathVariable Long id, HttpSession session, RedirectAttributes redirect) {
+    public String reservar(@PathVariable Long id, @RequestParam(name = "data", required = false) String dataTexto,
+                           HttpSession session, RedirectAttributes redirect) {
         Long alunoId = (Long) session.getAttribute("usuarioId");
         AulaColetiva aula = aulaColetivaRepository.findById(id).orElse(null);
         Aluno aluno = alunoId != null ? alunoRepository.findById(alunoId).orElse(null) : null;
@@ -80,18 +83,24 @@ public class AulaController {
             redirect.addFlashAttribute("erro", "Aula não encontrada.");
             return "redirect:/";
         }
+        LocalDate pedida = dataPedida(dataTexto);
+        String volta = voltaGrade(pedida);
         if (!"ATIVO".equals(aluno.getSituacao()) || !matriculaRepository.existsByAlunoIdAndSituacao(alunoId, "ATIVA")) {
             redirect.addFlashAttribute("erro", "Para reservar aulas você precisa estar ativo e com matrícula ativa.");
-            return "redirect:/";
+            return volta;
         }
-        LocalDate data = aulaService.proximaData(aula);
+        LocalDate data = pedida != null ? pedida : aulaService.proximaData(aula);
+        if (pedida != null && !GradeSemanal.dataValida(aula, data, LocalDateTime.now())) {
+            redirect.addFlashAttribute("erro", "Esta aula já passou ou ainda não abriu para reserva.");
+            return volta;
+        }
         if (reservaAulaRepository.findFirstByAulaIdAndAlunoIdAndDataAula(id, alunoId, data).isPresent()) {
             redirect.addFlashAttribute("erro", "Você já reservou esta aula.");
-            return "redirect:/";
+            return volta;
         }
         if (reservaAulaRepository.countByAulaIdAndDataAula(id, data) >= aula.getVagas()) {
             redirect.addFlashAttribute("erro", "Não há mais vagas nesta aula.");
-            return "redirect:/";
+            return volta;
         }
         ReservaAula reserva = new ReservaAula();
         reserva.setAula(aula);
@@ -99,19 +108,40 @@ public class AulaController {
         reserva.setDataAula(data);
         reservaAulaRepository.save(reserva);
         redirect.addFlashAttribute("sucesso", "Vaga reservada em " + aula.getNome() + "!");
-        return "redirect:/";
+        return volta;
     }
 
     @PostMapping("/aulas/cancelar-reserva/{id}")
-    public String cancelarReserva(@PathVariable Long id, HttpSession session, RedirectAttributes redirect) {
+    public String cancelarReserva(@PathVariable Long id, @RequestParam(name = "data", required = false) String dataTexto,
+                                  HttpSession session, RedirectAttributes redirect) {
         Long alunoId = (Long) session.getAttribute("usuarioId");
         AulaColetiva aula = aulaColetivaRepository.findById(id).orElse(null);
         if (aula == null || alunoId == null) {
             return "redirect:/";
         }
-        LocalDate data = aulaService.proximaData(aula);
+        LocalDate pedida = dataPedida(dataTexto);
+        LocalDate data = pedida != null ? pedida : aulaService.proximaData(aula);
+        if (pedida != null && pedida.isBefore(LocalDate.now())) {
+            redirect.addFlashAttribute("erro", "Aula que já passou não pode ser cancelada.");
+            return voltaGrade(pedida);
+        }
         reservaAulaRepository.findFirstByAulaIdAndAlunoIdAndDataAula(id, alunoId, data).ifPresent(reservaAulaRepository::delete);
         redirect.addFlashAttribute("sucesso", "Reserva cancelada.");
-        return "redirect:/";
+        return voltaGrade(pedida);
+    }
+
+    /** Data "aaaa-mm-dd" enviada pela grade; nula se não veio ou veio inválida. */
+    private static LocalDate dataPedida(String texto) {
+        if (texto == null || texto.isBlank()) return null;
+        try {
+            return LocalDate.parse(texto.trim());
+        } catch (RuntimeException e) {
+            return null;
+        }
+    }
+
+    /** Volta para a mesma semana da grade (com a data), ou para a tela inicial. */
+    private static String voltaGrade(LocalDate data) {
+        return data == null ? "redirect:/" : "redirect:/?semana=" + GradeSemanal.segundaDa(data);
     }
 }
