@@ -1,6 +1,7 @@
 <div th:fragment="aba" class="tab-pane fade show active" id="aba-portal" role="tabpanel">
 
     <th:block th:replace="~{fragments/avisos :: lista}"></th:block>
+    <!--/* MURAL: início */--><th:block th:replace="~{fragments/mural :: cartao}"></th:block><!--/* MURAL: fim */-->
 
     <!--/* Instalar no celular: o gymsync.js mostra este cartão só quando o navegador permite instalar (ou no iPhone) */-->
     <div class="instalar-app panel-card mb-4 ocultar-impressao" hidden>

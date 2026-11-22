@@ -1,0 +1,47 @@
+<!--/* Mural da academia: lista para todos os perfis; o administrador também publica e encerra avisos. */-->
+<div th:fragment="cartao" id="mural-academia" class="panel-card mural mb-4 ocultar-impressao"
+     th:if="${perfil == 'ADMIN' or (mural != null and !#lists.isEmpty(mural))}">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5 class="panel-title mb-0"><i class="ph ph-megaphone me-2"></i>Mural da academia</h5>
+        <span class="tag-pill" th:text="${mural != null ? #lists.size(mural) : 0}">0</span>
+    </div>
+
+    <p th:if="${mural == null or #lists.isEmpty(mural)}" class="small texto-apoio mb-2">Nenhum aviso no ar. Publique o primeiro abaixo.</p>
+
+    <ul class="list-unstyled mb-0 mural-lista" th:if="${mural != null and !#lists.isEmpty(mural)}">
+        <li th:each="av : ${mural}" class="mural-item">
+            <div class="mural-texto">
+                <div class="fw-semibold" th:text="${av.titulo}">Título</div>
+                <div class="small" th:text="${av.texto}">Texto</div>
+                <div class="small texto-apoio mural-meta">
+                    Publicado em <span th:text="${@fmt.data(av.dataPublicacao)}">01/01/2026</span>
+                    <span th:if="${av.dataTermino != null}"> · até <span th:text="${@fmt.data(av.dataTermino)}">02/01/2026</span></span>
+                </div>
+            </div>
+            <form th:if="${perfil == 'ADMIN'}" th:action="@{/mural/encerrar/{id}(id=${av.id})}" method="post" class="mural-encerrar" data-confirm="Encerrar este aviso? Ele sai do mural, mas não é apagado.">
+                <button type="submit" class="btn-theme btn-sm"><i class="ph ph-archive me-1"></i>Encerrar</button>
+            </form>
+        </li>
+    </ul>
+
+    <details th:if="${perfil == 'ADMIN'}" class="mural-novo mt-3">
+        <summary class="mural-novo-titulo"><i class="ph ph-plus-circle me-1"></i>Publicar aviso</summary>
+        <form th:action="@{/mural/publicar}" method="post" class="row g-2 mt-1">
+            <div class="col-md-8">
+                <label class="form-label small mb-1" for="muralTitulo">Título</label>
+                <input type="text" id="muralTitulo" name="titulo" class="form-control" maxlength="80" required placeholder="Ex.: Feriado: abrimos às 8h">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label small mb-1" for="muralTermino">Vale até (opcional)</label>
+                <input type="date" id="muralTermino" name="dataTermino" class="form-control">
+            </div>
+            <div class="col-12">
+                <label class="form-label small mb-1" for="muralTexto">Texto</label>
+                <textarea id="muralTexto" name="texto" class="form-control" rows="2" maxlength="300" required placeholder="Até 300 caracteres"></textarea>
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn-brand"><i class="ph ph-paper-plane-tilt me-1"></i>Publicar no mural</button>
+            </div>
+        </form>
+    </details>
+</div>

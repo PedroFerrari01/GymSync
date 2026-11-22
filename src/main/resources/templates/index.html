@@ -492,6 +492,7 @@
                 <div th:if="${perfil == 'ADMIN'}" class="tab-pane fade show active" id="aba-painel" role="tabpanel">
 
                     <th:block th:replace="~{fragments/avisos :: lista}"></th:block>
+                    <!--/* MURAL: início */--><th:block th:replace="~{fragments/mural :: cartao}"></th:block><!--/* MURAL: fim */-->
 
                     <div class="acoes-admin mb-4 d-flex flex-wrap gap-2">
                         <button type="button" class="btn-brand" data-bs-toggle="modal" data-bs-target="#modalCatraca"><i class="bi bi-unlock-fill me-1"></i> Liberar catraca</button>
@@ -739,6 +740,7 @@
                 </div>
 
                 <div th:if="${perfil == 'ADMIN' or perfil == 'PROFESSOR'}" class="tab-pane fade" th:classappend="${perfil == 'PROFESSOR' ? 'show active' : ''}" id="aba-treinos" role="tabpanel">
+                    <!--/* MURAL: início */--><th:block th:if="${perfil == 'PROFESSOR'}"><th:block th:replace="~{fragments/mural :: cartao}"></th:block></th:block><!--/* MURAL: fim */-->
                     <th:block th:replace="~{fragments/movimento :: mapa}"></th:block>
                     <!--/* Acompanhamento: alunos ativos com ficha (do professor logado; todos para o admin) */-->
                     <div th:if="${acompanhamento != null and !#lists.isEmpty(acompanhamento)}" class="row g-4 mb-4">

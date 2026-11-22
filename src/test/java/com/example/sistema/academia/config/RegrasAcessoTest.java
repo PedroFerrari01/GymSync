@@ -203,6 +203,17 @@ class RegrasAcessoTest {
     }
 
     @Test
+    void muralSoOAdminPublicaEVisitanteNaoGrava() {
+        assertTrue(RegrasAcesso.permitido("ADMIN", "/mural/publicar"));
+        assertTrue(RegrasAcesso.permitido("ADMIN", "/mural/encerrar/3"));
+        assertFalse(RegrasAcesso.permitido("PROFESSOR", "/mural/publicar"));
+        assertFalse(RegrasAcesso.permitido("ALUNO", "/mural/encerrar/3"));
+        assertFalse(RegrasAcesso.permitido(null, "/mural/publicar"));
+        assertFalse(RegrasAcesso.visitantePode("POST", "/mural/publicar"));
+        assertFalse(RegrasAcesso.visitantePode("POST", "/mural/encerrar/3"));
+    }
+
+    @Test
     void pixDaMensalidadeEhSoDoAlunoEVisitantePodeVer() {
         assertTrue(RegrasAcesso.permitido("ALUNO", "/aluno/mensalidades/5/pix"));
         assertFalse(RegrasAcesso.permitido("PROFESSOR", "/aluno/mensalidades/5/pix"));

@@ -66,6 +66,28 @@ public class VisitanteService {
 
     @Autowired private ReservaAulaRepository reservaAulaRepository;
 
+    // MURAL: início
+    @Autowired private MuralAvisoRepository muralAvisoRepository;
+
+    /** Dois avisos de exemplo, só com o modo visitante ligado e o mural vazio. */
+    @Transactional
+    public void criarMuralDeExemplo() {
+        if (!habilitado || muralAvisoRepository.count() > 0) return;
+        LocalDate hoje = LocalDate.now();
+        muralAvisoRepository.save(avisoMural("Feriado: abrimos às 8h", "No feriado a academia abre às 8h e fecha às 14h. As aulas coletivas seguem normais.", hoje, null));
+        muralAvisoRepository.save(avisoMural("Manutenção da esteira 3", "A esteira 3 fica fora de uso até o fim da semana. Use as esteiras 1, 2 e 4.", hoje, hoje.plusDays(7)));
+    }
+
+    private MuralAviso avisoMural(String titulo, String texto, LocalDate publicacao, LocalDate termino) {
+        MuralAviso a = new MuralAviso();
+        a.setTitulo(titulo);
+        a.setTexto(texto);
+        a.setDataPublicacao(publicacao);
+        a.setDataTermino(termino);
+        return a;
+    }
+    // MURAL: fim
+
     private static final String SUFIXO_EXEMPLO = "@exemplo.gymsync";
     /** A ficha da Ana é criada sempre "hoje - 20 dias": serve de marcador para saber quanto os dados envelheceram. */
     private static final int DIAS_FICHA_ANA = 20;
@@ -74,6 +96,7 @@ public class VisitanteService {
     @Transactional
     public void aoSubir() {
         criarDadosDeExemplo();
+        criarMuralDeExemplo(); // MURAL
         completarCamposNovos();
         renovarDatas();
     }
