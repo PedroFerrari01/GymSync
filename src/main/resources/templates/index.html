@@ -1592,6 +1592,7 @@
 <script th:if="${logado}" th:src="@{/js/aulas-grade.js}"></script>
 <script th:if="${logado}" type="module" th:src="@{/js/mapa-corpo.js}"></script>
     <!--/* Formulários do painel: abrem em modal (o painel fica só para olhar) */-->
+<script th:src="@{/js/simulador.js}" th:if="${perfil == 'ADMIN'}"></script>
     <div class="modal fade" id="modalCatraca" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
