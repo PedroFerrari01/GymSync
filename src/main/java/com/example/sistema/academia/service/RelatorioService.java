@@ -144,6 +144,24 @@ public class RelatorioService {
         model.addAttribute("relMesAMes", mesAMes(hoje, entradas, matriculaRepository.findAll(), mensalidades));
         model.addAttribute("relMesAMesTitulo", "Dia 1 a " + hoje.getDayOfMonth() + " de cada mês");
         model.addAttribute("historico", historicoAcaoRepository.findTop50ByOrderByDataHoraDescIdDesc());
+        model.addAttribute("simBase", baseSimulador(matriculaRepository.findAll(), mensalidades));
+    }
+
+    /** SIMULADOR: números de partida (só leitura). Receita = soma do valor do plano das matrículas ativas. */
+    public record BaseSimulador(int ativos, BigDecimal ticket, BigDecimal receita, double inadimplenciaPct) {}
+
+    public BaseSimulador baseSimulador(List<Matricula> matriculas, List<Mensalidade> mensalidades) {
+        List<Matricula> ativas = matriculas.stream()
+                .filter(m -> "ATIVA".equals(m.getSituacao()) && m.getPlano() != null && m.getPlano().getValor() != null)
+                .toList();
+        BigDecimal receita = ativas.stream().map(m -> m.getPlano().getValor()).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal ticket = ativas.isEmpty() ? BigDecimal.ZERO
+                : receita.divide(BigDecimal.valueOf(ativas.size()), 2, java.math.RoundingMode.HALF_UP);
+        long inadimplentes = mensalidades.stream()
+                .filter(m -> "ATRASADA".equals(m.getSituacao()) && m.getMatricula() != null && m.getMatricula().getAluno() != null)
+                .map(m -> m.getMatricula().getAluno().getId()).distinct().count();
+        double pct = ativas.isEmpty() ? 0 : Math.min(100.0, Math.round(inadimplentes * 1000.0 / ativas.size()) / 10.0);
+        return new BaseSimulador(ativas.size(), ticket, receita, pct);
     }
 
     /** Números de um mês, do dia 1 até {@code ateDia} (para comparar períodos iguais). */

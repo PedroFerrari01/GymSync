@@ -1390,6 +1390,7 @@
 
 <script th:src="@{/vendor/bootstrap/bootstrap.bundle.min.js}"></script>
 <script th:src="@{/js/gymsync.js}"></script>
+<script th:src="@{/js/simulador.js}" th:if="${perfil == 'ADMIN'}"></script>
     <!-- Formulários do painel: abrem em modal (o painel fica só para olhar) -->
     <div class="modal fade" id="modalCatraca" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">

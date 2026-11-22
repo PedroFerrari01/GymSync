@@ -118,6 +118,47 @@
         </div>
     </div>
 
+<!--/* SIMULADOR: início */-->
+    <div id="simulador" class="panel-card mt-4 ocultar-impressao" th:if="${simBase != null}"
+         th:data-ativos="${simBase.ativos}" th:data-ticket="${simBase.ticket}"
+         th:data-receita="${simBase.receita}" th:data-inad="${simBase.inadimplenciaPct}">
+        <button type="button" class="sim-toggle d-flex flex-wrap justify-content-between align-items-center gap-2 w-100"
+                data-bs-toggle="collapse" data-bs-target="#simulador-corpo" aria-expanded="false" aria-controls="simulador-corpo">
+            <h5 class="panel-title mb-0"><i class="ph ph-caret-right sim-seta"></i> Simulador de faturamento</h5>
+            <span class="tag-pill">Simulação: não altera nenhum dado</span>
+        </button>
+        <div class="collapse" id="simulador-corpo">
+        <p class="small texto-apoio mt-2 mb-3">Mexa nos controles e veja a receita mensal prevista. É uma estimativa simples, não uma promessa.</p>
+        <div class="row g-4">
+            <div class="col-lg-5">
+                <div class="sim-ctrl"><label for="sim-novas">Novas matrículas por mês <b data-sim="novas-valor">0</b></label>
+                    <input type="range" class="form-range" id="sim-novas" data-sim="novas" min="0" max="50" step="1"></div>
+                <div class="sim-ctrl"><label for="sim-cancel">Cancelamentos por mês <b data-sim="cancelamentos-valor">0</b></label>
+                    <input type="range" class="form-range" id="sim-cancel" data-sim="cancelamentos" min="0" max="50" step="1"></div>
+                <div class="sim-ctrl"><label for="sim-inad">Inadimplência <b data-sim="inadimplencia-valor">0%</b></label>
+                    <input type="range" class="form-range" id="sim-inad" data-sim="inadimplencia" min="0" max="100" step="0.1"></div>
+                <div class="sim-ctrl"><label for="sim-reaj">Reajuste dos planos <b data-sim="reajuste-valor">0%</b></label>
+                    <input type="range" class="form-range" id="sim-reaj" data-sim="reajuste" min="-20" max="30" step="1"></div>
+                <div class="sim-ctrl"><label for="sim-meta">Meta de receita do mês (R$)</label>
+                    <input type="text" inputmode="decimal" class="form-control" id="sim-meta" data-sim="meta" placeholder="ex.: 20000"></div>
+                <p class="sim-meta-resultado" data-sim="meta-resultado" aria-live="polite"></p>
+                <button type="button" class="btn-theme btn-sm" data-sim="reset"><i class="bi bi-arrow-counterclockwise"></i> Voltar ao valor atual</button>
+            </div>
+            <div class="col-lg-7">
+                <div class="row g-2 mb-3">
+                    <div class="col-6"><div class="mini-kpi"><div class="valor" data-sim="atual">R$ 0,00</div><div class="rotulo">Receita atual (descontada a inadimplência)</div></div></div>
+                    <div class="col-6"><div class="mini-kpi"><div class="valor" data-sim="prox">R$ 0,00</div><div class="rotulo">Prevista no próximo mês</div></div></div>
+                </div>
+                <p class="mb-1"><b>Diferença:</b> <span data-sim="dif" class="sim-dif">-</span></p>
+                <p class="small texto-apoio mb-2" data-sim="ativos6"></p>
+                <div class="sim-grafico" data-sim="barras" role="img" aria-label="Receita prevista: hoje e próximos 6 meses"></div>
+                <p class="small texto-apoio mt-3 mb-0">Como é calculado: alunos do mês = ativos hoje + (novas − cancelamentos) × meses; mensalidade = média dos planos × (1 + reajuste); receita = alunos × mensalidade × (1 − inadimplência).</p>
+            </div>
+        </div>
+        </div>
+    </div>
+<!--/* SIMULADOR: fim */-->
+
     <div class="panel-card mt-4 ocultar-impressao">
         <div class="d-flex justify-content-between align-items-center mb-1">
             <h5 class="panel-title">Histórico de ações</h5>

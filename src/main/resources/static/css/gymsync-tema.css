@@ -1279,3 +1279,34 @@ html:has(.sobre) { scroll-behavior: smooth; }
 .contato-pendente { border-left: 3px solid #f97316; }
 
 .mensalidades-resumo { display: flex; flex-wrap: wrap; gap: 4px 14px; }
+
+/* SIMULADOR: início */
+.sim-ctrl { margin-bottom: var(--s3, 14px); }
+.sim-ctrl label { display: flex; justify-content: space-between; gap: 8px; font-size: 0.9rem; margin-bottom: 4px; }
+.sim-ctrl label b { color: var(--accent); white-space: nowrap; }
+.sim-ctrl .form-range::-webkit-slider-thumb { background-color: var(--accent); }
+.sim-ctrl .form-range::-moz-range-thumb { background-color: var(--accent); }
+.sim-ctrl .form-range::-webkit-slider-runnable-track { background-color: var(--border-color); }
+.sim-ctrl .form-range::-moz-range-track { background-color: var(--border-color); }
+.sim-ctrl .form-range:focus { box-shadow: none; }
+.sim-meta-resultado { font-weight: 600; min-height: 1.4em; }
+.sim-dif { font-weight: 700; white-space: nowrap; }
+.sim-sobe { color: #10b981; }
+.sim-desce { color: #ef4444; }
+.sim-grafico { display: flex; gap: 6px; align-items: flex-end; height: 190px; }
+.sim-col { flex: 1 1 0; min-width: 0; height: 100%; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.sim-trilho { flex: 1; width: 100%; display: flex; align-items: flex-end; }
+.sim-barra { width: 100%; background: var(--accent); border-radius: 4px 4px 0 0; min-height: 2px; transition: height 0.25s cubic-bezier(0.22, 1, 0.36, 1); }
+.sim-barra-hoje { background: var(--text-secondary); }
+.sim-val { font-size: 0.62rem; color: var(--text-secondary); text-align: center; white-space: nowrap; }
+.sim-rot { font-size: 0.75rem; color: var(--text-secondary); }
+@media (max-width: 575px) { .sim-val { font-size: 0.5rem; } }
+@media (prefers-reduced-motion: reduce) { .sim-barra { transition: none; } }
+/* SIMULADOR: fim */
+
+/* SIMULADOR (recolhido): início */
+.sim-toggle { background: none; border: 0; padding: 0; color: inherit; text-align: left; cursor: pointer; }
+.sim-seta { display: inline-block; transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1); color: var(--accent); }
+.sim-toggle[aria-expanded="true"] .sim-seta { transform: rotate(90deg); }
+@media (prefers-reduced-motion: reduce) { .sim-seta { transition: none; } }
+/* SIMULADOR (recolhido): fim */
