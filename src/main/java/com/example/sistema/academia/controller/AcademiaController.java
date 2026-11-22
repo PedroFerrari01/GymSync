@@ -119,7 +119,8 @@ public class AcademiaController {
     }
 
     @GetMapping("/")
-    public String paginaInicial(@RequestParam(required = false) String mes, Model model, HttpSession session) {
+    public String paginaInicial(@RequestParam(required = false) String mes,
+                                @RequestParam(required = false) String semana, Model model, HttpSession session) {
         String perfil = (String) session.getAttribute("perfil");
         model.addAttribute("tamanhoMinimoSenha", senhaService.tamanhoMinimo());
         if (perfil == null) {
@@ -185,6 +186,7 @@ public class AcademiaController {
             model.addAttribute("linkWhatsappFicha", fichaService.linkWhatsapp(aluno.getContato(), fichaService.textoAluno(aluno)));
             model.addAttribute("naoLidas", mensagemRepository.countByAlunoIdAndRemetenteAndLidaFalse(usuarioId, "PROFESSOR"));
             aulaService.preencher(model, usuarioId);
+            aulaService.grade(model, usuarioId, semana);
             model.addAttribute("sininho", sininhoService.paraAluno(avisoService.paraAluno(usuarioId),
                     mensagemRepository.countByAlunoIdAndRemetenteAndLidaFalse(usuarioId, "PROFESSOR"), aulasReservadasTexto(model)));
             return "index";
@@ -221,6 +223,7 @@ public class AcademiaController {
         model.addAttribute("diasSumido", AcompanhamentoService.DIAS_SUMIDO);
         model.addAttribute("painel", visaoEquipeService.montar(professor ? usuarioId : null, LocalDate.now()));
         aulaService.preencher(model, null);
+        aulaService.grade(model, null, semana);
 
         if (professor) {
             // LGPD: o professor só vê fichas, avaliações, entradas e WhatsApp dos próprios alunos.

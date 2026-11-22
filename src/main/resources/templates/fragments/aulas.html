@@ -1,6 +1,66 @@
 <div th:fragment="aba" class="tab-pane fade" id="aba-aulas" role="tabpanel">
 
     <div class="row g-4">
+        <!--/* GRADE-AULAS: início */-->
+        <div class="col-12">
+            <div class="panel-card grade-aulas" id="grade-aulas">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+                    <div>
+                        <h5 class="panel-title mb-0">Grade semanal</h5>
+                        <p class="small mb-0" style="color:var(--text-secondary);" th:text="${perfil == 'ALUNO' ? 'Toque numa aula para reservar a vaga; toque de novo na sua reserva para cancelar.' : 'Aulas da semana, com vagas e inscritos.'}"></p>
+                    </div>
+                    <div class="grade-nav">
+                        <a th:if="${gradeAnterior != null}" class="cal-nav" th:href="@{/(semana=${gradeAnterior})}" title="Semana anterior"><i class="bi bi-chevron-left"></i></a>
+                        <span class="grade-titulo" th:text="${gradeTitulo}"></span>
+                        <a th:if="${gradeSeguinte != null}" class="cal-nav" th:href="@{/(semana=${gradeSeguinte})}" title="Próxima semana"><i class="bi bi-chevron-right"></i></a>
+                        <a th:unless="${gradeSemanaAtual}" class="grade-hoje" th:href="@{/}">Hoje</a>
+                    </div>
+                </div>
+
+                <div th:if="${#lists.isEmpty(gradeLinhas)}" class="vazio">Nenhuma aula cadastrada ainda.</div>
+
+                <div th:unless="${#lists.isEmpty(gradeLinhas)}">
+                    <div class="grade-legenda small mb-2">
+                        <span><i class="grade-bolinha b-aberta"></i> Com vagas</span>
+                        <span th:if="${perfil == 'ALUNO'}"><i class="grade-bolinha b-reservada"></i> Reservada por você</span>
+                        <span><i class="grade-bolinha b-lotada"></i> Lotada</span>
+                        <span><i class="grade-bolinha b-passou"></i> Já passou</span>
+                    </div>
+
+                    <!-- Computador/tablet: dias nas colunas, horários nas linhas -->
+                    <div class="grade-tabela">
+                        <div class="grade-cab">
+                            <div class="grade-hora-cab"></div>
+                            <div th:each="d : ${gradeDias}" class="grade-dia-cab" th:classappend="${d.hoje} ? 'hoje'">
+                                <strong th:text="${d.nome}"></strong>
+                                <span th:text="${#temporals.format(d.data, 'dd/MM')}"></span>
+                            </div>
+                        </div>
+                        <div th:each="linha : ${gradeLinhas}" class="grade-linha">
+                            <div class="grade-hora" th:text="${#temporals.format(linha.horario, 'HH:mm')}"></div>
+                            <div th:each="celula, st : ${linha.dias}" class="grade-celula" th:classappend="${gradeDias[st.index].hoje} ? 'hoje'">
+                                <th:block th:each="c : ${celula}">
+                                    <th:block th:replace="~{fragments/aulas :: card(${c})}"></th:block>
+                                </th:block>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Celular: uma lista por dia -->
+                    <div class="grade-lista">
+                        <div th:each="d : ${gradeDias}" class="grade-dia-bloco" th:classappend="${d.hoje} ? 'hoje'">
+                            <div class="grade-dia-titulo"><strong th:text="${d.nome}"></strong> <span th:text="${#temporals.format(d.data, 'dd/MM')}"></span><em th:if="${d.hoje}"> · hoje</em></div>
+                            <div th:if="${#lists.isEmpty(d.aulas)}" class="small" style="color:var(--text-secondary);">Sem aulas.</div>
+                            <th:block th:each="c : ${d.aulas}">
+                                <th:block th:replace="~{fragments/aulas :: card(${c})}"></th:block>
+                            </th:block>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--/* GRADE-AULAS: fim */-->
+
         <div th:if="${perfil == 'ADMIN' or perfil == 'PROFESSOR'}" class="col-lg-4">
             <div class="panel-card">
                 <div class="d-flex justify-content-between align-items-center mb-3"><span class="tag-pill">Agenda</span><i class="bi bi-calendar-week fs-5"></i></div>
@@ -34,7 +94,7 @@
             </div>
         </div>
 
-        <div th:class="${perfil == 'ALUNO' ? 'col-12' : 'col-lg-8'}">
+        <div th:if="${perfil != 'ALUNO'}" th:class="${perfil == 'ALUNO' ? 'col-12' : 'col-lg-8'}">
             <div class="panel-card">
                 <h5 class="panel-title mb-1">Aulas coletivas</h5>
                 <p class="small mb-3" style="color:var(--text-secondary);">As aulas se repetem toda semana. A reserva vale para a próxima aula.</p>
@@ -86,3 +146,33 @@
         </div>
     </div>
 </div>
+
+<!--/* GRADE-AULAS cartão: início */-->
+<th:block th:fragment="card(c)">
+    <form th:if="${perfil == 'ALUNO' and c.estado == 'RESERVADA'}" th:action="@{/aulas/cancelar-reserva/{id}(id=${c.aula.id})}" method="post" class="grade-form" data-confirm="Cancelar a sua reserva?">
+        <input type="hidden" name="data" th:value="${c.data}">
+        <button type="submit" class="aula-card est-reservada" title="Cancelar reserva"><th:block th:replace="~{fragments/aulas :: cartaoConteudo(${c})}"></th:block></button>
+    </form>
+    <form th:if="${perfil == 'ALUNO' and c.estado == 'ABERTA'}" th:action="@{/aulas/reservar/{id}(id=${c.aula.id})}" method="post" class="grade-form">
+        <input type="hidden" name="data" th:value="${c.data}">
+        <button type="submit" class="aula-card est-aberta" title="Reservar vaga"><th:block th:replace="~{fragments/aulas :: cartaoConteudo(${c})}"></th:block></button>
+    </form>
+    <div th:if="${perfil != 'ALUNO' or (c.estado != 'RESERVADA' and c.estado != 'ABERTA')}" class="aula-card"
+         th:classappend="${c.estado == 'LOTADA' ? 'est-lotada' : (c.estado == 'PASSOU' ? 'est-passou' : (c.estado == 'RESERVADA' ? 'est-reservada' : 'est-aberta'))}">
+        <th:block th:replace="~{fragments/aulas :: cartaoConteudo(${c})}"></th:block>
+    </div>
+</th:block>
+
+<th:block th:fragment="cartaoConteudo(c)">
+    <span class="aula-nome" th:text="${c.aula.nome}"></span>
+    <span class="aula-prof" th:text="${c.aula.professor.nome}"></span>
+    <span class="aula-meta">
+        <span class="aula-hora" th:text="${#temporals.format(c.aula.horario, 'HH:mm')}"></span>
+        <span class="aula-estado" th:if="${c.estado == 'RESERVADA'}"><i class="bi bi-check-circle-fill"></i> Reservada</span>
+        <span class="aula-estado" th:if="${c.estado == 'LOTADA'}">Lotada</span>
+        <span class="aula-estado" th:if="${c.estado == 'PASSOU'}">Passou</span>
+        <span class="aula-estado" th:if="${c.estado == 'ABERTA' or c.estado == 'LONGE'}" th:text="${c.livres == 1 ? '1 vaga' : c.livres + ' vagas'}"></span>
+    </span>
+    <span class="aula-meta" th:if="${perfil != 'ALUNO'}"><span th:text="|${c.inscritos} de ${c.aula.vagas} inscritos|"></span></span>
+</th:block>
+<!--/* GRADE-AULAS cartão: fim */-->
