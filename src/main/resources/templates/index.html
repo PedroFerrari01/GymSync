@@ -550,6 +550,8 @@
                         </div>
                     </div>
 
+                    <th:block th:replace="~{fragments/movimento :: mapa}"></th:block>
+
                     <div class="row g-4">
                         <div class="col-lg-5">
                             <div class="panel-card">
@@ -736,6 +738,7 @@
                 </div>
 
                 <div th:if="${perfil == 'ADMIN' or perfil == 'PROFESSOR'}" class="tab-pane fade" th:classappend="${perfil == 'PROFESSOR' ? 'show active' : ''}" id="aba-treinos" role="tabpanel">
+                    <th:block th:replace="~{fragments/movimento :: mapa}"></th:block>
                     <!--/* Acompanhamento: alunos ativos com ficha (do professor logado; todos para o admin) */-->
                     <div th:if="${acompanhamento != null and !#lists.isEmpty(acompanhamento)}" class="row g-4 mb-4">
                         <div class="col-lg-5 align-self-start">
@@ -1574,6 +1577,7 @@
 <script th:src="@{/js/gymsync.js}"></script>
 <script th:src="@{/js/carteirinha.js}"></script>
 <script th:src="@{/js/sininho.js}"></script>
+<script th:if="${logado}" th:src="@{/js/melhor-horario.js}" defer></script>
 <script th:if="${logado}" th:src="@{/js/dicas.js}"></script>
 <script th:if="${logado}" type="module" th:src="@{/js/mapa-corpo.js}"></script>
     <!--/* Formulários do painel: abrem em modal (o painel fica só para olhar) */-->

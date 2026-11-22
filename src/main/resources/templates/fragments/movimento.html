@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!--/* MAPA-CALOR: início. Grade dia da semana x hora (catraca, últimos 90 dias). Só números agregados. */-->
+<div th:fragment="mapa" class="panel-card mb-4 mapa-calor-cartao" th:if="${mapaCalor != null}">
+    <div class="d-flex justify-content-between align-items-center mb-1">
+        <h5 class="panel-title">Mapa de calor dos horários</h5>
+        <span class="tag-pill">90 dias</span>
+    </div>
+    <p class="small mb-2" style="color:var(--text-secondary);">Entradas na catraca por dia da semana e hora. Passe o mouse ou toque numa célula para ver a contagem.</p>
+    <div th:if="${mapaCalor.vazio}" class="vazio">Ainda não há entradas registradas nos últimos 90 dias.</div>
+    <div th:unless="${mapaCalor.vazio}">
+        <div class="calor-rolagem" tabindex="0" role="region" aria-label="Mapa de calor de entradas por dia e hora">
+            <table class="calor-tabela">
+                <thead>
+                    <tr>
+                        <th scope="col"><span class="visually-hidden">Dia</span></th>
+                        <th scope="col" th:each="h : ${mapaCalor.horas}" th:text="${h}"></th>
+                        <th scope="col" class="calor-total-col">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="l : ${mapaCalor.linhas}">
+                        <th scope="row" th:text="${l.dia}"></th>
+                        <td th:each="c : ${l.celulas}" class="calor-celula" th:classappend="${'calor-n' + c.nivel}" tabindex="0"
+                            th:title="|${l.dia} às ${c.hora}h: ${c.quantidade} entradas|"
+                            th:text="${c.quantidade > 0 ? c.quantidade : ''}"></td>
+                        <td class="calor-total" th:text="${l.total}"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="calor-legenda small">
+            <span>Menos movimento</span>
+            <span class="calor-celula calor-n0" aria-hidden="true"></span><span class="calor-celula calor-n1" aria-hidden="true"></span><span class="calor-celula calor-n2" aria-hidden="true"></span><span class="calor-celula calor-n3" aria-hidden="true"></span><span class="calor-celula calor-n4" aria-hidden="true"></span><span class="calor-celula calor-n5" aria-hidden="true"></span>
+            <span>Mais movimento</span>
+            <span class="ms-auto" th:text="|${mapaCalor.total} entradas no período|"></span>
+        </div>
+    </div>
+</div>
+<!--/* MAPA-CALOR: fim */-->
+
+<!--/* MELHOR-HORARIO: início. Cartão do aluno: movimento por hora de cada dia, sem identificar ninguém. */-->
+<div th:fragment="melhorHorario" class="panel-card mb-4 melhor-horario" th:if="${melhorHorario != null}" id="melhorHorario">
+    <div class="d-flex justify-content-between align-items-center mb-1">
+        <h5 class="panel-title"><i class="ph ph-clock-countdown me-1" aria-hidden="true"></i>Melhor horário para treinar</h5>
+        <span class="tag-pill">90 dias</span>
+    </div>
+    <p class="small mb-2 texto-apoio" th:unless="${melhorHorario.semana.semDados}">
+        Mais vazios na semana:
+        <strong th:each="h, st : ${melhorHorario.semana.melhores}" th:text="${h.texto + (st.last ? '' : ' · ')}"></strong>
+    </p>
+    <div class="melhor-chips" role="tablist" aria-label="Escolha o dia">
+        <button type="button" class="melhor-chip" th:each="d, st : ${melhorHorario.dias}" th:classappend="${d.selecionado ? 'ativo' : ''}"
+                role="tab" th:attr="aria-selected=${d.selecionado}" th:data-dia="${st.index}" th:text="${d.destaque}"></button>
+    </div>
+    <div class="melhor-painel" th:each="d, st : ${melhorHorario.dias}" th:data-painel="${st.index}" th:hidden="${!d.selecionado}">
+        <div class="melhor-grafico" role="img" th:aria-label="${d.resumo}">
+            <div class="melhor-col" th:each="b : ${d.barras}" th:classappend="${(b.melhor ? 'melhor ' : '') + (b.evitar ? 'evitar' : '')}" th:title="${b.titulo}">
+                <div class="melhor-trilho"><div class="melhor-barra" th:classappend="${'calor-n' + b.nivel}" th:style="|height:${b.percentual}%|"></div></div>
+                <span class="melhor-hora" th:text="${b.rotulo}"></span>
+            </div>
+        </div>
+        <p class="melhor-resumo mb-0" th:text="${d.resumo}"></p>
+    </div>
+    <div class="calor-legenda small mt-2">
+        <span>Mais vazio</span>
+        <span class="calor-celula calor-n1" aria-hidden="true"></span><span class="calor-celula calor-n2" aria-hidden="true"></span><span class="calor-celula calor-n3" aria-hidden="true"></span><span class="calor-celula calor-n4" aria-hidden="true"></span><span class="calor-celula calor-n5" aria-hidden="true"></span>
+        <span>Mais cheio</span>
+        <span class="ms-auto"><span class="melhor-marca melhor-marca-bom"></span> melhores horários</span>
+    </div>
+</div>
+<!--/* MELHOR-HORARIO: fim */-->
+
+</body>
+</html>
