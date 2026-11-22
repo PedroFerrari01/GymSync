@@ -1947,3 +1947,16 @@ body.mt-aberto { overflow: hidden; }
 .sim-toggle[aria-expanded="true"] .sim-seta { transform: rotate(90deg); }
 @media (prefers-reduced-motion: reduce) { .sim-seta { transition: none; } }
 /* SIMULADOR (recolhido): fim */
+
+/* MURAL DA ACADEMIA: início */
+.mural-item { display: flex; gap: 12px; justify-content: space-between; align-items: flex-start; padding: 10px 0; border-top: 1px solid var(--border-color); }
+.mural-item:first-child { border-top: 0; padding-top: 2px; }
+.mural-texto { min-width: 0; overflow-wrap: anywhere; }
+.mural-meta { margin-top: 2px; }
+.mural-encerrar { flex: 0 0 auto; }
+.mural-novo { border-top: 1px solid var(--border-color); padding-top: 12px; }
+.mural-novo-titulo { cursor: pointer; color: var(--accent); font-weight: 600; font-size: .9rem; }
+@media (max-width: 575.98px) {
+    .mural-item { flex-direction: column; gap: 6px; }
+}
+/* MURAL DA ACADEMIA: fim */

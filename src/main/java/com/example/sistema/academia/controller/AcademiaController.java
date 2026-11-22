@@ -58,6 +58,7 @@ public class AcademiaController {
     @Autowired private SenhaService senhaService;
     @Autowired private VisitanteService visitanteService;
     @Autowired private CarteirinhaService carteirinhaService;
+    @Autowired private com.example.sistema.academia.service.MuralService muralService; // MURAL
 
     @Value("${gymsync.validar-cpf:true}") private boolean validarCpf;
     @Value("${gymsync.recuperacao-por-email:true}") private boolean recuperacaoPorEmail;
@@ -141,6 +142,8 @@ public class AcademiaController {
         model.addAttribute("visitante", Boolean.TRUE.equals(session.getAttribute("visitante")));
         model.addAttribute("nomeUsuario", session.getAttribute("nomeUsuario"));
         Long usuarioId = (Long) session.getAttribute("usuarioId");
+        List<com.example.sistema.academia.model.MuralAviso> mural = muralService.ativos(LocalDate.now()); // MURAL
+        model.addAttribute("mural", mural);
 
         if ("ALUNO".equals(perfil)) {
             Aluno aluno = usuarioId != null ? alunoRepository.findById(usuarioId).orElse(null) : null;
@@ -189,8 +192,8 @@ public class AcademiaController {
             aulaService.preencher(model, usuarioId);
             aulaService.grade(model, usuarioId, semana);
             model.addAttribute("melhorHorario", movimentoService.planoAluno(java.time.LocalDateTime.now()));
-            model.addAttribute("sininho", sininhoService.paraAluno(avisoService.paraAluno(usuarioId),
-                    mensagemRepository.countByAlunoIdAndRemetenteAndLidaFalse(usuarioId, "PROFESSOR"), aulasReservadasTexto(model)));
+            model.addAttribute("sininho", com.example.sistema.academia.service.MuralService.naFrente(sininhoService.paraAluno(avisoService.paraAluno(usuarioId),
+                    mensagemRepository.countByAlunoIdAndRemetenteAndLidaFalse(usuarioId, "PROFESSOR"), aulasReservadasTexto(model)), mural, perfil));
             return "index";
         }
 
@@ -251,7 +254,7 @@ public class AcademiaController {
             model.addAttribute("professorId", usuarioId);
             model.addAttribute("meusTreinos", meusTreinos);
             model.addAttribute("naoLidas", mensagemRepository.countByProfessorIdAndRemetenteAndLidaFalse(usuarioId, "ALUNO"));
-            model.addAttribute("sininho", sininhoService.paraProfessor((List<Acompanhamento>) model.asMap().get("acompanhamento")));
+            model.addAttribute("sininho", com.example.sistema.academia.service.MuralService.naFrente(sininhoService.paraProfessor((List<Acompanhamento>) model.asMap().get("acompanhamento")), mural, perfil));
             return "index";
         }
 
@@ -271,7 +274,7 @@ public class AcademiaController {
         model.addAttribute("mensalidades", mensalidadeRepository.findAll());
         List<Aviso> avisosAdmin = avisoService.paraAdmin();
         model.addAttribute("avisos", avisosAdmin);
-        model.addAttribute("sininho", sininhoService.paraAdmin(avisosAdmin, (List<Acompanhamento>) model.asMap().get("acompanhamento")));
+        model.addAttribute("sininho", com.example.sistema.academia.service.MuralService.naFrente(sininhoService.paraAdmin(avisosAdmin, (List<Acompanhamento>) model.asMap().get("acompanhamento")), mural, perfil));
         model.addAttribute("equipamentos", equipamentoRepository.findAll());
         model.addAttribute("equipamentosComFoto", equipamentoImagemRepository.idsComImagem());
         model.addAttribute("manutencoes", manutencaoRepository.findAllByOrderByDataManutencaoDescIdDesc());
