@@ -1416,6 +1416,15 @@ tr.paleta-destaque td { background: var(--accent-soft) !important; transition: b
     --mapa-piorou: #f87171;
     --mapa-neutro: #e2e8f0;
     --mapa-destaque: #f8fafc;
+    --mapa-estavel: #f97316;
+    /* 3D "body scan": grafite fosco, contorno frio, regiões acesas com brilho (bloom só no escuro) */
+    --mapa3d-base: #151922;
+    --mapa3d-borda: #7da2d8;
+    --mapa3d-anel: #f97316;
+    --mapa3d-melhorou: #10b981;
+    --mapa3d-piorou: #ef4444;
+    --mapa3d-estavel: #f97316;
+    --mapa3d-brilho: 1;
     height: auto;
 }
 :root[data-theme="light"] .mapa-corpo {
@@ -1425,6 +1434,14 @@ tr.paleta-destaque td { background: var(--accent-soft) !important; transition: b
     --mapa-piorou: #b91c1c;
     --mapa-neutro: #475569;
     --mapa-destaque: #94a3b8;
+    --mapa-estavel: #c2410c;
+    --mapa3d-base: #c9ced8;
+    --mapa3d-borda: #ffffff;
+    --mapa3d-anel: #ea580c;
+    --mapa3d-melhorou: #059669;
+    --mapa3d-piorou: #dc2626;
+    --mapa3d-estavel: #f97316;
+    --mapa3d-brilho: 0;
 }
 .mapa-topo { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: var(--s3); margin-bottom: var(--s3); }
 .mapa-controles { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2); }
@@ -1471,6 +1488,7 @@ tr.paleta-destaque td { background: var(--accent-soft) !important; transition: b
 .mapa-musculo { fill: var(--mapa-pele); fill-opacity: 0.55; stroke: var(--bg-card); stroke-width: 1.5px; vector-effect: non-scaling-stroke; stroke-linejoin: round; transition: fill-opacity 200ms, stroke 200ms; }
 .mapa-musculo.medido { fill-opacity: 0.9; }
 .mapa-musculo.melhorou { fill: var(--mapa-melhorou); }
+.mapa-musculo.estavel { fill: var(--mapa-estavel); }
 .mapa-musculo.piorou { fill: var(--mapa-piorou); }
 .mapa-musculo.medido { cursor: pointer; }
 .mapa-musculo.ativo { stroke: var(--mapa-destaque); stroke-width: 2.5px; }
@@ -1488,6 +1506,7 @@ tr.paleta-destaque td { background: var(--accent-soft) !important; transition: b
 }
 .mapa-dica-musculo[hidden] { display: none; }
 .mapa-dica-musculo.melhorou { border-left-color: var(--mapa-melhorou); }
+.mapa-dica-musculo.estavel { border-left-color: var(--mapa-estavel); }
 .mapa-dica-musculo.piorou { border-left-color: var(--mapa-piorou); }
 .mapa-rotulo.fora-da-vista { opacity: 0.5; }
 .mapa-comparando { color: var(--text-secondary); white-space: nowrap; user-select: none; }
@@ -1541,13 +1560,16 @@ tr.paleta-destaque td { background: var(--accent-soft) !important; transition: b
 .mapa-rotulo .evo-dif { white-space: nowrap; }
 .mapa-rotulo .evo-dif, .mapa-resumo-item .evo-dif { font-size: 0.85rem; }
 .mapa-rotulo .evo-dif.neutro, .mapa-resumo-item .evo-dif.neutro { color: var(--text-secondary); }
+.mapa-rotulo .evo-dif.estavel, .mapa-resumo-item .evo-dif.estavel { color: var(--mapa-estavel); }
 
 .mapa-linhas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
 .mapa-traco { fill: none; stroke: var(--mapa-neutro); stroke-width: 1.25; opacity: 0.75; }
 .mapa-bolinha { fill: var(--mapa-neutro); stroke: var(--bg-card); stroke-width: 2; }
 .mapa-traco.melhorou { stroke: var(--mapa-melhorou); }
+.mapa-traco.estavel { stroke: var(--mapa-estavel); }
 .mapa-traco.piorou { stroke: var(--mapa-piorou); }
 .mapa-bolinha.melhorou { fill: var(--mapa-melhorou); }
+.mapa-bolinha.estavel { fill: var(--mapa-estavel); }
 .mapa-bolinha.piorou { fill: var(--mapa-piorou); }
 .mapa-traco.ativo { stroke-width: 2; opacity: 1; }
 
@@ -1565,6 +1587,7 @@ tr.paleta-destaque td { background: var(--accent-soft) !important; transition: b
         border-left: 3px solid var(--mapa-neutro);
     }
     .mapa-rotulo.melhorou { border-left-color: var(--mapa-melhorou); }
+    .mapa-rotulo.estavel { border-left-color: var(--mapa-estavel); }
     .mapa-rotulo.piorou { border-left-color: var(--mapa-piorou); }
     .mapa-rotulo.ativo { border-color: var(--mapa-destaque); }
     .mapa-linhas { display: none; }
@@ -1591,6 +1614,7 @@ tr.paleta-destaque td { background: var(--accent-soft) !important; transition: b
 .mapa-legenda-item { white-space: nowrap; } /* nome e número da medida nunca se separam */
 .mapa-ponto { flex: none; width: 10px; height: 10px; border-radius: 50%; background: var(--mapa-neutro); margin-top: 0.42em; }
 .mapa-ponto.melhorou { background: var(--mapa-melhorou); }
+.mapa-ponto.estavel { background: var(--mapa-estavel); }
 .mapa-ponto.piorou { background: var(--mapa-piorou); }
 @media (prefers-reduced-motion: reduce) {
     .mapa-alternar button, .mapa-rotulo, .mapa-musculo, .mapa-dica, .mapa-silhueta, .mapa-linhas { transition: none; }
@@ -1869,3 +1893,26 @@ body.mt-aberto { overflow: hidden; }
 .pix-nota { font-size: .8rem; opacity: .85; margin-bottom: .6rem; }
 .pix-codigo { font-size: .72rem; }
 /* PIX-QR: fim */
+
+/* Mapa do corpo 3D anatômico: aviso de carregamento discreto no meio da figura */
+.mapa-carregando {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    white-space: nowrap;
+    pointer-events: none;
+}
+.mapa-carregando[hidden] { display: none; }
+
+/* Crédito do modelo 3D: mesmo tom do texto de apoio, sem o azul de link */
+.mapa-nota-3d a { color: inherit; text-decoration: underline; text-decoration-color: var(--border-color); text-underline-offset: 2px; }
+.mapa-nota-3d a:hover { color: var(--text-primary); }
+/* 3D sem linhas-guia: a pílula liga com a região pelo destaque */
+.mapa-em-3d .mapa-linhas { visibility: hidden; }

@@ -160,6 +160,13 @@ function fatoresDe(aluno, momento) {
 
 /* ---------- Dados do HTML ---------- */
 
+// Sem cor só para peso e IMC (subir ou descer não é bom nem ruim por si). As outras medidas comparadas
+// que não mudaram além do limite do servidor aparecem como "estável" (laranja), nos dois modos.
+const SEMPRE_SEM_COR = ['peso', 'imc'];
+function classeVisual(chave, classe, diferenca) {
+    return classe === 'neutro' && diferenca && !SEMPRE_SEM_COR.includes(chave) ? 'estavel' : classe;
+}
+
 function lerAlunos() {
     const alunos = new Map();
     raiz.querySelectorAll('.mapa-dados > [data-aluno]').forEach(bloco => {
@@ -169,7 +176,7 @@ function lerAlunos() {
             medidas[d.chave] = {
                 chave: d.chave, rotulo: d.rotulo, primeira: d.primeira, ultima: d.ultima,
                 primeiraNumero: parseFloat(d.primeiraNumero), ultimaNumero: parseFloat(d.ultimaNumero),
-                diferenca: d.diferenca || null, classe: d.classe || 'neutro',
+                diferenca: d.diferenca || null, classe: classeVisual(d.chave, d.classe || 'neutro', d.diferenca),
                 intensidade: parseFloat(d.intensidade) || 0
             };
         });
@@ -332,6 +339,9 @@ const CHAVE_DO_MUSCULO = Object.fromEntries(Object.entries(MUSCULOS).map(([vista
 
 // Ao clicar na pílula, a região que aparece melhor de um lado só leva a figura para esse lado
 const VISTA_PREFERIDA = { peito: 'frente', quadril: 'costas' };
+// Músculo que fica no meio do corpo nesta vista: a linha-guia teria de atravessar outro músculo para chegar,
+// então ali a pílula fica apagada (como o peito nas costas). O quadril, de frente, é o abdutor (parte de dentro da coxa).
+const SEM_LINHA = { frente: ['quadril'], costas: [] };
 
 function noSvg(nome, atributos) {
     const el = document.createElementNS(SVG_NS, nome);
@@ -387,7 +397,9 @@ function criarSilhueta(svg) {
                 const el = noSvg('polygon', { points: texto, class: `mapa-musculo${extra}${classe}` });
                 if (classe) {
                     el.dataset.chave = chave;
-                    if (regioes[chave] !== 'neutro') el.style.fillOpacity = (0.45 + 0.55 * (forca[chave] || 0)).toFixed(2); // vence o CSS (atributo não venceria)
+                    // vence o CSS (atributo não venceria); estável tem variação ~0, então usa opacidade fixa para o laranja aparecer
+                    if (regioes[chave] === 'estavel') el.style.fillOpacity = '0.75';
+                    else if (regioes[chave] !== 'neutro') el.style.fillOpacity = (0.45 + 0.55 * (forca[chave] || 0)).toFixed(2);
                 }
                 svg.appendChild(el);
             }
@@ -406,11 +418,37 @@ function criarSilhueta(svg) {
         };
     }
 
-    /** Centro do músculo da medida mais para o lado pedido; sem músculo nesta vista, null. */
+    /**
+     * Ponto do músculo da medida para a linha-guia: só músculos do mesmo lado do rótulo (ou um que fica no meio
+     * do corpo), na borda virada para o rótulo, na altura do meio do músculo. Assim a linha não atravessa o corpo.
+     * Sem músculo nesta vista, null.
+     */
     function ancora(chave, lado) {
+        if (SEM_LINHA[vista].includes(chave)) return null;
+        const nomes = MUSCULOS[vista][chave] || [];
+        let minX = Infinity, maxX = -Infinity;
+        for (const item of formas[vista]) for (const pts of item.pontos) for (const p of pts) { minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x); }
+        const meio = (minX + maxX) / 2, folga = (maxX - minX) * 0.03;
         let melhor = null;
-        for (const c of centros(vista, chave)) if (!melhor || lado * c.x > lado * melhor.x) melhor = c;
-        return melhor && emPixels(melhor);
+        for (const item of formas[vista]) {
+            if (!nomes.includes(item.muscle)) continue;
+            for (const pts of item.pontos) {
+                const cx = pts.reduce((s, p) => s + p.x, 0) / pts.length;
+                if (lado * (cx - meio) < -folga) continue; // músculo do outro lado do corpo
+                let y0 = Infinity, y1 = -Infinity;
+                for (const p of pts) { y0 = Math.min(y0, p.y); y1 = Math.max(y1, p.y); }
+                const y = (y0 + y1) / 2;
+                // Borda do polígono na altura y, a mais para o lado do rótulo
+                for (let i = 0; i < pts.length; i++) {
+                    const a = pts[i], b = pts[(i + 1) % pts.length];
+                    if ((a.y - y) * (b.y - y) > 0 || a.y === b.y) continue;
+                    const x = a.x + (y - a.y) * (b.x - a.x) / (b.y - a.y);
+                    if (!melhor || lado * x > lado * melhor.x) melhor = { x, y };
+                }
+            }
+        }
+        if (!melhor) return null;
+        return emPixels({ x: melhor.x - lado * 1.2, y: melhor.y }); // um pouco para dentro: a bolinha fica sobre o músculo
     }
 
     /** Altura (em pixels) da medida para alinhar o rótulo; usa a frente quando a vista não tem o músculo. */
@@ -807,7 +845,12 @@ function iniciar() {
         const cor = nome => estilo.getPropertyValue(nome).trim();
         return {
             pele: cor('--mapa-pele'), melhorou: cor('--mapa-melhorou'), piorou: cor('--mapa-piorou'),
-            neutro: cor('--mapa-neutro'), texto: cor('--mapa-chao'), borda: cor('--mapa-neutro')
+            neutro: cor('--mapa-neutro'), texto: cor('--mapa-chao'), borda: cor('--mapa-neutro'),
+            destaque: cor('--mapa-destaque'),
+            // Visual "body scan" do 3D
+            base3d: cor('--mapa3d-base'), borda3d: cor('--mapa3d-borda'), anel3d: cor('--mapa3d-anel'),
+            melhorou3d: cor('--mapa3d-melhorou'), piorou3d: cor('--mapa3d-piorou'), estavel3d: cor('--mapa3d-estavel'),
+            brilho3d: cor('--mapa3d-brilho') === '1'
         };
     }
 
@@ -851,15 +894,18 @@ function iniciar() {
             nome.append(' ', elemento('span', 'mapa-rotulo-tipo', '(perímetro)')); // o espaço deixa quebrar a linha em tela estreita
             li.append(nome, elemento('span', 'mapa-rotulo-valor', valor(m)));
             if (m.diferenca) li.append(elemento('span', `evo-dif ${m.classe}`, `${m.diferenca} ${sentido(m.diferenca)}`));
-            li.addEventListener('mouseenter', () => destacar(chave));
+            // No 3D não há linha-guia: a pílula acende a região e o corpo gira para o lado em que ela aparece
+            const apontarPilula = () => { destacar(chave); if (usando3d()) cena3d.mostrarLado(chave); };
+            li.addEventListener('mouseenter', apontarPilula);
             li.addEventListener('mouseleave', () => destacar(null));
-            li.addEventListener('focus', () => destacar(chave));
+            li.addEventListener('focus', apontarPilula);
             li.addEventListener('blur', () => destacar(null));
             li.addEventListener('click', () => {
                 fixado = fixado === chave ? null : chave;
                 destacar(null);
                 const preferida = VISTA_PREFERIDA[chave];
-                if (fixado && preferida && !usando3d()) mudarVista(preferida);
+                if (fixado && usando3d()) cena3d.mostrarLado(chave);
+                else if (fixado && preferida) mudarVista(preferida);
             });
             colunas[lado].append(li);
             const traco = noSvg('path', { class: `mapa-traco ${m.classe}` });
@@ -898,7 +944,7 @@ function iniciar() {
 
         // Legenda a partir dos dados: cada medida entra num status só
         legenda.replaceChildren();
-        const grupos = { melhorou: 'Melhorou', piorou: 'Piorou', neutro: 'Sem cor' };
+        const grupos = { melhorou: 'Melhorou', piorou: 'Piorou', estavel: 'Estável', neutro: 'Sem cor' };
         for (const classe in grupos) {
             const doGrupo = Object.values(a.medidas).filter(m => (m.classe || 'neutro') === classe);
             if (!doGrupo.length) continue;
@@ -908,7 +954,7 @@ function iniciar() {
             corpo.append(elemento('span', 'mapa-legenda-titulo', `${grupos[classe]}:`));
             const itens = elemento('span', 'mapa-legenda-itens');
             doGrupo.forEach((m, i) => {
-                const texto = m.diferenca && classe !== 'neutro' ? `${m.rotulo} (${m.diferenca})` : m.rotulo;
+                const texto = m.diferenca && classe !== 'neutro' && classe !== 'estavel' ? `${m.rotulo} (${m.diferenca})` : m.rotulo;
                 itens.append(elemento('span', 'mapa-legenda-item', texto + (i < doGrupo.length - 1 ? ',' : '')));
                 if (i < doGrupo.length - 1) itens.append(' ');
             });
@@ -928,7 +974,7 @@ function iniciar() {
         const topoFigura = figura.getBoundingClientRect().top - palco.getBoundingClientRect().top;
         // Altura do rótulo no palco: no 3D pela forma do manequim, no 2D pelo centro do músculo
         const meioDe = chave => {
-            const y = usando3d() ? null : silhueta.alturaRotulo(chave);
+            const y = (usando3d() ? cena3d : silhueta).alturaRotulo(chave);
             return y != null ? topoFigura + y : (1 - (alturaDe(chave) + 0.06) / 1.92) * alturaPalco;
         };
         for (const lado of [-1, 1]) {
@@ -952,6 +998,15 @@ function iniciar() {
 
     function atualizarTracos() {
         if (!rotulos.length || !comTracos()) return;
+        if (usando3d()) {
+            // 3D sem linhas-guia (a ligação é pelo destaque ao passar o mouse)
+            for (const r of rotulos) {
+                r.li.classList.remove('fora-da-vista');
+                r.traco.setAttribute('d', '');
+                r.bolinha.setAttribute('visibility', 'hidden');
+            }
+            return;
+        }
         const base = palco.getBoundingClientRect();
         const caixaFigura = figura.getBoundingClientRect();
         const fonte = usando3d() ? cena3d : silhueta;
@@ -996,6 +1051,7 @@ function iniciar() {
             b.classList.toggle('active', b.dataset.vista === vista);
             b.setAttribute('aria-pressed', b.dataset.vista === vista);
         });
+        if (usando3d()) { vistaEscolhida = vista; cena3d.girarPara(vista); desenhar2d(); return; }
         if (vista === vistaEscolhida) return;
         vistaEscolhida = vista;
         mostrarDica(null);
@@ -1039,7 +1095,7 @@ function iniciar() {
         const a = aluno();
         const fatores = a ? fatoresDe(a, momento) : { ...FATOR_NEUTRO };
         desenhar2d();
-        if (cena3d) cena3d.mostrar(fatores, regioesComClasse(), semAnimar);
+        if (cena3d) cena3d.mostrar(fatores, regioesComClasse(), semAnimar, intensidades());
         destacar(null);
         atualizarTracos();
     }
@@ -1061,35 +1117,60 @@ function iniciar() {
                 if (sem3d) b.title = 'Este aparelho não conseguiu abrir o 3D';
             }
         });
-        grupoVista.hidden = usando3d(); // Frente/Costas é do mapa dos músculos; o 3D gira
+        // Fora do 3D, a cena é descartada (libera a GPU); o modelo já baixado fica guardado no módulo
+        if (modo !== '3d' && cena3d) { cena3d.descartar(); cena3d = null; }
         if (usando3d()) cena3d.redimensionar();
         posicionarRotulos();
         atualizarTracos();
     }
 
+    // Aviso curto quando o 3D não abre (sem WebGL, erro ou demora): fica o mapa 2D
+    const avisoSem3d = elemento('p', 'small mb-0 texto-apoio mapa-aviso-3d', 'Não deu para abrir o 3D neste aparelho; mostrando o mapa 2D.');
+    avisoSem3d.hidden = true;
+    raiz.querySelector('.mapa-lateral').append(avisoSem3d);
+    const progresso = elemento('span', 'mapa-carregando', 'Carregando o 3D…');
+    progresso.setAttribute('role', 'status');
+    progresso.hidden = true;
+    figura.append(progresso);
+
     function desistirDo3d() {
         sem3d = true;
+        if (cena3d) { try { cena3d.descartar(); } catch (e) { /* contexto já perdido */ } }
         cena3d = null;
+        progresso.hidden = true;
+        if (modo === '3d') avisoSem3d.hidden = false;
         aplicarModo();
     }
 
     async function carregar3d() {
         if (cena3d || carregando3d || sem3d || modo !== '3d' || !visivel) return;
         carregando3d = true;
+        progresso.hidden = false;
+        progresso.textContent = 'Carregando o 3D…';
+        let demorou = false;
+        const prazo = setTimeout(() => { demorou = true; desistirDo3d(); }, 10000);
         try {
             // Sem WebGL nem adianta baixar o Three.js: fica a silhueta
             if (!document.createElement('canvas').getContext('webgl2')) throw new Error('sem WebGL');
-            const THREE = await import('../vendor/three/three.module.min.js');
-            cena3d = criarCena3D(THREE, canvas, atualizarTracos);
+            const { criarCenaAnatomica } = await import('./mapa-corporal-3d.js');
+            const cena = await criarCenaAnatomica(canvas, atualizarTracos, {
+                aoProgresso: f => { progresso.textContent = `Carregando o 3D… ${Math.round(f * 100)}%`; }
+            });
+            if (demorou || modo !== '3d') { cena.descartar(); throw new Error('cancelado'); }
+            cena3d = cena;
             cena3d.aoPerder(desistirDo3d);
+            cena3d.aoApontar(apontarMusculo, clicarMusculo);
             cena3d.cores(coresDoTema());
             const a = aluno();
-            cena3d.mostrar(a ? fatoresDe(a, momento) : { ...FATOR_NEUTRO }, regioesComClasse(), true);
+            cena3d.mostrar(a ? fatoresDe(a, momento) : { ...FATOR_NEUTRO }, regioesComClasse(), true, intensidades());
             aplicarModo();
         } catch (erro) {
-            desistirDo3d();
+            if (!demorou && modo === '3d') desistirDo3d();
+        } finally {
+            clearTimeout(prazo);
+            progresso.hidden = true;
+            carregando3d = false;
         }
-        carregando3d = false;
     }
 
     /* Controles */
@@ -1121,13 +1202,15 @@ function iniciar() {
         mudarVista(botao.dataset.vista);
     }));
     // Músculos interativos nas duas vistas: passar o mouse destaca a pílula e mostra a dica; clicar fixa, como na pílula
-    silhueta.aoApontar((chave, e) => {
+    function apontarMusculo(chave, e) {
         mostrarDica(chave, e);
         destacar(chave);
-    }, chave => {
+    }
+    function clicarMusculo(chave) {
         fixado = fixado === chave ? null : chave;
         destacar(null);
-    });
+    }
+    silhueta.aoApontar(apontarMusculo, clicarMusculo);
     canvas.addEventListener('pointerdown', () => raiz.classList.add('mapa-ja-girou'), { once: true });
 
     // Tema claro/escuro: as cores do 3D vêm das variáveis CSS

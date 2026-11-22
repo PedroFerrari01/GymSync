@@ -25,6 +25,7 @@ public final class RegrasAcesso {
                 || caminho.startsWith("/js/")
                 || caminho.startsWith("/img/")
                 || caminho.startsWith("/video/")
+                || caminho.startsWith("/models/")
                 || caminho.startsWith("/vendor/");
     }
 
