@@ -57,7 +57,10 @@ public class SegurancaConfig {
                     HttpSession sessao = req.getSession(false);
                     if (sessao != null && Boolean.TRUE.equals(sessao.getAttribute("visitante"))) {
                         FlashMap aviso = new FlashMap();
-                        aviso.put("erro", "Você está no modo visitante: dá para ver tudo, mas nada é salvo.");
+                        boolean exportar = req.getRequestURI().startsWith(req.getContextPath() + "/relatorios/exportar");
+                        aviso.put("erro", exportar
+                                ? "Exportar planilha não está disponível no modo visitante."
+                                : "Você está no modo visitante: dá para ver tudo, mas nada é salvo.");
                         new SessionFlashMapManager().saveOutputFlashMap(aviso, req, res);
                     }
                     res.sendRedirect(req.getContextPath() + "/");

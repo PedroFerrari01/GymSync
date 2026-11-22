@@ -189,4 +189,16 @@ class RegrasAcessoTest {
         assertTrue(SegurancaConfig.politicaPermissoes("/catraca/leitor").contains("geolocation=()"));
         assertTrue(SegurancaConfig.politicaPermissoes("/catraca/leitor").contains("payment=()"));
     }
+
+    @Test
+    void reciboEDoAdminEDoAlunoMasNaoDoProfessor() {
+        assertTrue(RegrasAcesso.permitido("ADMIN", "/mensalidades/5/recibo"));
+        assertTrue(RegrasAcesso.permitido("ALUNO", "/mensalidades/5/recibo"));
+        assertFalse(RegrasAcesso.permitido("PROFESSOR", "/mensalidades/5/recibo"));
+        assertFalse(RegrasAcesso.permitido(null, "/mensalidades/5/recibo"));
+        // O resto de /mensalidades continua só do admin
+        assertFalse(RegrasAcesso.permitido("ALUNO", "/mensalidades/pagar/5"));
+        // Visitante só faz GET, então vê o recibo
+        assertTrue(RegrasAcesso.visitantePode("GET", "/mensalidades/5/recibo"));
+    }
 }

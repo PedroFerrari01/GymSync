@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+    <title th:text="|Recibo ${numeroRecibo} - GymSync|">Recibo - GymSync</title>
+    <link rel="stylesheet" th:href="@{/vendor/bootstrap/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/vendor/bootstrap-icons/bootstrap-icons.min.css}">
+    <link rel="stylesheet" th:href="@{/css/gymsync.css}">
+    <link rel="stylesheet" th:href="@{/css/gymsync-tema.css}">
+    <link rel="icon" type="image/png" th:href="@{/img/favicon.png}">
+</head>
+<body class="recibo-fundo">
+
+<!--/* RECIBO: início (página própria, sempre em fundo branco para imprimir bem) */-->
+<div class="recibo-barra">
+    <a th:href="@{/}" class="btn-theme btn-sm"><i class="bi bi-arrow-left"></i> Voltar</a>
+    <button type="button" class="btn-brand btn-sm" data-imprimir><i class="bi bi-file-earmark-pdf"></i> Baixar PDF</button>
+    <span class="small texto-apoio">Na janela de impressão, escolha "Salvar como PDF".</span>
+</div>
+
+<main class="recibo-folha">
+    <header class="recibo-topo">
+        <img th:src="@{/img/logo-completo-fundo-claro.png}" alt="GymSync" class="recibo-logo">
+        <div class="recibo-numero">
+            <div class="recibo-rotulo">Recibo de pagamento</div>
+            <div class="recibo-num" th:text="${numeroRecibo}">GS-2026-000001</div>
+        </div>
+    </header>
+
+    <section class="recibo-valor-destaque">
+        <span class="recibo-rotulo">Valor recebido</span>
+        <strong th:text="|R$ ${@fmt.dinheiro(m.valor)}|">R$ 0,00</strong>
+    </section>
+
+    <dl class="recibo-dados">
+        <div><dt>Aluno(a)</dt><dd th:text="${m.matricula.aluno.nome}">Nome</dd></div>
+        <div><dt>CPF</dt><dd th:text="${cpfMascarado}">***.000.000-**</dd></div>
+        <div><dt>Plano</dt><dd th:text="${m.matricula.plano.nome}">Plano</dd></div>
+        <div><dt>Referência (vencimento)</dt><dd th:text="${@fmt.data(m.vencimento)}">01/01/2026</dd></div>
+        <div><dt>Data da confirmação</dt><dd th:text="${@fmt.data(m.dataPagamento)}">01/01/2026</dd></div>
+        <div><dt>Situação</dt><dd>Paga</dd></div>
+    </dl>
+
+    <p class="recibo-aviso">
+        Pagamento confirmado pela recepção. Neste sistema o Pix é <strong>simulado</strong> (demonstração): não há
+        movimentação bancária real e este documento não tem valor fiscal.
+    </p>
+
+    <footer class="recibo-rodape">
+        <span th:text="|Emitido em ${#temporals.format(#temporals.createNow(), 'dd/MM/yyyy HH:mm')}|">Emitido em</span>
+        <span th:if="${emitidoPor != null}" th:text="|por ${emitidoPor}|"></span>
+        <span class="ms-auto">Documento gerado pelo GymSync</span>
+    </footer>
+</main>
+<!--/* RECIBO: fim */-->
+
+<script th:src="@{/vendor/bootstrap/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/js/gymsync.js}"></script>
+</body>
+</html>

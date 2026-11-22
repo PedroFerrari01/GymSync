@@ -195,13 +195,14 @@
                     </div>
                     <div class="table-responsive">
                         <table class="table table-custom tabela-mensalidades">
-                            <thead><tr><th>Plano</th><th>Valor</th><th>Vencimento</th><th>Situação</th></tr></thead>
+                            <thead><tr><th>Plano</th><th>Valor</th><th>Vencimento</th><th>Situação</th><th></th></tr></thead>
                             <tbody>
                                 <tr th:each="m : ${mensalidades}" th:data-grupo="${(m.situacao == 'PAGA') ? 'pagas' : ((m.situacao == 'ATRASADA' or m.situacao == 'VENCIDA') ? 'atrasadas' : 'pendentes')}">
                                     <td th:text="${m.matricula.plano.nome}"></td>
                                     <td class="cel-valor" th:text="|R$ ${@fmt.dinheiro(m.valor)}|"></td>
                                     <td class="cel-venc" th:text="${m.vencimento != null ? #temporals.format(m.vencimento, 'dd/MM/yyyy') : ''}"></td>
                                     <td><span th:text="${@fmt.statusTexto(m.situacao)}" th:class="${@fmt.statusClasse(m.situacao)}"></span></td>
+                                    <td class="text-end"><a th:if="${m.situacao == 'PAGA'}" th:href="@{/mensalidades/{id}/recibo(id=${m.id})}" class="btn btn-sm btn-outline-secondary fw-semibold px-2" target="_blank" rel="noopener"><i class="bi bi-receipt"></i> Recibo</a></td>
                                 </tr>
                             </tbody>
                         </table>

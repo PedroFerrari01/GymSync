@@ -1,17 +1,126 @@
 <div th:fragment="aba" class="tab-pane fade" id="aba-relatorios" role="tabpanel">
 
-    <div class="cabecalho-impressao">
-        <h3 class="fw-bold mb-1">GymSync - RELATÓRIO DA ACADEMIA</h3>
-        <p class="mb-0" th:text="|Impresso em ${#temporals.format(#temporals.createNow(), 'dd/MM/yyyy HH:mm')}|"></p>
+    <!--/* PDF: início (cabeçalho e rodapé só aparecem na impressão) */-->
+    <div class="cabecalho-impressao relatorio-cabecalho">
+        <img th:src="@{/img/logo-completo-fundo-claro.png}" alt="GymSync">
+        <div class="relatorio-meta">
+            <h3 class="fw-bold mb-1">Relatório da academia</h3>
+            <div th:if="${relMesAMesTitulo != null}" th:text="|Período: ${relMesAMesTitulo}|"></div>
+            <div th:text="|Emitido em ${#temporals.format(#temporals.createNow(), 'dd/MM/yyyy HH:mm')}|"></div>
+            <div th:if="${nomeUsuario != null}" th:text="|Emitido por: ${nomeUsuario}|"></div>
+        </div>
     </div>
+    <div class="impressao-so relatorio-rodape">Documento gerado pelo GymSync</div>
+    <!--/* PDF: fim */-->
+
+    <!--/* PDF DETALHADO: início (só aparece na impressão; a tela normal fica escondida ao imprimir) */-->
+    <div class="relatorio-pdf" th:if="${pdfResumo != null}">
+        <section class="pdf-bloco">
+            <h4>Resumo executivo</h4>
+            <div class="pdf-kpis">
+                <div><span>Alunos ativos</span><strong th:text="${pdfResumo.alunosAtivos}">0</strong><small th:text="|${pdfResumo.alunosInativos} inativos|"></small></div>
+                <div><span>Matrículas novas no mês</span><strong th:text="${pdfResumo.matriculasNovasMes}">0</strong><small th:text="|${pdfResumo.matriculasCanceladas} canceladas (acumulado)|"></small></div>
+                <div><span>Receita do mês</span><strong th:text="|R$ ${@fmt.dinheiro(pdfResumo.receitaMes)}|">R$ 0,00</strong>
+                    <small th:if="${pdfResumo.variacaoPct != null}" th:text="|${pdfResumo.variacaoPct >= 0 ? '+' : ''}${@fmt.numero(pdfResumo.variacaoPct, 1)}% sobre o mês anterior (R$ ${@fmt.dinheiro(pdfResumo.receitaMesAnterior)})|"></small>
+                    <small th:if="${pdfResumo.variacaoPct == null}">Sem base no mês anterior</small></div>
+                <div><span>Ticket médio</span><strong th:text="|R$ ${@fmt.dinheiro(pdfResumo.ticketMedio)}|">R$ 0,00</strong><small th:text="|${pdfResumo.pagamentosMes} pagamentos no mês|"></small></div>
+                <div><span>Em atraso</span><strong th:text="|R$ ${@fmt.dinheiro(pdfResumo.emAtraso)}|">R$ 0,00</strong>
+                    <small th:text="|${pdfResumo.alunosInadimplentes} aluno(s)${pdfResumo.inadimplenciaPct != null ? ' = ' + @fmt.numero(pdfResumo.inadimplenciaPct, 1) + '% dos ativos' : ''}|"></small></div>
+                <div><span>Entradas no mês</span><strong th:text="${relEntradasMes}">0</strong><small th:text="|${relEntradasHoje} hoje|"></small></div>
+            </div>
+        </section>
+
+        <section class="pdf-bloco">
+            <h4>Receita dos últimos 12 meses</h4>
+            <div class="pdf-grafico" th:utext="${pdfGraficoReceita}"></div>
+            <table class="pdf-tabela pdf-tabela-12">
+                <thead><tr><th>Mês</th><th class="d">Recebido</th><th class="d">Variação</th></tr></thead>
+                <tbody>
+                    <tr th:each="mes : ${pdfReceita12.meses}">
+                        <td th:text="${mes.rotulo}"></td>
+                        <td class="d" th:text="|R$ ${@fmt.dinheiro(mes.valor)}|"></td>
+                        <td class="d" th:text="${mes.variacaoPct != null ? (mes.variacaoPct >= 0 ? '+' : '') + @fmt.numero(mes.variacaoPct, 1) + '%' : '-'}"></td>
+                    </tr>
+                </tbody>
+                <tfoot><tr><td>Total / média</td><td class="d" th:text="|R$ ${@fmt.dinheiro(pdfReceita12.total)}|"></td><td class="d" th:text="|média R$ ${@fmt.dinheiro(pdfReceita12.media)}|"></td></tr></tfoot>
+            </table>
+        </section>
+
+        <section class="pdf-bloco">
+            <h4>Mensalidades por situação</h4>
+            <table class="pdf-tabela">
+                <thead><tr><th>Situação</th><th class="d">Quantidade</th><th class="d">Valor</th></tr></thead>
+                <tbody>
+                    <tr th:each="sit : ${relSituacoesDetalhe}">
+                        <td th:text="${@fmt.statusTexto(sit.situacao)}"></td>
+                        <td class="d" th:text="${sit.quantidade}"></td>
+                        <td class="d" th:text="|R$ ${@fmt.dinheiro(sit.valor)}|"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="pdf-bloco pdf-quebra">
+            <h4>Movimento da catraca (últimos 30 dias)</h4>
+            <div class="pdf-duas">
+                <div><div class="pdf-sub">Entradas por dia da semana</div><div class="pdf-grafico" th:utext="${pdfGraficoDias}"></div>
+                    <p class="pdf-nota" th:if="${relDiaPico != null}" th:text="|Dia mais movimentado: ${relDiaPico}|"></p></div>
+                <div><div class="pdf-sub">Entradas por horário</div><div class="pdf-grafico" th:utext="${pdfGraficoHoras}"></div>
+                    <p class="pdf-nota" th:if="${relHoraPico != null}" th:text="|Pico: ${relHoraPico}|"></p></div>
+            </div>
+        </section>
+
+        <section class="pdf-bloco">
+            <h4>Planos mais contratados (matrículas ativas)</h4>
+            <table class="pdf-tabela" th:if="${!#lists.isEmpty(pdfPlanos)}">
+                <tbody>
+                    <tr th:each="pl : ${pdfPlanos}">
+                        <td th:text="${pl.plano}"></td>
+                        <td class="barra-cel"><span class="pdf-barra"><i th:style="|width:${pl.pct}%|"></i></span></td>
+                        <td class="d" th:text="${pl.matriculas}"></td>
+                    </tr>
+                </tbody>
+            </table>
+            <p class="pdf-nota" th:if="${#lists.isEmpty(pdfPlanos)}">Nenhuma matrícula ativa.</p>
+        </section>
+
+        <section class="pdf-bloco">
+            <h4>Ocupação das aulas coletivas (próxima aula de cada uma)</h4>
+            <table class="pdf-tabela" th:if="${!#lists.isEmpty(pdfAulas)}">
+                <thead><tr><th>Aula</th><th>Quando</th><th class="d">Reservas</th><th class="d">Ocupação</th></tr></thead>
+                <tbody>
+                    <tr th:each="au : ${pdfAulas}">
+                        <td th:text="${au.nome}"></td>
+                        <td th:text="${au.quando}"></td>
+                        <td class="d" th:text="|${au.reservas} de ${au.vagas}|"></td>
+                        <td class="d" th:text="|${au.pct}%|"></td>
+                    </tr>
+                </tbody>
+            </table>
+            <p class="pdf-nota" th:if="${#lists.isEmpty(pdfAulas)}">Nenhuma aula cadastrada.</p>
+        </section>
+
+        <section class="pdf-bloco">
+            <h4>Equipamentos</h4>
+            <p class="pdf-nota" th:if="${#lists.isEmpty(pdfManutencao)}" th:text="|Nenhum equipamento em manutenção (${pdfEquipamentos} cadastrados).|"></p>
+            <p class="pdf-nota" th:if="${!#lists.isEmpty(pdfManutencao)}"
+               th:text="|Em manutenção (${#lists.size(pdfManutencao)} de ${pdfEquipamentos}): ${#strings.listJoin(pdfManutencao, ', ')}|"></p>
+        </section>
+    </div>
+    <!--/* PDF DETALHADO: fim */-->
 
     <div class="barra-exportar mb-4 ocultar-impressao">
         <span class="small texto-apoio me-1"><i class="bi bi-download"></i> Exportar planilha:</span>
-        <a class="btn-theme btn-sm" th:href="@{/relatorios/exportar/resumo-mensal}"><i class="bi bi-table"></i> Resumo dos 12 meses</a>
-        <a class="btn-theme btn-sm" th:href="@{/relatorios/exportar/alunos}"><i class="bi bi-people"></i> Alunos</a>
-        <a class="btn-theme btn-sm" th:href="@{/relatorios/exportar/mensalidades}"><i class="bi bi-cash-coin"></i> Mensalidades</a>
-        <a class="btn-theme btn-sm" th:href="@{/relatorios/exportar/entradas}"><i class="bi bi-door-open"></i> Entradas (90 dias)</a>
-        <button type="button" class="btn-brand btn-sm ms-lg-auto" data-imprimir><i class="bi bi-printer"></i> Imprimir / PDF</button>
+        <a th:unless="${visitante}" class="btn-theme btn-sm" th:href="@{/relatorios/exportar/resumo-mensal}"><i class="bi bi-table"></i> Resumo dos 12 meses</a>
+        <span th:if="${visitante}" class="btn-theme btn-sm botao-indisponivel" aria-disabled="true" title="Exportar planilha não está disponível no modo visitante"><i class="bi bi-table"></i> Resumo dos 12 meses</span>
+        <a th:unless="${visitante}" class="btn-theme btn-sm" th:href="@{/relatorios/exportar/alunos}"><i class="bi bi-people"></i> Alunos</a>
+        <span th:if="${visitante}" class="btn-theme btn-sm botao-indisponivel" aria-disabled="true" title="Exportar planilha não está disponível no modo visitante"><i class="bi bi-people"></i> Alunos</span>
+        <a th:unless="${visitante}" class="btn-theme btn-sm" th:href="@{/relatorios/exportar/mensalidades}"><i class="bi bi-cash-coin"></i> Mensalidades</a>
+        <span th:if="${visitante}" class="btn-theme btn-sm botao-indisponivel" aria-disabled="true" title="Exportar planilha não está disponível no modo visitante"><i class="bi bi-cash-coin"></i> Mensalidades</span>
+        <a th:unless="${visitante}" class="btn-theme btn-sm" th:href="@{/relatorios/exportar/entradas}"><i class="bi bi-door-open"></i> Entradas (90 dias)</a>
+        <span th:if="${visitante}" class="btn-theme btn-sm botao-indisponivel" aria-disabled="true" title="Exportar planilha não está disponível no modo visitante"><i class="bi bi-door-open"></i> Entradas (90 dias)</span>
+        <span th:if="${visitante}" class="small texto-apoio w-100"><i class="bi bi-info-circle"></i> Exportar planilha não está disponível no modo visitante (a planilha leva a base inteira).</span>
+        <button type="button" class="btn-brand btn-sm ms-lg-auto" data-imprimir><i class="bi bi-file-earmark-pdf"></i> Baixar PDF</button>
     </div>
 
     <div class="row g-3 mb-4">

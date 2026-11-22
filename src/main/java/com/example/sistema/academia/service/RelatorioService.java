@@ -33,6 +33,10 @@ public class RelatorioService {
     @Autowired private AlunoRepository alunoRepository;
     @Autowired private MatriculaRepository matriculaRepository;
     @Autowired private HistoricoAcaoRepository historicoAcaoRepository;
+    @Autowired private com.example.sistema.academia.repository.AulaColetivaRepository aulaColetivaRepository;
+    @Autowired private com.example.sistema.academia.repository.ReservaAulaRepository reservaAulaRepository;
+    @Autowired private com.example.sistema.academia.repository.EquipamentoRepository equipamentoRepository;
+    @Autowired private AulaService aulaService;
 
     private String dinheiro(BigDecimal valor) {
         NumberFormat nf = NumberFormat.getNumberInstance(BR);
@@ -148,7 +152,42 @@ public class RelatorioService {
 
         model.addAttribute("relMesAMes", mesAMes(hoje, entradas, matriculaRepository.findAll(), mensalidades));
         model.addAttribute("relMesAMesTitulo", "Dia 1 a " + hoje.getDayOfMonth() + " de cada mês");
+        montarRelatorioImpresso(model, mesAtual, mensalidades, porDia, horas);
         model.addAttribute("historico", historicoAcaoRepository.findTop50ByOrderByDataHoraDescIdDesc());
+    }
+
+    public record OcupacaoAula(String nome, String quando, int reservas, int vagas, int pct) {}
+
+    /** Dados do relatório impresso (PDF): resumo executivo, 12 meses, planos, ocupação das aulas e manutenção. */
+    private void montarRelatorioImpresso(Model model, YearMonth mes, List<Mensalidade> mensalidades, long[] porDia, List<Barra> horas) {
+        List<Matricula> matriculas = matriculaRepository.findAll();
+        model.addAttribute("pdfResumo", RelatorioExecutivo.resumo(mes, alunoRepository.findAll(), matriculas, mensalidades));
+
+        List<String> rot12 = RelatorioExecutivo.rotulosMeses(mes, 12);
+        List<BigDecimal> val12 = RelatorioExecutivo.receitaPorMes(mes, 12, mensalidades);
+        model.addAttribute("pdfReceita12", detalheFaturamento(rot12, val12));
+        model.addAttribute("pdfGraficoReceita", RelatorioExecutivo.graficoBarras(rot12, val12, 640, 150));
+
+        List<Long> valDias = Arrays.stream(porDia).boxed().toList();
+        model.addAttribute("pdfGraficoDias", RelatorioExecutivo.graficoBarras(Arrays.asList(DIAS), valDias, 300, 130));
+        List<String> rotHoras = horas.stream().map(Barra::getRotulo).toList();
+        List<Integer> valHoras = horas.stream().map(b -> Integer.parseInt(b.getTexto())).toList();
+        model.addAttribute("pdfGraficoHoras", RelatorioExecutivo.graficoBarras(rotHoras, valHoras, 340, 130));
+
+        model.addAttribute("pdfPlanos", RelatorioExecutivo.planosMaisContratados(matriculas, 5));
+
+        List<OcupacaoAula> aulas = new ArrayList<>();
+        for (com.example.sistema.academia.model.AulaColetiva a : aulaColetivaRepository.findAll()) {
+            LocalDate data = aulaService.proximaData(a);
+            int reservas = reservaAulaRepository.findByAulaIdAndDataAula(a.getId(), data).size();
+            int vagas = a.getVagas() == null ? 0 : a.getVagas();
+            aulas.add(new OcupacaoAula(a.getNome(), DIAS[a.getDiaSemana().getValue() - 1] + " " + a.getHorario(),
+                    reservas, vagas, vagas == 0 ? 0 : (int) Math.round(reservas * 100.0 / vagas)));
+        }
+        model.addAttribute("pdfAulas", aulas);
+        model.addAttribute("pdfManutencao", equipamentoRepository.findAll().stream()
+                .filter(e -> "EM_MANUTENCAO".equals(e.getSituacao())).map(e -> e.getNome()).toList());
+        model.addAttribute("pdfEquipamentos", equipamentoRepository.count());
     }
 
     private static final String[] SITUACOES = {"PAGA", "PENDENTE", "EM_ANALISE", "ATRASADA", "VENCIDA"};

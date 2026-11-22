@@ -618,6 +618,7 @@
                                                             <button type="submit" class="btn btn-sm btn-outline-danger fw-semibold px-2 me-1">Recusar</button>
                                                         </form>
                                                     </th:block>
+                                                    <a th:if="${m.situacao == 'PAGA'}" th:href="@{/mensalidades/{id}/recibo(id=${m.id})}" class="btn btn-sm btn-outline-secondary fw-semibold px-2 me-1" target="_blank" rel="noopener"><i class="bi bi-receipt"></i> Recibo</a>
                                                     <form th:action="@{/mensalidades/excluir/{id}(id=${m.id})}" method="post" class="d-inline" data-confirm="Excluir esta mensalidade?">
                                                         <button type="submit" class="action-btn" title="Excluir"><i class="bi bi-trash"></i></button>
                                                     </form>
