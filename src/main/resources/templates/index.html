@@ -1573,6 +1573,7 @@
 <script th:src="@{/vendor/bootstrap/bootstrap.bundle.min.js}"></script>
 <script th:src="@{/js/gymsync.js}"></script>
 <script th:src="@{/js/carteirinha.js}"></script>
+<script th:if="${perfil == 'ALUNO'}" th:src="@{/js/modo-treino.js}"></script>
 <script th:src="@{/js/sininho.js}"></script>
 <script th:if="${logado}" th:src="@{/js/dicas.js}"></script>
 <script th:if="${logado}" type="module" th:src="@{/js/mapa-corpo.js}"></script>
