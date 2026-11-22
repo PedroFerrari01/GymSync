@@ -1817,3 +1817,41 @@ body.mt-aberto { overflow: hidden; }
     .fp-rodape { margin-top: 12mm; display: flex; justify-content: space-between; font-size: 9pt; color: #52525b; border-top: 1px solid #d4d4d8; padding-top: 6px; }
 }
 /* ===== FICHA PARA IMPRESSÃO: fim ===== */
+
+/* MAPA-CALOR / MELHOR-HORARIO: início */
+.calor-rolagem { overflow-x: auto; max-width: 100%; padding-bottom: 4px; }
+.calor-tabela { border-collapse: separate; border-spacing: 3px; width: 100%; min-width: 640px; font-size: 0.7rem; }
+.calor-tabela thead th { font-weight: 600; color: var(--text-secondary); text-align: center; white-space: nowrap; }
+.calor-tabela tbody th { font-weight: 600; color: var(--text-primary); padding-right: 6px; white-space: nowrap; text-align: left; }
+.calor-celula { height: 26px; min-width: 26px; text-align: center; vertical-align: middle; border-radius: 5px; color: var(--text-primary); font-size: 0.66rem; outline-offset: 1px; }
+.calor-celula:hover, .calor-celula:focus-visible { outline: 2px solid var(--accent); }
+.calor-n0 { background: var(--bg-input); color: transparent; }
+.calor-n1 { background: color-mix(in srgb, var(--accent) 18%, var(--bg-input)); }
+.calor-n2 { background: color-mix(in srgb, var(--accent) 38%, var(--bg-input)); }
+.calor-n3 { background: color-mix(in srgb, var(--accent) 60%, var(--bg-input)); }
+.calor-n4 { background: color-mix(in srgb, var(--accent) 80%, var(--bg-input)); color: #fff; }
+.calor-n5 { background: var(--accent); color: #fff; }
+.calor-total { text-align: right; font-weight: 700; color: var(--text-primary); padding-left: 6px; white-space: nowrap; }
+.calor-legenda { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin-top: 10px; color: var(--text-secondary); }
+.calor-legenda .calor-celula { display: inline-block; height: 14px; width: 14px; min-width: 14px; }
+.melhor-bloco { background: var(--bg-input); border-radius: var(--raio); padding: 12px 14px; height: 100%; }
+.melhor-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.melhor-nivel { color: var(--text-secondary); font-size: 0.8rem; margin-left: 4px; }
+.melhor-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.melhor-chip { border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-secondary); border-radius: 999px; padding: 4px 12px; font-size: 0.8rem; font-weight: 600; cursor: pointer; min-height: 32px; }
+.melhor-chip:hover { color: var(--text-primary); }
+.melhor-chip.ativo { background: var(--accent); border-color: var(--accent); color: #fff; }
+.melhor-chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.melhor-grafico { display: flex; align-items: stretch; gap: 3px; height: 150px; }
+.melhor-col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.melhor-trilho { flex: 1; width: 100%; display: flex; align-items: flex-end; background: var(--bg-input); border-radius: 4px; overflow: hidden; }
+.melhor-barra { width: 100%; min-height: 2px; border-radius: 4px 4px 0 0; }
+.melhor-col.melhor .melhor-trilho { outline: 2px solid #22a06b; outline-offset: -2px; }
+.melhor-col.evitar .melhor-trilho { outline: 2px dashed var(--text-secondary); outline-offset: -2px; }
+.melhor-hora { font-size: 0.62rem; line-height: 1; height: 10px; color: var(--text-secondary); white-space: nowrap; }
+.melhor-resumo { margin-top: 10px; font-weight: 600; font-size: 0.9rem; }
+.melhor-marca { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -2px; }
+.melhor-marca-bom { outline: 2px solid #22a06b; outline-offset: -2px; }
+@media (prefers-reduced-motion: no-preference) { .melhor-painel:not([hidden]) { animation: melhorEntra .18s ease-out; } }
+@keyframes melhorEntra { from { opacity: 0; } to { opacity: 1; } }
+/* MAPA-CALOR / MELHOR-HORARIO: fim */

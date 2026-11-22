@@ -46,6 +46,8 @@
         <div class="col-4"><div class="mini-kpi"><div class="valor" th:text="${visitas30}">0</div><div class="rotulo">Últimos 30 dias</div></div></div>
     </div>
 
+    <div class="ocultar-impressao"><th:block th:replace="~{fragments/movimento :: melhorHorario}"></th:block></div>
+
     <div class="row g-4 align-items-start">
         <div class="col-lg-7 col-impressao-full">
             <div class="panel-card">

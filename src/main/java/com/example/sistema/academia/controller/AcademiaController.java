@@ -45,6 +45,7 @@ public class AcademiaController {
     @Autowired private ExclusaoService exclusaoService;
     @Autowired private AvisoService avisoService;
     @Autowired private RelatorioService relatorioService;
+    @Autowired private com.example.sistema.academia.service.MovimentoService movimentoService;
     @Autowired private AulaService aulaService;
     @Autowired private FichaService fichaService;
     @Autowired private FrequenciaService frequenciaService;
@@ -187,6 +188,7 @@ public class AcademiaController {
             model.addAttribute("naoLidas", mensagemRepository.countByAlunoIdAndRemetenteAndLidaFalse(usuarioId, "PROFESSOR"));
             aulaService.preencher(model, usuarioId);
             aulaService.grade(model, usuarioId, semana);
+            model.addAttribute("melhorHorario", movimentoService.planoAluno(java.time.LocalDateTime.now()));
             model.addAttribute("sininho", sininhoService.paraAluno(avisoService.paraAluno(usuarioId),
                     mensagemRepository.countByAlunoIdAndRemetenteAndLidaFalse(usuarioId, "PROFESSOR"), aulasReservadasTexto(model)));
             return "index";
@@ -224,6 +226,7 @@ public class AcademiaController {
         model.addAttribute("painel", visaoEquipeService.montar(professor ? usuarioId : null, LocalDate.now()));
         aulaService.preencher(model, null);
         aulaService.grade(model, null, semana);
+        model.addAttribute("mapaCalor", movimentoService.mapa(java.time.LocalDateTime.now()));
 
         if (professor) {
             // LGPD: o professor só vê fichas, avaliações, entradas e WhatsApp dos próprios alunos.
