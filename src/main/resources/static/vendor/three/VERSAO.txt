@@ -1,0 +1,5 @@
+three.js r169 (pacote npm three@0.169.0), licença MIT (LICENSE).
+
+- three.module.min.js: build/three.module.min.js
+- GLTFLoader.js, OrbitControls.js, BufferGeometryUtils.js: examples/jsm (addons); só os imports foram trocados para caminhos relativos (sem importmap, por causa da CSP).
+- EffectComposer.js, RenderPass.js, UnrealBloomPass.js, OutputPass.js, ShaderPass.js, MaskPass.js, Pass.js (examples/jsm/postprocessing) e CopyShader.js, LuminosityHighPassShader.js, OutputShader.js (examples/jsm/shaders), do mesmo three@0.169.0; os imports de "three" e "../shaders/" viraram caminhos relativos nesta pasta.

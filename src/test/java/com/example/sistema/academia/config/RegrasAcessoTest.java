@@ -23,6 +23,9 @@ class RegrasAcessoTest {
         assertTrue(RegrasAcesso.permitido(null, "/css/gymsync-tema.css"));
         // Vídeo de apresentação do "Quem somos" (fica na tela de login, antes de entrar)
         assertTrue(RegrasAcesso.permitido(null, "/video/gymsync.mp4"));
+        // Modelo 3D do mapa do corpo (arquivo estático, sem dados de ninguém)
+        assertTrue(RegrasAcesso.permitido(null, "/models/corpo-musculos.glb"));
+        assertTrue(RegrasAcesso.permitido("ALUNO", "/models/corpo-musculos.glb"));
         // Instalar no celular: o navegador busca estes arquivos sem a sessão do usuário
         assertTrue(RegrasAcesso.permitido(null, "/manifest.json"));
         assertTrue(RegrasAcesso.permitido(null, "/sw.js"));

@@ -40,3 +40,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Arquivos-fonte do modelo 3D (BodyParts3D, OBJ extraídos)
+assets-fonte/
