@@ -687,6 +687,9 @@
                                                 <td th:text="${a.contato}"></td>
                                                 <td><span th:text="${a.situacao}" th:classappend="${a.situacao == 'ATIVO' ? 'status-ok' : 'status-off'}"></span></td>
                                                 <td class="text-end text-nowrap">
+                                                    <!--/* VISAO360: início */-->
+                                                    <button type="button" class="action-btn action-toggle me-1 btn-visao360" title="Visão 360° do aluno" aria-label="Visão 360° do aluno" th:data-url="@{/alunos/{id}/visao-360(id=${a.id})}"><i class="ph ph-user-focus"></i></button>
+                                                    <!--/* VISAO360: fim */-->
                                                     <button type="button" class="action-btn action-toggle me-1 btn-fill" title="Editar dados"
                                                             data-bs-toggle="modal" data-bs-target="#modalEditarAluno" data-form="formEditarAluno"
                                                             th:attr="data-campo-id=${a.id},data-campo-nome=${a.nome},data-campo-email=${a.email},data-campo-contato=${a.contato},data-campo-data-nascimento=${a.dataNascimento}"
@@ -967,6 +970,9 @@
                                                 <td th:text="${t.professor.nome}"></td>
                                                 <td th:text="${@fmt.data(t.dataCriacao)}"></td>
                                                 <td class="text-end text-nowrap">
+                                                    <!--/* VISAO360: início */-->
+                                                    <button type="button" class="action-btn action-toggle me-1 btn-visao360" title="Visão 360° do aluno" aria-label="Visão 360° do aluno" th:data-url="@{/alunos/{id}/visao-360(id=${t.aluno.id})}"><i class="ph ph-user-focus"></i></button>
+                                                    <!--/* VISAO360: fim */-->
                                                     <a th:if="${linksWhatsapp[t.id] != null}" th:href="${linksWhatsapp[t.id]}" target="_blank" rel="noopener" class="action-btn action-toggle me-1" title="Enviar por WhatsApp"><i class="bi bi-whatsapp"></i></a>
                                                     <form th:action="@{/treinos/enviar-email/{id}(id=${t.id})}" method="post" class="d-inline" data-confirm="Enviar esta ficha por e-mail para o aluno?">
                                                         <button type="submit" class="action-btn action-toggle me-1" title="Enviar por e-mail"><i class="bi bi-envelope"></i></button>
@@ -1516,6 +1522,19 @@
     </div>
 </th:block>
 
+<!--/* VISAO360: início — modal da visão 360° do aluno (admin e professor) */-->
+<th:block th:if="${logado and (perfil == 'ADMIN' or perfil == 'PROFESSOR')}">
+    <div class="modal fade" id="modalVisao360" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title">Visão 360° do aluno</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button></div>
+                <div class="modal-body" id="visao360Conteudo"><div class="vazio">Carregando...</div></div>
+            </div>
+        </div>
+    </div>
+</th:block>
+<!--/* VISAO360: fim */-->
+
 <th:block th:if="${logado and perfil == 'ALUNO'}">
 
     <div class="modal fade" id="modalPagarPix" tabindex="-1" aria-hidden="true">
@@ -1593,6 +1612,7 @@
 <script th:if="${logado}" type="module" th:src="@{/js/mapa-corpo.js}"></script>
     <!--/* Formulários do painel: abrem em modal (o painel fica só para olhar) */-->
 <script th:src="@{/js/simulador.js}" th:if="${perfil == 'ADMIN'}"></script>
+<script th:src="@{/js/visao360.js}" th:if="${perfil == 'ADMIN' or perfil == 'PROFESSOR'}"></script>
     <div class="modal fade" id="modalCatraca" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">

@@ -1947,3 +1947,35 @@ body.mt-aberto { overflow: hidden; }
 .sim-toggle[aria-expanded="true"] .sim-seta { transform: rotate(90deg); }
 @media (prefers-reduced-motion: reduce) { .sim-seta { transition: none; } }
 /* SIMULADOR (recolhido): fim */
+
+/* VISAO 360: início */
+.v360-topo { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--s2); margin-bottom: var(--s3); }
+.v360-contato { text-align: right; }
+.v360-contato i { margin-right: 4px; color: var(--accent); }
+.v360-indicadores { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s2); margin-bottom: var(--s3); }
+.v360-ind { display: flex; flex-direction: column; gap: 2px; padding: 12px; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-input); min-width: 0; }
+.v360-num { font-size: 1.6rem; font-weight: 700; line-height: 1.1; }
+.v360-txt { font-size: 1rem; font-weight: 600; line-height: 1.5; overflow-wrap: anywhere; }
+.v360-rot { font-size: 0.75rem; color: var(--text-secondary); }
+.v360-alerta .v360-num { color: #ef4444; }
+:root[data-theme="light"] .v360-alerta .v360-num { color: #b91c1c; }
+.v360-sub { font-weight: 700; margin: var(--s3) 0 var(--s2); }
+.v360-tempo { list-style: none; margin: 0; padding: 0 0 0 4px; position: relative; }
+.v360-tempo::before { content: ""; position: absolute; left: 18px; top: 8px; bottom: 8px; width: 2px; background: var(--border-color); }
+.v360-item { position: relative; display: flex; align-items: flex-start; gap: 12px; padding: 8px 0; }
+.v360-ponto { flex: 0 0 30px; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-size: 0.85rem; background: var(--bg-card); border: 2px solid var(--accent); color: var(--accent); z-index: 1; }
+.v360-pagamento .v360-ponto { border-color: #10b981; color: #10b981; }
+.v360-atraso .v360-ponto { border-color: #ef4444; color: #ef4444; }
+.v360-entradas .v360-ponto, .v360-mensagem .v360-ponto { border-color: var(--border-color); color: var(--text-secondary); }
+:root[data-theme="light"] .v360-pagamento .v360-ponto { border-color: #047857; color: #047857; }
+:root[data-theme="light"] .v360-atraso .v360-ponto { border-color: #b91c1c; color: #b91c1c; }
+.v360-corpo { flex: 1; min-width: 0; }
+.v360-titulo { font-weight: 600; }
+.v360-data { flex: 0 0 auto; font-size: 0.8rem; color: var(--text-secondary); white-space: nowrap; padding-top: 4px; }
+@media (max-width: 575.98px) {
+    .v360-indicadores { grid-template-columns: repeat(2, 1fr); }
+    .v360-contato { text-align: left; }
+    .v360-item { flex-wrap: wrap; }
+    .v360-data { order: 3; margin-left: 42px; padding-top: 0; flex-basis: 100%; }
+}
+/* VISAO 360: fim */

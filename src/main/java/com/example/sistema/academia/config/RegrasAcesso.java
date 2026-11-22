@@ -60,6 +60,10 @@ public final class RegrasAcesso {
         if (caminho.startsWith("/mensalidades/") && caminho.endsWith("/recibo")) {
             return admin || aluno;
         }
+        // Visão 360° do aluno: admin e professor entram; o controller confere se o aluno é do professor.
+        if (caminho.matches("/alunos/\\d+/visao-360")) {
+            return admin || professor;
+        }
         if (caminho.startsWith("/treinos")
                 || caminho.startsWith("/exercicios")
                 || caminho.startsWith("/avaliacoes")

@@ -213,4 +213,16 @@ class RegrasAcessoTest {
         assertFalse(RegrasAcesso.permitido(null, "/aluno/mensalidades/5/pix"));
         assertTrue(RegrasAcesso.visitantePode("GET", "/aluno/mensalidades/5/pix"));
     }
+
+    @Test
+    void visao360EhDeAdminEProfessorEVisitantePodeVer() {
+        assertTrue(RegrasAcesso.permitido("ADMIN", "/alunos/7/visao-360"));
+        assertTrue(RegrasAcesso.permitido("PROFESSOR", "/alunos/7/visao-360"));
+        assertFalse(RegrasAcesso.permitido("ALUNO", "/alunos/7/visao-360"));
+        assertFalse(RegrasAcesso.permitido(null, "/alunos/7/visao-360"));
+        // O resto de /alunos continua só do admin
+        assertFalse(RegrasAcesso.permitido("PROFESSOR", "/alunos/excluir/7"));
+        assertFalse(RegrasAcesso.permitido("PROFESSOR", "/alunos/7/visao-360/../excluir"));
+        assertTrue(RegrasAcesso.visitantePode("GET", "/alunos/7/visao-360"));
+    }
 }
