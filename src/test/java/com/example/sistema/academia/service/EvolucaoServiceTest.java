@@ -118,6 +118,7 @@ class EvolucaoServiceTest {
     private AvaliacaoFisica completa(LocalDate data, double v) {
         AvaliacaoFisica a = avaliacao(data, 80 + v, 20 + v, 85 + v, 33 + v);
         a.setQuadril(98 + v);
+        a.setAbdomen(90 + v);
         a.setPeito(100 + v);
         a.setCoxa(56 + v);
         a.setOmbro(112 + v);
@@ -275,5 +276,26 @@ class EvolucaoServiceTest {
         assertTrue(service.comparacao(uma).isEmpty());
         assertEquals(1, service.barrasGordura(uma).size());
         assertEquals("24,0%", service.barrasGordura(uma).get(0).getTexto());
+    }
+
+    @Test
+    void abdomenDiminuirEhBomComAMesmaRegraDaCintura() {
+        MapaCorpo desceu = service.mapaCorpo(1L, "Aluno", List.of(
+                completa(LocalDate.of(2026, 8, 18), 4), completa(LocalDate.of(2026, 11, 11), 0)));
+        assertEquals("melhorou", medida(desceu, "abdomen").getClasse());
+        assertEquals("-4,0 cm", medida(desceu, "abdomen").getDiferenca());
+        assertEquals("94,0 cm", medida(desceu, "abdomen").getPrimeira());
+        MapaCorpo subiu = service.mapaCorpo(1L, "Aluno", List.of(
+                completa(LocalDate.of(2026, 8, 18), 0), completa(LocalDate.of(2026, 11, 11), 3)));
+        assertEquals("piorou", medida(subiu, "abdomen").getClasse());
+        // 90 -> 90 sem mudança: sem cor (o mapa mostra "estável")
+        MapaCorpo igual = service.mapaCorpo(1L, "Aluno", List.of(
+                completa(LocalDate.of(2026, 8, 18), 0), completa(LocalDate.of(2026, 11, 11), 0)));
+        assertEquals("neutro", medida(igual, "abdomen").getClasse());
+        // Avaliações antigas, sem abdômen, não quebram: a medida só some
+        assertTrue(service.mapaCorpo(1L, "Aluno", List.of(avaliacao(LocalDate.of(2026, 8, 18), 80.0, 20.0, 85.0, 33.0)))
+                .getMedidas().stream().noneMatch(m -> m.getChave().equals("abdomen")));
+        assertTrue(service.comparacao(List.of(completa(LocalDate.of(2026, 8, 18), 4), completa(LocalDate.of(2026, 11, 11), 0)))
+                .stream().anyMatch(c -> c.getRotulo().equals("Abdômen") && c.getClasse().equals("melhorou")));
     }
 }

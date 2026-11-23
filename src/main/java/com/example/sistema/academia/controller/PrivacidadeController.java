@@ -135,6 +135,7 @@ public class PrivacidadeController {
             l.put("alturaM", av.getAltura());
             l.put("gorduraPercentual", av.getPercentualGordura());
             l.put("cinturaCm", av.getCintura());
+            l.put("abdomenCm", av.getAbdomen());
             l.put("quadrilCm", av.getQuadril());
             l.put("peitoCm", av.getPeito());
             l.put("bracoCm", av.getBraco());
