@@ -2059,3 +2059,42 @@ body.mt-aberto { overflow: hidden; }
     .tabela-mens td:nth-child(6) form { margin: 0; }
 }
 /* MENSALIDADES-CELULAR: fim */
+
+/* RECORDES-CARGA: início (cartão "Meus recordes" na Minha Área e aviso no modo treino) */
+.recordes-grade { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+.recorde-item { border: 1px solid var(--border-color); border-radius: 12px; padding: 12px 14px; background: var(--bg-card); min-width: 0; }
+.recorde-topo { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.recorde-nome { font-weight: 600; font-size: .9rem; overflow-wrap: anywhere; }
+.recorde-selo { flex: none; font-size: .68rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); white-space: nowrap; }
+.recorde-valor { font-size: 1.7rem; font-weight: 800; line-height: 1.2; margin-top: 4px; }
+.recorde-valor small { font-size: .8rem; font-weight: 600; color: var(--text-secondary); }
+.recorde-grafico { display: block; width: 100%; max-width: 260px; height: auto; margin-top: 8px; overflow: visible; }
+.recorde-linha { stroke: var(--accent); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.recorde-ponto { fill: var(--accent); }
+.mt-recorde { position: absolute; left: 50%; top: 84px; transform: translateX(-50%); z-index: 5; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 10px 20px; border-radius: 14px; background: var(--accent); color: #fff; text-align: center; box-shadow: 0 6px 18px rgba(0,0,0,.35); pointer-events: none; max-width: 92vw; }
+.mt-recorde[hidden] { display: none !important; }
+.mt-recorde strong { font-size: 1.1rem; position: relative; z-index: 1; }
+.mt-recorde span { font-size: .9rem; position: relative; z-index: 1; }
+.mt-recorde.no-ar { animation: mt-recorde-entra .35s ease-out; }
+.mt-confete { position: absolute; left: 50%; top: 0; width: 0; height: 0; }
+.mt-confete i { position: absolute; width: 6px; height: 10px; border-radius: 1px; opacity: 0; background: #fff; }
+.mt-recorde.no-ar .mt-confete i { animation: mt-confete 1.4s ease-out forwards; }
+.mt-confete i:nth-child(odd) { background: #fde68a; }
+.mt-confete i:nth-child(3n) { background: #fed7aa; width: 5px; height: 5px; border-radius: 50%; }
+.mt-confete i:nth-child(1) { --dx: -90px; --dy: -30px; --r: 200deg; }
+.mt-confete i:nth-child(2) { --dx: -60px; --dy: 50px; --r: -160deg; animation-delay: .05s; }
+.mt-confete i:nth-child(3) { --dx: -30px; --dy: -50px; --r: 120deg; }
+.mt-confete i:nth-child(4) { --dx: 0px; --dy: -62px; --r: -90deg; animation-delay: .08s; }
+.mt-confete i:nth-child(5) { --dx: 30px; --dy: -50px; --r: 250deg; }
+.mt-confete i:nth-child(6) { --dx: 60px; --dy: 50px; --r: -200deg; animation-delay: .04s; }
+.mt-confete i:nth-child(7) { --dx: 90px; --dy: -30px; --r: 160deg; }
+.mt-confete i:nth-child(8) { --dx: -110px; --dy: 20px; --r: -120deg; animation-delay: .1s; }
+.mt-confete i:nth-child(9) { --dx: 110px; --dy: 20px; --r: 300deg; animation-delay: .06s; }
+.mt-confete i:nth-child(10) { --dx: 0px; --dy: 62px; --r: -240deg; animation-delay: .12s; }
+@keyframes mt-confete { 0% { opacity: 1; transform: translate(0, 0) rotate(0); } 100% { opacity: 0; transform: translate(var(--dx), calc(var(--dy) + 30px)) rotate(var(--r)); } }
+@keyframes mt-recorde-entra { from { opacity: 0; transform: translateX(-50%) translateY(-10px); } to { opacity: 1; transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) {
+    .mt-recorde.no-ar { animation: none; }
+    .mt-confete { display: none; }
+}
+/* RECORDES-CARGA: fim */

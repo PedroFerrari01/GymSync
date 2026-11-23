@@ -1,0 +1,22 @@
+<!--/* Recordes pessoais de carga (Minha Área do aluno). Gráfico em SVG puro, sem biblioteca. */-->
+<div th:fragment="cartao" class="panel-card mb-4 recordes-cartao">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+        <h5 class="panel-title mb-0"><i class="ph ph-trophy"></i> Meus recordes</h5>
+        <span class="small texto-apoio">Maior carga registrada em cada exercício</span>
+    </div>
+    <div class="recordes-grade">
+        <div th:each="r : ${recordes}" class="recorde-item">
+            <div class="recorde-topo">
+                <span class="recorde-nome" th:text="${r.exercicio}">Supino reto</span>
+                <span class="recorde-selo" th:if="${r.novo}"><i class="ph ph-trophy"></i> Novo recorde</span>
+            </div>
+            <div class="recorde-valor"><span th:text="${@fmt.numero(r.carga, 1)}">32,5</span> <small>kg</small></div>
+            <div class="recorde-data small texto-apoio" th:text="|em ${@fmt.data(r.data)} · ${r.registros} registros|">em 01/11/2026</div>
+            <svg class="recorde-grafico" viewBox="0 0 120 44" role="img"
+                 th:aria-label="|Evolução da carga em ${r.exercicio}|">
+                <polyline class="recorde-linha" fill="none" th:attr="points=${r.pontosSvg}"></polyline>
+                <circle class="recorde-ponto" r="3" th:attr="cx=${r.ultimoX},cy=${r.ultimoY}"></circle>
+            </svg>
+        </div>
+    </div>
+</div>

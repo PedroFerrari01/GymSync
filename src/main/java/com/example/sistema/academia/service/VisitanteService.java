@@ -266,10 +266,23 @@ public class VisitanteService {
         treinoRepository.save(treinoAna);
         ExercicioTreino supino = exercicio(treinoAna, "Supino reto", 4, 10);
         ExercicioTreino remada = exercicio(treinoAna, "Remada curvada", 3, 12);
-        exercicio(treinoAna, "Desenvolvimento com halteres", 3, 12);
+        ExercicioTreino desenvolvimento = exercicio(treinoAna, "Desenvolvimento com halteres", 3, 12);
         registro(supino, ana, hoje.minusDays(7), 30.0);
         registro(supino, ana, hoje.minusDays(3), 32.5);
         registro(remada, ana, hoje.minusDays(3), 25.0);
+        // histórico mais antigo, para os recordes e o gráfico de evolução da Minha Área
+        registro(supino, ana, hoje.minusDays(35), 25.0);
+        registro(supino, ana, hoje.minusDays(28), 27.5);
+        registro(supino, ana, hoje.minusDays(21), 27.5);
+        registro(supino, ana, hoje.minusDays(14), 30.0);
+        registro(remada, ana, hoje.minusDays(30), 20.0);
+        registro(remada, ana, hoje.minusDays(23), 22.5);
+        registro(remada, ana, hoje.minusDays(16), 22.5);
+        registro(remada, ana, hoje.minusDays(9), 25.0);
+        registro(desenvolvimento, ana, hoje.minusDays(26), 8.0);
+        registro(desenvolvimento, ana, hoje.minusDays(19), 10.0);
+        registro(desenvolvimento, ana, hoje.minusDays(12), 10.0);
+        registro(desenvolvimento, ana, hoje.minusDays(5), 12.0);
 
         Treino treinoDiego = new Treino();
         treinoDiego.setAluno(diego);

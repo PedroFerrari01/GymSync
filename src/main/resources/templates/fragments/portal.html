@@ -49,6 +49,10 @@
 
     <div class="ocultar-impressao"><th:block th:replace="~{fragments/movimento :: melhorHorario}"></th:block></div>
 
+    <!--/* RECORDES: início */-->
+    <div class="ocultar-impressao" th:if="${!#lists.isEmpty(recordes)}"><th:block th:replace="~{fragments/recordes :: cartao}"></th:block></div>
+    <!--/* RECORDES: fim */-->
+
     <div class="row g-4 align-items-start">
         <div class="col-lg-7 col-impressao-full">
             <div class="panel-card">
@@ -76,7 +80,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr th:each="ex : ${exercicios}" class="linha-exercicio" th:data-id="${ex.id}" th:data-nome="${ex.exercicio}" th:data-series="${ex.series}" th:data-reps="${ex.repeticoes}" th:data-carga="${ultimosRegistros[ex.id]?.carga}">
+                            <tr th:each="ex : ${exercicios}" class="linha-exercicio" th:data-id="${ex.id}" th:data-nome="${ex.exercicio}" th:data-series="${ex.series}" th:data-reps="${ex.repeticoes}" th:data-carga="${ultimosRegistros[ex.id]?.carga}" th:data-recorde="${recordesFicha[ex.id]}">
                                 <td th:text="|${ex.treino.descricao} (${ex.treino.professor.nome})|"></td>
                                 <td class="fw-semibold cel-exercicio" th:text="${ex.exercicio}"></td>
                                 <td><span class="status-ok" th:text="|${ex.series} x ${ex.repeticoes}|"></span></td>
