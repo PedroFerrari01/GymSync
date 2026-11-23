@@ -139,7 +139,7 @@ Linux/macOS (bash; as aspas evitam que o `!` seja interpretado):
 sh mvnw test "-Dtest=!SistemaAcademiaApplicationTests"
 ```
 
-São 326 testes; não precisam do banco. `SistemaAcademiaApplicationTests` precisa do MySQL ligado e fica de fora.
+São 327 testes; não precisam do banco. `SistemaAcademiaApplicationTests` precisa do MySQL ligado e fica de fora.
 
 | Erro | Solução |
 | :--- | :--- |
