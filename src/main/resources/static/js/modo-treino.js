@@ -41,7 +41,8 @@
         return Array.from(document.querySelectorAll('tr.linha-exercicio')).map(tr => ({
             id: tr.dataset.id, nome: tr.dataset.nome,
             series: parseInt(tr.dataset.series, 10) || 1, reps: tr.dataset.reps || '',
-            carga: tr.dataset.carga || ''
+            carga: tr.dataset.carga || '',
+            recorde: parseFloat(tr.dataset.recorde) || 0   // RECORDES: maior carga já registrada neste exercício
         }));
     }
 
@@ -145,12 +146,49 @@
         } else if (i === feitas) {            // só a próxima série é marcada, em ordem
             estado.feitas[e.id] = feitas + 1;
             seguro(() => { if (navigator.vibrate) navigator.vibrate(30); });
+            verificarRecorde(e);
             if (estado.feitas[e.id] >= e.series) enviar(e);
             iniciarDescanso(DESCANSO_PADRAO);
         } else { return; }
         salvar();
         desenhar();
     }
+
+    /* ---- RECORDES: início (aviso "Novo recorde!" com confete em CSS; só calcula no navegador, não grava nada) ---- */
+    let avisoTimer = null;
+    function verificarRecorde(e) {
+        const kg = parseFloat(String(el.carga.value).replace(',', '.'));
+        if (!(e.recorde > 0) || !(kg > e.recorde)) return;
+        e.recorde = kg;   // só avisa de novo se a carga subir mais
+        mostrarRecorde(e.nome, kg);
+    }
+    function mostrarRecorde(nome, kg) {
+        let aviso = document.getElementById('mtRecorde');
+        if (!aviso) {
+            aviso = document.createElement('div');
+            aviso.id = 'mtRecorde';
+            aviso.className = 'mt-recorde';
+            aviso.setAttribute('role', 'status');
+            overlay.appendChild(aviso);
+        }
+        aviso.textContent = '';
+        const confete = document.createElement('div');
+        confete.className = 'mt-confete';
+        confete.setAttribute('aria-hidden', 'true');
+        for (let i = 0; i < 10; i++) confete.appendChild(document.createElement('i'));
+        const t = document.createElement('strong');
+        t.innerHTML = '<i class="ph ph-trophy"></i> Novo recorde!';
+        const d = document.createElement('span');
+        d.textContent = nome + ': ' + String(kg).replace('.', ',') + ' kg';
+        aviso.append(confete, t, d);
+        aviso.hidden = false;
+        aviso.classList.remove('no-ar');
+        void aviso.offsetWidth;   // reinicia a animação
+        aviso.classList.add('no-ar');
+        clearTimeout(avisoTimer);
+        avisoTimer = setTimeout(() => { aviso.hidden = true; aviso.classList.remove('no-ar'); }, 2600);
+    }
+    /* RECORDES: fim */
 
     function guardarCarga() {
         const e = lista[estado.idx];

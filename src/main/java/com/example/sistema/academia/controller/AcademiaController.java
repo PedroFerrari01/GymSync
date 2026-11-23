@@ -54,6 +54,7 @@ public class AcademiaController {
     @Autowired private com.example.sistema.academia.service.MetasService metasService; // METAS
     @Autowired private com.example.sistema.academia.repository.MetaAlunoRepository metaAlunoRepository; // METAS
     @Autowired private AcompanhamentoService acompanhamentoService;
+    @Autowired private com.example.sistema.academia.service.RecordesService recordesService; // recordes de carga do aluno
     @Autowired private SininhoService sininhoService;
     @Autowired private com.example.sistema.academia.service.VisaoEquipeService visaoEquipeService;
     @Autowired private com.example.sistema.academia.service.AlunosDoProfessorService alunosDoProfessor;
@@ -189,6 +190,12 @@ public class AcademiaController {
                     && !Boolean.TRUE.equals(session.getAttribute("trocarSenha")));
             model.addAttribute("avisos", avisoService.paraAluno(usuarioId));
             model.addAttribute("ultimosRegistros", ultimosRegistros(registroExercicioRepository.findByAlunoId(usuarioId)));
+            // RECORDES DE CARGA: início
+            List<RegistroExercicio> registrosAluno = registroExercicioRepository.findByAlunoId(usuarioId);
+            model.addAttribute("recordes", recordesService.calcular(registrosAluno, hoje, 4));
+            model.addAttribute("recordesFicha", recordesService.maximosDaFicha(
+                    exercicioTreinoRepository.findByTreinoAlunoId(usuarioId), registrosAluno));
+            // RECORDES DE CARGA: fim
             model.addAttribute("avaliacoes", avaliacoes);
             model.addAttribute("barrasPeso", relatorioService.barrasPeso(avaliacoes));
             model.addAttribute("resumoPeso", relatorioService.resumoPeso(avaliacoes));
