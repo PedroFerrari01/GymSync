@@ -66,6 +66,36 @@ public final class ImagemValidador {
         }
     }
 
+    /**
+     * Sempre decodifica a imagem e grava de novo (tira qualquer dado colado depois dela, como um script, e os metadados)
+     * e reduz se passar de LADO_MAXIMO. Devolve null se não der para ler a imagem: nesse caso ela deve ser recusada.
+     */
+    public static byte[] sanear(byte[] dados, String tipo) {
+        try {
+            BufferedImage origem = ImageIO.read(new ByteArrayInputStream(dados));
+            if (origem == null) return null;
+            int maior = Math.max(origem.getWidth(), origem.getHeight());
+            double fator = maior > LADO_MAXIMO ? (double) LADO_MAXIMO / maior : 1.0;
+            int largura = Math.max(1, (int) Math.round(origem.getWidth() * fator));
+            int altura = Math.max(1, (int) Math.round(origem.getHeight() * fator));
+            boolean png = "image/png".equals(tipo);
+            BufferedImage saida = new BufferedImage(largura, altura, png ? BufferedImage.TYPE_INT_ARGB : BufferedImage.TYPE_INT_RGB);
+            Graphics2D g = saida.createGraphics();
+            g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+            if (!png) {
+                g.setColor(Color.WHITE);
+                g.fillRect(0, 0, largura, altura);
+            }
+            g.drawImage(origem, 0, 0, largura, altura, null);
+            g.dispose();
+            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+            if (!ImageIO.write(saida, png ? "png" : "jpg", bytes)) return null;
+            return bytes.toByteArray();
+        } catch (Exception | Error e) {
+            return null;
+        }
+    }
+
     /** Devolve "image/jpeg" ou "image/png"; qualquer outra coisa devolve null. */
     public static String tipo(byte[] dados) {
         if (dados == null) return null;

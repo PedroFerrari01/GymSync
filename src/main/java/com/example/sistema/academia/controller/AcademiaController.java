@@ -513,10 +513,27 @@ public class AcademiaController {
         return "redirect:/";
     }
 
+    /** Confere os números do plano: duração de 1 a 60 meses e valor total entre R$ 1,00 e R$ 100.000,00. */
+    static String erroPlano(Integer duracaoMeses, java.math.BigDecimal valor) {
+        if (duracaoMeses == null || duracaoMeses < 1 || duracaoMeses > 60) {
+            return "A duração do plano deve ser de 1 a 60 meses.";
+        }
+        if (valor == null || valor.compareTo(java.math.BigDecimal.ONE) < 0
+                || valor.compareTo(new java.math.BigDecimal("100000")) > 0) {
+            return "O valor do plano deve ficar entre R$ 1,00 e R$ 100.000,00.";
+        }
+        return null;
+    }
+
     @PostMapping("/planos/salvar")
     public String salvarPlano(Plano plano, RedirectAttributes redirect) {
         if (plano.getNome() == null || plano.getNome().isBlank()) {
             redirect.addFlashAttribute("erro", "Informe o nome do plano.");
+            return "redirect:/";
+        }
+        String erroNumeros = erroPlano(plano.getDuracaoMeses(), plano.getValor());
+        if (erroNumeros != null) {
+            redirect.addFlashAttribute("erro", erroNumeros);
             return "redirect:/";
         }
         planoRepository.save(plano);
@@ -530,6 +547,11 @@ public class AcademiaController {
         if (plano == null || dados.getNome() == null || dados.getNome().isBlank()
                 || dados.getValor() == null || "null".equals(String.valueOf(dados.getDuracaoMeses()))) {
             redirect.addFlashAttribute("erro", "Preencha todos os dados do plano.");
+            return "redirect:/";
+        }
+        String erroNumeros = erroPlano(dados.getDuracaoMeses(), dados.getValor());
+        if (erroNumeros != null) {
+            redirect.addFlashAttribute("erro", erroNumeros);
             return "redirect:/";
         }
         plano.setNome(dados.getNome().trim());
@@ -695,9 +717,17 @@ public class AcademiaController {
             return "redirect:/";
         }
 
+        LocalDateTime agora = LocalDateTime.now();
+        Entrada ultima = entradaRepository.findFirstByAlunoIdOrderByDataHoraEntradaDesc(alunoId).orElse(null);
+        if (ultima != null && com.example.sistema.academia.util.RegraCatraca.entradaRepetida(ultima.getDataHoraEntrada(), agora)) {
+            // Leitura repetida do mesmo QR (ou duplo clique): libera, mas não conta a entrada duas vezes
+            redirect.addFlashAttribute("sucesso", "Catraca Liberada: a entrada de " + a.getNome() + " já foi registrada há instantes (não foi duplicada).");
+            return "redirect:/";
+        }
+
         Entrada e = new Entrada();
         e.setAluno(a);
-        e.setDataHoraEntrada(LocalDateTime.now());
+        e.setDataHoraEntrada(agora);
         entradaRepository.save(e);
         redirect.addFlashAttribute("sucesso", "Catraca Liberada: acesso registrado para " + a.getNome() + "!");
         return "redirect:/";

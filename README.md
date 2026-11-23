@@ -131,7 +131,7 @@ cd GymSync
 ./mvnw test -Dtest=!SistemaAcademiaApplicationTests
 ```
 
-São 317 testes; não precisam do banco. `SistemaAcademiaApplicationTests` precisa do MySQL ligado e fica de fora.
+São 326 testes; não precisam do banco. `SistemaAcademiaApplicationTests` precisa do MySQL ligado e fica de fora.
 
 | Erro | Solução |
 | :--- | :--- |

@@ -89,6 +89,9 @@ public class MarcaService {
         if (!ImagemValidador.dimensoesAceitaveis(dados)) {
             return "A logo é grande demais (máximo " + ImagemValidador.LADO_LIMITE_ENVIO + " px de largura ou altura).";
         }
+        if (ImagemValidador.sanear(dados, ImagemValidador.tipo(dados)) == null) {
+            return "Não foi possível ler a logo. Envie outro arquivo JPG ou PNG.";
+        }
         return null;
     }
 
@@ -108,7 +111,7 @@ public class MarcaService {
         c.setNome(nome == null || nome.isBlank() ? null : nome.trim());
         if (logo != null && logo.length > 0) {
             String tipo = ImagemValidador.tipo(logo);
-            logoRepository.save(new ConfigAcademiaLogo(tipo, ImagemValidador.reduzir(logo, tipo)));
+            logoRepository.save(new ConfigAcademiaLogo(tipo, ImagemValidador.sanear(logo, tipo)));
             c.setTemLogo(true);
             c.setLogoClara(logoEClara(logo));
         }

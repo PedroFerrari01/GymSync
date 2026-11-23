@@ -12,4 +12,5 @@ public interface EntradaRepository extends JpaRepository<Entrada, Long> {
     List<Entrada> findByAlunoIdOrderByDataHoraEntradaDesc(Long alunoId);
     List<Entrada> findAllByOrderByDataHoraEntradaDesc();
     List<Entrada> findByDataHoraEntradaAfter(LocalDateTime data);
+    Optional<Entrada> findFirstByAlunoIdOrderByDataHoraEntradaDesc(Long alunoId);
 }

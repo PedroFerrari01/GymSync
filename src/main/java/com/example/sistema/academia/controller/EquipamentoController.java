@@ -110,13 +110,17 @@ public class EquipamentoController {
         if (!ImagemValidador.dimensoesAceitaveis(imagem.getBytes())) {
             return "A imagem é grande demais (máximo " + ImagemValidador.LADO_LIMITE_ENVIO + " px de largura ou altura).";
         }
+        if (ImagemValidador.sanear(imagem.getBytes(), ImagemValidador.tipo(imagem.getBytes())) == null) {
+            return "Não foi possível ler a imagem. Envie outro arquivo JPG ou PNG.";
+        }
         return null;
     }
 
     private void guardarImagem(Long equipamentoId, MultipartFile imagem) throws IOException {
         byte[] original = imagem.getBytes();
         String tipo = ImagemValidador.tipo(original);
-        imagemRepository.save(new EquipamentoImagem(equipamentoId, tipo, ImagemValidador.reduzir(original, tipo)));
+        // Sempre regrava a imagem: o que for colado depois dela (script, por exemplo) não é guardado
+        imagemRepository.save(new EquipamentoImagem(equipamentoId, tipo, ImagemValidador.sanear(original, tipo)));
     }
 
     @PostMapping("/equipamentos/status/{id}")

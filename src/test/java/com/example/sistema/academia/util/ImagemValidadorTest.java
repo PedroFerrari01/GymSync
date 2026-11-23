@@ -65,6 +65,31 @@ class ImagemValidadorTest {
     }
 
     @Test
+    void sanearTiraScriptColadoDepoisDaImagem() throws Exception {
+        byte[] png = gerar(40, 40, "png");
+        byte[] polig = java.util.Arrays.copyOf(png, png.length + 25);
+        byte[] script = "<script>alert(1)</script>".getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        System.arraycopy(script, 0, polig, png.length, script.length);
+        byte[] limpa = ImagemValidador.sanear(polig, "image/png");
+        assertNotNull(limpa);
+        assertEquals("image/png", ImagemValidador.tipo(limpa));
+        assertFalse(new String(limpa, java.nio.charset.StandardCharsets.ISO_8859_1).contains("<script>"));
+    }
+
+    @Test
+    void saneaTambemImagemPequenaEJpeg() throws Exception {
+        assertNotNull(ImageIO.read(new ByteArrayInputStream(ImagemValidador.sanear(gerar(300, 200, "png"), "image/png"))));
+        byte[] jpg = ImagemValidador.sanear(gerar(300, 200, "jpg"), "image/jpeg");
+        assertEquals("image/jpeg", ImagemValidador.tipo(jpg));
+    }
+
+    @Test
+    void sanearDevolveNuloQuandoNaoEImagemLegivel() {
+        assertNull(ImagemValidador.sanear("MZ nao e imagem".getBytes(java.nio.charset.StandardCharsets.UTF_8), "image/png"));
+        assertNull(ImagemValidador.sanear(new byte[]{(byte) 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 1, 2, 3}, "image/png"));
+    }
+
+    @Test
     void limiteDeTamanhoEDeDoisMegas() {
         assertEquals(2 * 1024 * 1024, ImagemValidador.TAMANHO_MAXIMO);
     }
