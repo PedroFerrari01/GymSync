@@ -14,13 +14,13 @@ spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=false
 
 # Login do administrador. A senha é OBRIGATÓRIA (sem ela o sistema não sobe). No computador pode ser curta; na publicação use 8+ caracteres.
-# gymsync.admin.usuario=admin
-# gymsync.admin.senha=123
+gymsync.admin.usuario=admin
+gymsync.admin.senha=123
 
 # Senhas fortes (o padrão do sistema é LIGADO; aqui desligado só para desenvolvimento no computador): mínimo de 8 caracteres, senha provisória
 # aleatória com troca obrigatória no primeiro acesso. As senhas já salvas não mudam.
 # Ligado, o sistema não sobe se gymsync.admin.senha tiver menos de 8 caracteres.
-# gymsync.senhas-fortes=false
+gymsync.senhas-fortes=false
 
 # Acesso de visitante: botão "Testar como visitante" no login, só leitura. Com o banco vazio,
 # cria dados de exemplo. Deixe desligado num sistema com dados reais.
