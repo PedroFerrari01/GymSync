@@ -2,14 +2,11 @@
    licença MIT (texto em static/vendor/react-body-highlighter/LICENSE e static/vendor/CREDITS.md).
    Mãos, pés e o ajuste da silhueta são feitos aqui.
 
-   Mapa do corpo (aba Avaliações Físicas): manequim 3D que gira, com uma fita em cada região medida
-   (peito, braço, cintura, quadril, coxa, ombro, antebraço e panturrilha; as três últimas só no 2D) e a diferença entre a primeira e a última avaliação.
-   - O manequim é feito aqui mesmo, em código (nenhum modelo de terceiros). As proporções são ilustrativas:
-     cada região engrossa ou afina um pouco conforme a medida do aluno.
-   - Os dados vêm do HTML (data-*), montados pelo EvolucaoService; a cor segue a regra de lá.
-   - No botão "2D" (o padrão), sem WebGL ou em aparelho fraco aparece o mapa dos músculos em SVG
-     (frente e costas), com cada músculo na cor da medida ligada a ele.
-   - O Three.js só é baixado quando a aba aparece na tela. */
+   Mapa do corpo (aba Avaliações Físicas): silhueta em SVG (frente e costas) com os músculos, uma medida por região
+   (peito, abdômen, braço, cintura, quadril, coxa, ombro, antebraço e panturrilha) e a diferença entre a primeira e a última avaliação.
+   - Os dados vêm do HTML (data-*), montados pelo EvolucaoService; a cor de cada músculo segue a regra de lá.
+   - Cada músculo fica na cor da medida ligada a ele (melhorou, piorou ou estável).
+*/
 
 import { anteriorData, posteriorData } from '../vendor/react-body-highlighter/musculos.js';
 
@@ -84,7 +81,7 @@ const CHAVES_REGIAO = Object.keys(REGIOES);
 // Cartões do resumo; massa muscular e massa gorda (bioimpedância) são do corpo inteiro e não pintam região nenhuma
 const CHAVES_RESUMO = ['peso', 'gordura', 'imc', 'massaMuscular', 'massaGorda'];
 
-// Medidas que só o mapa dos músculos (2D) desenha; o manequim 3D não tem fita para elas.
+// Medidas que só o mapa dos músculos desenha.
 // lado: de que lado fica o rótulo; em: altura aproximada (m) para alinhar o rótulo quando não há músculo para medir
 const SO_2D = {
     ombro: { lado: -1, em: 1.40 },
@@ -480,331 +477,12 @@ function criarSilhueta(svg) {
     };
 }
 
-/* ---------- Cena 3D ---------- */
-
-function criarCena3D(THREE, canvas, aoDesenhar) {
-    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-
-    const cena = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(28, 1, 0.1, 30);
-    const centro = new THREE.Vector3(0, 0.9, 0);
-    cena.add(new THREE.HemisphereLight(0xffffff, 0x30323c, 1.5));
-    const principal = new THREE.DirectionalLight(0xffffff, 2.1);
-    principal.position.set(1.6, 2.6, 3.2);
-    cena.add(principal);
-    const contraLuz = new THREE.DirectionalLight(0xf97316, 2.4); // recorte laranja por trás, como no halter
-    contraLuz.position.set(-2.4, 1.2, -3);
-    cena.add(contraLuz);
-
-    const corpo = new THREE.Group();
-    cena.add(corpo);
-    const pele = new THREE.MeshStandardMaterial({ color: 0xc7cbd6, roughness: 0.58, metalness: 0.06 });
-    const materialFita = {
-        melhorou: new THREE.MeshBasicMaterial({ toneMapped: false }),
-        piorou: new THREE.MeshBasicMaterial({ toneMapped: false }),
-        neutro: new THREE.MeshBasicMaterial({ toneMapped: false })
-    };
-    const materialChao = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.07, depthWrite: false });
-    const materialBorda = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.55 });
-
-    // Malha "torneada" pelas seções: uma volta de vértices por seção, fechada em cima e embaixo
-    const LADOS = 40;
-    function criarMalha(nSecoes, invertida) {
-        const geometria = new THREE.BufferGeometry();
-        geometria.setAttribute('position', new THREE.BufferAttribute(new Float32Array((nSecoes * LADOS + 2) * 3), 3));
-        const indices = [];
-        const tri = (a, b, c) => (invertida ? indices.push(a, c, b) : indices.push(a, b, c));
-        for (let i = 0; i < nSecoes - 1; i++) {
-            for (let j = 0; j < LADOS; j++) {
-                const a = i * LADOS + j, b = (i + 1) * LADOS + j;
-                const c = i * LADOS + (j + 1) % LADOS, d = (i + 1) * LADOS + (j + 1) % LADOS;
-                tri(a, b, c);
-                tri(c, b, d);
-            }
-        }
-        const fundo = nSecoes * LADOS, topo = fundo + 1, ultima = (nSecoes - 1) * LADOS;
-        for (let j = 0; j < LADOS; j++) {
-            tri((j + 1) % LADOS, fundo, j);
-            tri(ultima + j, topo, ultima + (j + 1) % LADOS);
-        }
-        geometria.setIndex(indices);
-        return geometria;
-    }
-    function moldar(geometria, secoes, ladoX, noBraco) {
-        const pos = geometria.attributes.position;
-        const y = s => (noBraco ? -s.p : s.p);
-        secoes.forEach((s, i) => {
-            for (let j = 0; j < LADOS; j++) {
-                const ang = (j / LADOS) * Math.PI * 2;
-                pos.setXYZ(i * LADOS + j, ladoX * s.cx + s.rx * Math.cos(ang), y(s), s.cz + s.rz * Math.sin(ang));
-            }
-        });
-        const primeira = secoes[0], ultima = secoes[secoes.length - 1];
-        pos.setXYZ(secoes.length * LADOS, ladoX * primeira.cx, y(primeira), primeira.cz);
-        pos.setXYZ(secoes.length * LADOS + 1, ladoX * ultima.cx, y(ultima), ultima.cz);
-        pos.needsUpdate = true;
-        geometria.computeVertexNormals();
-        geometria.computeBoundingSphere();
-    }
-
-    const nSecoes = parte => secoesDe(parte, FATOR_NEUTRO).length;
-    const pecas = []; // { geometria, parte, ladoX, noBraco }
-    const malha = (parte, ladoX, noBraco, pai) => {
-        const geometria = criarMalha(nSecoes(parte), noBraco);
-        pecas.push({ geometria, parte, ladoX, noBraco });
-        const m = new THREE.Mesh(geometria, pele);
-        pai.add(m);
-        return m;
-    };
-    const elipsoide = (rx, ry, rz, pai) => {
-        const m = new THREE.Mesh(new THREE.SphereGeometry(1, 40, 28), pele);
-        m.scale.set(rx, ry, rz);
-        pai.add(m);
-        return m;
-    };
-
-    malha('tronco', 1, false, corpo);
-    elipsoide(CABECA.rx, CABECA.ry, CABECA.rz, corpo).position.set(0, CABECA.y, CABECA.z);
-    const bracos = {};
-    for (const lado of [-1, 1]) {
-        malha('perna', lado, false, corpo);
-        elipsoide(PE.rx, PE.ry, PE.rz, corpo).position.set(lado * PE.x, PE.y, PE.z);
-        const braco = new THREE.Group();
-        braco.position.set(lado * OMBRO.x, OMBRO.y, 0);
-        braco.rotation.z = lado * OMBRO.giro;
-        corpo.add(braco);
-        malha('braco', 1, true, braco);
-        elipsoide(MAO.rx, MAO.ry, MAO.rz, braco).position.y = -MAO.p;
-        elipsoide(0.056, 0.054, 0.06, braco).position.y = 0.002; // ombro
-        bracos[lado] = braco;
-    }
-
-    // Chão: disco quase invisível com uma borda fina, para o corpo não parecer solto no ar
-    const chao = new THREE.Mesh(new THREE.CircleGeometry(0.42, 64), materialChao);
-    chao.rotation.x = -Math.PI / 2;
-    const borda = new THREE.Mesh(new THREE.RingGeometry(0.414, 0.42, 96), materialBorda);
-    borda.rotation.x = -Math.PI / 2;
-    borda.position.y = 0.001;
-    cena.add(chao, borda);
-
-    // Fitas: um tubo fino em volta de cada região (elipse do manequim sem ajuste; a escala acompanha o fator)
-    class Elipse extends THREE.Curve {
-        constructor(a, b) { super(); this.a = a; this.b = b; }
-        getPoint(t, alvo = new THREE.Vector3()) {
-            const ang = t * Math.PI * 2;
-            return alvo.set(this.a * Math.cos(ang), 0, this.b * Math.sin(ang));
-        }
-    }
-    const aneis = {};
-    for (const chave of CHAVES_REGIAO) {
-        const regiao = REGIOES[chave];
-        const s = secaoEm(secoesDe(regiao.parte, FATOR_NEUTRO), regiao.em);
-        const a = s.rx * 1.02 + 0.004, b = s.rz * 1.02 + 0.004;
-        aneis[chave] = [];
-        const lados = regiao.parte === 'tronco' ? [0] : [-1, 1];
-        for (const lado of lados) {
-            const fita = new THREE.Mesh(new THREE.TubeGeometry(new Elipse(a, b), 96, 0.0062, 10, true), materialFita.neutro);
-            const brilho = new THREE.Mesh(new THREE.TubeGeometry(new Elipse(a, b), 96, 0.016, 10, true),
-                new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, toneMapped: false }));
-            const grupo = new THREE.Group();
-            grupo.add(fita, brilho);
-            if (regiao.parte === 'braco') {
-                grupo.position.y = -regiao.em;
-                bracos[lado].add(grupo);
-            } else {
-                grupo.position.set(lado * s.cx, regiao.em, s.cz);
-                corpo.add(grupo);
-            }
-            grupo.visible = false;
-            aneis[chave].push({ grupo, fita, brilho, a, b });
-        }
-    }
-
-    /* Estado e animação: só desenha quando algo muda (arrasto, inércia, troca de medida) */
-    const reduzido = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const POSE = 0.34; // leve giro para a figura não ficar chapada de frente
-    let giro = reduzido ? POSE : POSE - 0.56;
-    let velocidade = reduzido ? 0 : 0.045;
-    let giroAlvo = null;
-    let inclinacao = 0.1;
-    let arrastando = false;
-    let destaque = null;
-    let largura = 1, altura = 1;
-    let quadroPedido = 0;
-    let perdido = false;
-    let desenhado = false;
-    const fatores = { ...FATOR_NEUTRO };
-    const fatoresAlvo = { ...FATOR_NEUTRO };
-
-    function remodelar() {
-        for (const peca of pecas) moldar(peca.geometria, secoesDe(peca.parte, fatores), peca.ladoX, peca.noBraco);
-        for (const chave of CHAVES_REGIAO) aneis[chave].forEach(anel => anel.grupo.scale.set(fatores[chave], 1, fatores[chave]));
-    }
-
-    function posicionarCamera() {
-        const metade = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
-        const distancia = Math.max(1.02 / metade, 0.46 / (metade * camera.aspect));
-        camera.position.set(0, centro.y + Math.sin(inclinacao) * distancia, Math.cos(inclinacao) * distancia);
-        camera.lookAt(centro);
-    }
-
-    function quadro() {
-        quadroPedido = 0;
-        if (perdido) return;
-        let continuar = false;
-        if (!arrastando) {
-            if (giroAlvo !== null) {
-                const falta = giroAlvo - giro;
-                if (Math.abs(falta) > 0.002) { giro += falta * 0.14; continuar = true; } else { giro = giroAlvo; giroAlvo = null; }
-            } else if (Math.abs(velocidade) > 0.0005) {
-                giro += velocidade;
-                velocidade *= 0.92;
-                continuar = true;
-            }
-        }
-        let mudou = false;
-        for (const chave of CHAVES_REGIAO) {
-            const falta = fatoresAlvo[chave] - fatores[chave];
-            if (falta === 0) continue;
-            if (Math.abs(falta) > 0.0008 && !reduzido) { fatores[chave] += falta * 0.16; continuar = true; } else fatores[chave] = fatoresAlvo[chave];
-            mudou = true;
-        }
-        if (mudou) remodelar();
-        for (const chave of CHAVES_REGIAO) {
-            for (const anel of aneis[chave]) {
-                const alvo = chave === destaque ? 0.32 : 0;
-                const falta = alvo - anel.brilho.material.opacity;
-                if (Math.abs(falta) > 0.01 && !reduzido) { anel.brilho.material.opacity += falta * 0.25; continuar = true; } else anel.brilho.material.opacity = alvo;
-            }
-        }
-        corpo.rotation.y = giro;
-        posicionarCamera();
-        renderer.render(cena, camera);
-        desenhado = true;
-        aoDesenhar();
-        if (continuar) pedirQuadro();
-    }
-    function pedirQuadro() {
-        if (!quadroPedido) quadroPedido = requestAnimationFrame(quadro);
-    }
-
-    /* Girar: arrastar (mouse ou dedo), setas do teclado; dois cliques voltam à pose inicial */
-    let ultimoX = 0, ultimoY = 0;
-    canvas.addEventListener('pointerdown', e => {
-        arrastando = true;
-        giroAlvo = null;
-        velocidade = 0;
-        ultimoX = e.clientX;
-        ultimoY = e.clientY;
-        canvas.setPointerCapture(e.pointerId);
-        canvas.classList.add('arrastando');
-    });
-    canvas.addEventListener('pointermove', e => {
-        if (!arrastando) return;
-        const dx = (e.clientX - ultimoX) * 0.011;
-        giro += dx;
-        velocidade = dx;
-        if (e.pointerType === 'mouse') inclinacao = limitar(inclinacao + (e.clientY - ultimoY) * 0.004, -0.12, 0.42);
-        ultimoX = e.clientX;
-        ultimoY = e.clientY;
-        pedirQuadro();
-    });
-    const soltar = () => {
-        if (!arrastando) return;
-        arrastando = false;
-        canvas.classList.remove('arrastando');
-        if (reduzido) velocidade = 0;
-        pedirQuadro();
-    };
-    canvas.addEventListener('pointerup', soltar);
-    canvas.addEventListener('pointercancel', soltar);
-    canvas.addEventListener('keydown', e => {
-        if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
-        e.preventDefault();
-        giroAlvo = (giroAlvo === null ? giro : giroAlvo) + (e.key === 'ArrowLeft' ? -0.4 : 0.4);
-        pedirQuadro();
-    });
-    canvas.addEventListener('dblclick', () => {
-        // volta pela volta mais curta
-        giro = Math.atan2(Math.sin(giro - POSE), Math.cos(giro - POSE)) + POSE;
-        giroAlvo = POSE;
-        inclinacao = 0.1;
-        pedirQuadro();
-    });
-
-    const quat = new THREE.Quaternion();
-    const direcao = new THREE.Vector3();
-    const ponto = new THREE.Vector3();
-
-    return {
-        canvas,
-        aoPerder(f) {
-            canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); perdido = true; f(); });
-        },
-        redimensionar() {
-            const w = canvas.clientWidth, h = canvas.clientHeight;
-            if (!w || !h) return;
-            largura = w;
-            altura = h;
-            renderer.setSize(w, h, false);
-            camera.aspect = w / h;
-            camera.updateProjectionMatrix();
-            pedirQuadro();
-        },
-        /** fatores = quanto cada região engrossa; regioes = { chave: classe } das que têm medida. */
-        mostrar(novosFatores, regioes, semAnimar) {
-            Object.assign(fatoresAlvo, novosFatores);
-            if (semAnimar) { Object.assign(fatores, novosFatores); remodelar(); }
-            for (const chave of CHAVES_REGIAO) {
-                aneis[chave].forEach(anel => {
-                    anel.grupo.visible = !!regioes[chave];
-                    if (regioes[chave]) {
-                        anel.fita.material = materialFita[regioes[chave]] || materialFita.neutro;
-                        anel.brilho.material.color.copy(anel.fita.material.color);
-                    }
-                });
-            }
-            pedirQuadro();
-        },
-        cores(c) {
-            pele.color.set(c.pele);
-            for (const classe in materialFita) materialFita[classe].color.set(c[classe]);
-            materialChao.color.set(c.texto);
-            materialBorda.color.set(c.borda);
-            for (const chave of CHAVES_REGIAO) aneis[chave].forEach(anel => anel.brilho.material.color.copy(anel.fita.material.color));
-            pedirQuadro();
-        },
-        destacar(chave) {
-            destaque = chave;
-            pedirQuadro();
-        },
-        /** Ponto da fita mais para o lado pedido da tela, em pixels dentro do canvas. */
-        ancora(chave, lado) {
-            let melhor = null;
-            if (!desenhado) return null; // antes do primeiro quadro a câmera ainda não está no lugar
-            for (const anel of aneis[chave] || []) {
-                if (!anel.grupo.visible) continue;
-                anel.grupo.getWorldQuaternion(quat).invert();
-                direcao.set(lado, 0, 0).applyQuaternion(quat);
-                const n = Math.hypot(anel.a * direcao.x, anel.b * direcao.z) || 1;
-                ponto.set(anel.a * anel.a * direcao.x / n, 0, anel.b * anel.b * direcao.z / n);
-                anel.grupo.localToWorld(ponto).project(camera);
-                const x = (ponto.x + 1) / 2 * largura, y = (1 - ponto.y) / 2 * altura;
-                if (!melhor || lado * x > lado * melhor.x) melhor = { x, y };
-            }
-            return melhor;
-        }
-    };
-}
-
 /* ---------- Tela ---------- */
 
 function iniciar() {
     const alunos = lerAlunos();
     const palco = raiz.querySelector('.mapa-palco');
     const figura = raiz.querySelector('.mapa-figura');
-    const canvas = raiz.querySelector('.mapa-canvas');
     const linhas = raiz.querySelector('.mapa-linhas');
     const colunas = { '-1': raiz.querySelector('.mapa-esq'), '1': raiz.querySelector('.mapa-dir') };
     const resumo = raiz.querySelector('.mapa-resumo');
@@ -813,7 +491,6 @@ function iniciar() {
     const avisoAltura = raiz.querySelector('.mapa-aviso-altura');
     const seletor = raiz.querySelector('.mapa-aluno');
     const botoesMomento = raiz.querySelectorAll('[data-momento]');
-    const botoesModo = raiz.querySelectorAll('[data-modo]');
     const botoesVista = raiz.querySelectorAll('[data-vista]');
     const grupoVista = raiz.querySelector('.mapa-vista');
     const comparando = raiz.querySelector('.mapa-comparando');
@@ -825,32 +502,10 @@ function iniciar() {
 
     let alunoAtual = seletor ? seletor.value : alunos.keys().next().value;
     let momento = 'ultima';
-    let cena3d = null;
-    let carregando3d = false;
-    let visivel = false;
     let fixado = null;
     let rotulos = []; // { chave, lado, li, traco, bolinha }
 
-    // O 3D foi retirado (fica nos "Próximos passos"): o mapa dos músculos (2D) é o único modo
-    const modo = '2d';
-    let sem3d = false;
-
     const aluno = () => alunos.get(alunoAtual);
-    const usando3d = () => modo === '3d' && cena3d && !sem3d;
-
-    function coresDoTema() {
-        const estilo = getComputedStyle(raiz);
-        const cor = nome => estilo.getPropertyValue(nome).trim();
-        return {
-            pele: cor('--mapa-pele'), melhorou: cor('--mapa-melhorou'), piorou: cor('--mapa-piorou'),
-            neutro: cor('--mapa-neutro'), texto: cor('--mapa-chao'), borda: cor('--mapa-neutro'),
-            destaque: cor('--mapa-destaque'),
-            // Visual "body scan" do 3D
-            base3d: cor('--mapa3d-base'), borda3d: cor('--mapa3d-borda'), anel3d: cor('--mapa3d-anel'),
-            melhorou3d: cor('--mapa3d-melhorou'), piorou3d: cor('--mapa3d-piorou'), estavel3d: cor('--mapa3d-estavel'),
-            brilho3d: cor('--mapa3d-brilho') === '1'
-        };
-    }
 
     function elemento(tag, classe, texto) {
         const el = document.createElement(tag);
@@ -868,7 +523,6 @@ function iniciar() {
             r.bolinha.classList.toggle('ativo', ligado);
         });
         silhueta.destacar(ativa);
-        if (cena3d) cena3d.destacar(ativa);
     }
 
     function montarRotulos() {
@@ -892,8 +546,7 @@ function iniciar() {
             nome.append(' ', elemento('span', 'mapa-rotulo-tipo', '(perímetro)')); // o espaço deixa quebrar a linha em tela estreita
             li.append(nome, elemento('span', 'mapa-rotulo-valor', valor(m)));
             if (m.diferenca) li.append(elemento('span', `evo-dif ${m.classe}`, `${m.diferenca} ${sentido(m.diferenca)}`));
-            // No 3D não há linha-guia: a pílula acende a região e o corpo gira para o lado em que ela aparece
-            const apontarPilula = () => { destacar(chave); if (usando3d()) cena3d.mostrarLado(chave); };
+            const apontarPilula = () => destacar(chave);
             li.addEventListener('mouseenter', apontarPilula);
             li.addEventListener('mouseleave', () => destacar(null));
             li.addEventListener('focus', apontarPilula);
@@ -902,8 +555,7 @@ function iniciar() {
                 fixado = fixado === chave ? null : chave;
                 destacar(null);
                 const preferida = VISTA_PREFERIDA[chave];
-                if (fixado && usando3d()) cena3d.mostrarLado(chave);
-                else if (fixado && preferida) mudarVista(preferida);
+                if (fixado && preferida) mudarVista(preferida);
             });
             colunas[lado].append(li);
             const traco = noSvg('path', { class: `mapa-traco ${m.classe}` });
@@ -970,9 +622,9 @@ function iniciar() {
         const largo = comTracos();
         const alturaPalco = palco.clientHeight;
         const topoFigura = figura.getBoundingClientRect().top - palco.getBoundingClientRect().top;
-        // Altura do rótulo no palco: no 3D pela forma do manequim, no 2D pelo centro do músculo
+        // Altura do rótulo no palco: pelo centro do músculo
         const meioDe = chave => {
-            const y = (usando3d() ? cena3d : silhueta).alturaRotulo(chave);
+            const y = silhueta.alturaRotulo(chave);
             return y != null ? topoFigura + y : (1 - (alturaDe(chave) + 0.06) / 1.92) * alturaPalco;
         };
         for (const lado of [-1, 1]) {
@@ -996,23 +648,14 @@ function iniciar() {
 
     function atualizarTracos() {
         if (!rotulos.length || !comTracos()) return;
-        if (usando3d()) {
-            // 3D sem linhas-guia (a ligação é pelo destaque ao passar o mouse)
-            for (const r of rotulos) {
-                r.li.classList.remove('fora-da-vista');
-                r.traco.setAttribute('d', '');
-                r.bolinha.setAttribute('visibility', 'hidden');
-            }
-            return;
-        }
         const base = palco.getBoundingClientRect();
         const caixaFigura = figura.getBoundingClientRect();
-        const fonte = usando3d() ? cena3d : silhueta;
+        const fonte = silhueta;
         linhas.setAttribute('viewBox', `0 0 ${base.width} ${base.height}`);
         for (const r of rotulos) {
             const ancora = fonte.ancora(r.chave, r.lado);
             // No mapa dos músculos, medida sem músculo nesta vista (o peito nas costas) fica apagada
-            r.li.classList.toggle('fora-da-vista', !ancora && !usando3d());
+            r.li.classList.toggle('fora-da-vista', !ancora);
             if (!ancora) { r.traco.setAttribute('d', ''); r.bolinha.setAttribute('visibility', 'hidden'); continue; }
             const ax = caixaFigura.left - base.left + ancora.x;
             const ay = caixaFigura.top - base.top + ancora.y;
@@ -1049,7 +692,6 @@ function iniciar() {
             b.classList.toggle('active', b.dataset.vista === vista);
             b.setAttribute('aria-pressed', b.dataset.vista === vista);
         });
-        if (usando3d()) { vistaEscolhida = vista; cena3d.girarPara(vista); desenhar2d(); return; }
         if (vista === vistaEscolhida) return;
         vistaEscolhida = vista;
         mostrarDica(null);
@@ -1093,7 +735,6 @@ function iniciar() {
         const a = aluno();
         const fatores = a ? fatoresDe(a, momento) : { ...FATOR_NEUTRO };
         desenhar2d();
-        if (cena3d) cena3d.mostrar(fatores, regioesComClasse(), semAnimar, intensidades());
         destacar(null);
         atualizarTracos();
     }
@@ -1102,73 +743,6 @@ function iniciar() {
         montarRotulos();
         posicionarRotulos();
         atualizarFigura(semAnimar);
-    }
-
-    function aplicarModo() {
-        raiz.classList.toggle('mapa-em-3d', usando3d());
-        botoesModo.forEach(b => {
-            const ativo = b.dataset.modo === (usando3d() || (modo === '3d' && !sem3d) ? '3d' : '2d');
-            b.classList.toggle('active', ativo);
-            b.setAttribute('aria-pressed', ativo);
-            if (b.dataset.modo === '3d') {
-                b.disabled = sem3d;
-                if (sem3d) b.title = 'Este aparelho não conseguiu abrir o 3D';
-            }
-        });
-        // Fora do 3D, a cena é descartada (libera a GPU); o modelo já baixado fica guardado no módulo
-        if (modo !== '3d' && cena3d) { cena3d.descartar(); cena3d = null; }
-        if (usando3d()) cena3d.redimensionar();
-        posicionarRotulos();
-        atualizarTracos();
-    }
-
-    // Aviso curto quando o 3D não abre (sem WebGL, erro ou demora): fica o mapa 2D
-    const avisoSem3d = elemento('p', 'small mb-0 texto-apoio mapa-aviso-3d', 'Não deu para abrir o 3D neste aparelho; mostrando o mapa 2D.');
-    avisoSem3d.hidden = true;
-    raiz.querySelector('.mapa-lateral').append(avisoSem3d);
-    const progresso = elemento('span', 'mapa-carregando', 'Carregando o 3D…');
-    progresso.setAttribute('role', 'status');
-    progresso.hidden = true;
-    figura.append(progresso);
-
-    function desistirDo3d() {
-        sem3d = true;
-        if (cena3d) { try { cena3d.descartar(); } catch (e) { /* contexto já perdido */ } }
-        cena3d = null;
-        progresso.hidden = true;
-        if (modo === '3d') avisoSem3d.hidden = false;
-        aplicarModo();
-    }
-
-    async function carregar3d() {
-        if (cena3d || carregando3d || sem3d || modo !== '3d' || !visivel) return;
-        carregando3d = true;
-        progresso.hidden = false;
-        progresso.textContent = 'Carregando o 3D…';
-        let demorou = false;
-        const prazo = setTimeout(() => { demorou = true; desistirDo3d(); }, 10000);
-        try {
-            // Sem WebGL nem adianta baixar o Three.js: fica a silhueta
-            if (!document.createElement('canvas').getContext('webgl2')) throw new Error('sem WebGL');
-            const { criarCenaAnatomica } = await import('./mapa-corporal-3d.js');
-            const cena = await criarCenaAnatomica(canvas, atualizarTracos, {
-                aoProgresso: f => { progresso.textContent = `Carregando o 3D… ${Math.round(f * 100)}%`; }
-            });
-            if (demorou || modo !== '3d') { cena.descartar(); throw new Error('cancelado'); }
-            cena3d = cena;
-            cena3d.aoPerder(desistirDo3d);
-            cena3d.aoApontar(apontarMusculo, clicarMusculo);
-            cena3d.cores(coresDoTema());
-            const a = aluno();
-            cena3d.mostrar(a ? fatoresDe(a, momento) : { ...FATOR_NEUTRO }, regioesComClasse(), true, intensidades());
-            aplicarModo();
-        } catch (erro) {
-            if (!demorou && modo === '3d') desistirDo3d();
-        } finally {
-            clearTimeout(prazo);
-            progresso.hidden = true;
-            carregando3d = false;
-        }
     }
 
     /* Controles */
@@ -1203,26 +777,15 @@ function iniciar() {
         destacar(null);
     }
     silhueta.aoApontar(apontarMusculo, clicarMusculo);
-    canvas.addEventListener('pointerdown', () => raiz.classList.add('mapa-ja-girou'), { once: true });
 
-    // Tema claro/escuro: as cores do 3D vêm das variáveis CSS
-    new MutationObserver(() => { if (cena3d) cena3d.cores(coresDoTema()); })
-        .observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-
-    // A aba começa escondida: só mede e carrega o 3D quando a figura aparece
+    // A aba começa escondida: só mede quando a figura aparece
     new ResizeObserver(() => {
         if (!figura.clientWidth) return;
         posicionarRotulos();
-        if (usando3d()) cena3d.redimensionar();
         atualizarTracos();
     }).observe(palco);
-    new IntersectionObserver(entradas => {
-        visivel = entradas.some(e => e.isIntersecting);
-        if (visivel) carregar3d();
-    }).observe(figura);
 
     atualizarTudo(true);
-    aplicarModo();
 }
 
 if (raiz && raiz.querySelector('.mapa-palco')) iniciar();

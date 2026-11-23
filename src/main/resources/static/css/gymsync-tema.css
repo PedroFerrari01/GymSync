@@ -282,7 +282,8 @@
 }
 .boas-saudacao { font-size: 0.8rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
 .boas-nome { font-size: 1.75rem; font-weight: 700; margin: var(--s1) 0 0; color: var(--text-primary); }
-.boas-data { font-size: 0.9rem; color: var(--text-secondary); text-transform: capitalize; }
+.boas-data { font-size: 0.9rem; color: var(--text-secondary); }
+.boas-data::first-letter { text-transform: uppercase; }
 
 /* Destaque de uma palavra no título da tela de login */
 .destaque-titulo { color: var(--accent); font-style: italic; }
@@ -1409,8 +1410,8 @@ tr.paleta-destaque td { background: var(--accent-soft) !important; transition: b
 .leitor-video { position: relative; aspect-ratio: 4 / 3; background: #000; border-radius: 12px; overflow: hidden; }
 .leitor-video video { width: 100%; height: 100%; object-fit: cover; display: block; }
 .leitor-mira { position: absolute; inset: 18%; border: 3px solid var(--accent, #f97316); border-radius: 12px; box-shadow: 0 0 0 9999px rgba(0, 0, 0, .35); pointer-events: none; }
-/* ===== Mapa do corpo (aba Avaliações Físicas): manequim 3D com as medidas por região =====
-   As cores do 3D são lidas destas variáveis pelo mapa-corpo.js. Para tirar a tela, apague este bloco,
+/* ===== Mapa do corpo (aba Avaliações Físicas): mapa dos músculos com as medidas por região =====
+   As cores são lidas destas variáveis pelo mapa-corpo.js. Para tirar a tela, apague este bloco,
    o fragmento mapa-corpo.html e o mapa-corpo.js. */
 .mapa-corpo {
     --mapa-pele: #a3a9b7;
@@ -1420,14 +1421,6 @@ tr.paleta-destaque td { background: var(--accent-soft) !important; transition: b
     --mapa-neutro: #e2e8f0;
     --mapa-destaque: #f8fafc;
     --mapa-estavel: #f97316;
-    /* 3D "body scan": grafite fosco, contorno frio, regiões acesas com brilho (bloom só no escuro) */
-    --mapa3d-base: #151922;
-    --mapa3d-borda: #7da2d8;
-    --mapa3d-anel: #f97316;
-    --mapa3d-melhorou: #10b981;
-    --mapa3d-piorou: #ef4444;
-    --mapa3d-estavel: #f97316;
-    --mapa3d-brilho: 1;
     height: auto;
 }
 :root[data-theme="light"] .mapa-corpo {
@@ -1438,13 +1431,6 @@ tr.paleta-destaque td { background: var(--accent-soft) !important; transition: b
     --mapa-neutro: #475569;
     --mapa-destaque: #94a3b8;
     --mapa-estavel: #c2410c;
-    --mapa3d-base: #c9ced8;
-    --mapa3d-borda: #ffffff;
-    --mapa3d-anel: #ea580c;
-    --mapa3d-melhorou: #059669;
-    --mapa3d-piorou: #dc2626;
-    --mapa3d-estavel: #f97316;
-    --mapa3d-brilho: 0;
 }
 .mapa-topo { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: var(--s3); margin-bottom: var(--s3); }
 .mapa-controles { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2); }
@@ -1464,7 +1450,7 @@ tr.paleta-destaque td { background: var(--accent-soft) !important; transition: b
 .mapa-alternar button:hover:not(:disabled) { color: var(--text-primary); }
 .mapa-alternar button.active { background: var(--accent-soft); color: var(--accent); }
 .mapa-alternar button:disabled { opacity: 0.45; cursor: not-allowed; }
-.mapa-alternar button:focus-visible, .mapa-canvas:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.mapa-alternar button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 .mapa-rotulo:focus-visible { outline: 2px solid var(--mapa-destaque); outline-offset: -2px; }
 
 .mapa-grade { display: grid; gap: var(--s4); }
@@ -1481,11 +1467,7 @@ tr.paleta-destaque td { background: var(--accent-soft) !important; transition: b
     margin: 0 auto;
 }
 .mapa-figura { position: relative; min-width: 0; background: radial-gradient(closest-side at 50% 46%, var(--accent-soft), transparent 78%); }
-.mapa-silhueta, .mapa-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-.mapa-canvas { visibility: hidden; cursor: grab; touch-action: pan-y; border-radius: var(--raio); }
-.mapa-canvas.arrastando { cursor: grabbing; }
-.mapa-em-3d .mapa-canvas { visibility: visible; }
-.mapa-em-3d .mapa-silhueta { visibility: hidden; }
+.mapa-silhueta { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 /* Mapa dos músculos (2D): cor base, e a cor da medida nos músculos ligados a ela */
 /* Contorno de 1,5px na cor do cartão separa os músculos (cabeça e mãos também); a força da cor vem do fill-opacity (intensidade) */
 .mapa-musculo { fill: var(--mapa-pele); fill-opacity: 0.55; stroke: var(--bg-card); stroke-width: 1.5px; vector-effect: non-scaling-stroke; stroke-linejoin: round; transition: fill-opacity 200ms, stroke 200ms; }
@@ -1530,7 +1512,6 @@ tr.paleta-destaque td { background: var(--accent-soft) !important; transition: b
     pointer-events: none;
     transition: opacity 400ms;
 }
-.mapa-em-3d .mapa-dica { display: inline-flex; }
 .mapa-ja-girou .mapa-dica { opacity: 0; }
 
 .mapa-rotulos { position: relative; list-style: none; margin: 0; padding: 0; min-width: 0; }
@@ -1896,29 +1877,6 @@ body.mt-aberto { overflow: hidden; }
 .pix-nota { font-size: .8rem; opacity: .85; margin-bottom: .6rem; }
 .pix-codigo { font-size: .72rem; }
 /* PIX-QR: fim */
-
-/* Mapa do corpo 3D anatômico: aviso de carregamento discreto no meio da figura */
-.mapa-carregando {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    padding: 4px 12px;
-    border-radius: 999px;
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    color: var(--text-secondary);
-    font-size: 0.8rem;
-    white-space: nowrap;
-    pointer-events: none;
-}
-.mapa-carregando[hidden] { display: none; }
-
-/* Crédito do modelo 3D: mesmo tom do texto de apoio, sem o azul de link */
-.mapa-nota-3d a { color: inherit; text-decoration: underline; text-decoration-color: var(--border-color); text-underline-offset: 2px; }
-.mapa-nota-3d a:hover { color: var(--text-primary); }
-/* 3D sem linhas-guia: a pílula liga com a região pelo destaque */
-.mapa-em-3d .mapa-linhas { visibility: hidden; }
 
 /* SIMULADOR: início */
 .sim-ctrl { margin-bottom: var(--s3, 14px); }

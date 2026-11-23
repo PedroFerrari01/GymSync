@@ -1,4 +1,4 @@
-<!--/* Mapa do corpo: modelo anatômico 3D (ou mapa 2D dos músculos) com as medidas por região. A lógica fica em /js/mapa-corpo.js; os dados vão em data-*. */-->
+<!--/* Mapa do corpo: mapa dos músculos (SVG) com as medidas por região. A lógica fica em /js/mapa-corpo.js; os dados vão em data-*. */-->
 <div th:fragment="mapa" class="panel-card mapa-corpo" data-mapa-corpo>
     <div class="mapa-topo">
         <div>
@@ -33,7 +33,6 @@
             <ul class="mapa-rotulos mapa-esq" aria-label="Medidas por região"></ul>
             <div class="mapa-figura">
                 <svg class="mapa-silhueta" role="img" aria-label="Mapa dos músculos com a cor de cada medida"></svg>
-                <canvas class="mapa-canvas" tabindex="0" role="img" aria-label="Corpo em 3D com as regiões medidas. Arraste ou use as setas para girar."></canvas>
                 <span class="mapa-dica"><i class="ph ph-arrows-horizontal"></i> arraste para girar</span>
                 <span class="mapa-dica-musculo" role="status" hidden></span>
             </div>
