@@ -13,4 +13,7 @@ public interface MatriculaRepository extends JpaRepository<Matricula, Long> {
     boolean existsByAlunoIdAndSituacao(Long alunoId, String situacao);
     List<Matricula> findBySituacaoAndDataFimBefore(String situacao, LocalDate data);
     List<Matricula> findBySituacaoAndDataFimBetween(String situacao, LocalDate inicio, LocalDate fim);
+    // TRANCAMENTO
+    List<Matricula> findBySituacao(String situacao);
+    Optional<Matricula> findFirstByAlunoIdAndSituacao(Long alunoId, String situacao);
 }

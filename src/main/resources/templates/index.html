@@ -495,6 +495,12 @@
                 <div class="col-6 col-xl-3"><div class="kpi-card"><div><div class="kpi-val" th:text="${#lists.size(entradas)}">0</div><div class="kpi-lbl">Acessos Catraca</div></div><div class="kpi-ico"><i class="ph ph-fingerprint"></i></div></div></div>
             </div>
 
+            <!--/* TRANCAMENTO: início */-->
+            <p th:if="${perfil == 'ADMIN' and trancadasQtd != null and trancadasQtd > 0}" class="trancadas-resumo small texto-apoio mb-3">
+                <i class="bi bi-pause-circle"></i>
+                <span th:text="${trancadasQtd == 1 ? '1 matrícula trancada' : trancadasQtd + ' matrículas trancadas'}"></span>
+            </p>
+            <!--/* TRANCAMENTO: fim */-->
             <div class="tab-content">
 
                 <div th:if="${perfil == 'ADMIN'}" class="tab-pane fade show active" id="aba-painel" role="tabpanel">
@@ -734,9 +740,24 @@
                                                 <td th:text="${mat.plano.nome}"></td>
                                                 <td th:text="${@fmt.data(mat.dataInicio)}"></td>
                                                 <td th:text="${@fmt.data(mat.dataFim)}"></td>
-                                                <td><span th:text="${mat.situacao}" th:class="${mat.situacao == 'ATIVA' ? 'status-ok' : (mat.situacao == 'VENCIDA' ? 'status-wait' : 'status-off')}"></span></td>
+                                                <td>
+                                                    <span th:text="${mat.situacao}" th:class="${mat.situacao == 'ATIVA' ? 'status-ok' : (mat.situacao == 'VENCIDA' || mat.situacao == 'TRANCADA' ? 'status-wait' : 'status-off')}"></span>
+                                                    <!--/* TRANCAMENTO: início */-->
+                                                    <div th:if="${mat.situacao == 'TRANCADA'}" class="small texto-apoio mt-1 trancada-info">
+                                                        <span th:text="${mat.trancadaAte != null ? 'Volta em ' + @fmt.data(mat.trancadaAte) : 'Sem data de retorno'}"></span>
+                                                        <span th:if="${mat.motivoTrancamento != null}" th:text="|· ${mat.motivoTrancamento}|"></span>
+                                                    </div>
+                                                    <!--/* TRANCAMENTO: fim */-->
+                                                </td>
                                                 <td class="text-end">
-                                                    <form th:if="${mat.situacao == 'ATIVA'}" th:action="@{/matriculas/cancelar/{id}(id=${mat.id})}" method="post" class="d-inline" data-confirm="Cancelar esta matrícula? As mensalidades em aberto também serão canceladas.">
+                                                    <!--/* TRANCAMENTO: início */-->
+                                                    <button th:if="${mat.situacao == 'ATIVA'}" type="button" class="btn btn-sm btn-outline-secondary fw-semibold btn-trancar"
+                                                            data-bs-toggle="modal" data-bs-target="#modalTrancar" th:data-id="${mat.id}" th:data-aluno="${mat.aluno.nome}"><i class="bi bi-pause-circle"></i> Trancar</button>
+                                                    <form th:if="${mat.situacao == 'TRANCADA'}" th:action="@{/matriculas/destrancar/{id}(id=${mat.id})}" method="post" class="d-inline" data-confirm="Destrancar esta matrícula? O fim do plano e os vencimentos pendentes andam pelos dias trancados.">
+                                                        <button type="submit" class="btn btn-sm btn-outline-secondary fw-semibold"><i class="bi bi-play-circle"></i> Destrancar</button>
+                                                    </form>
+                                                    <!--/* TRANCAMENTO: fim */-->
+                                                    <form th:if="${mat.situacao == 'ATIVA' or mat.situacao == 'TRANCADA'}" th:action="@{/matriculas/cancelar/{id}(id=${mat.id})}" method="post" class="d-inline" data-confirm="Cancelar esta matrícula? As mensalidades em aberto também serão canceladas.">
                                                         <button type="submit" class="btn btn-sm btn-outline-danger fw-semibold">Cancelar</button>
                                                     </form>
                                                 </td>
@@ -1617,6 +1638,7 @@
 <script th:src="@{/js/carteirinha.js}"></script>
 <script th:if="${perfil == 'ALUNO'}" th:src="@{/js/modo-treino.js}"></script>
 <script th:if="${perfil == 'ALUNO'}" th:src="@{/js/metas.js}"></script>
+<script th:if="${perfil == 'ADMIN'}" th:src="@{/js/trancamento.js}"></script>
 <script th:src="@{/js/sininho.js}"></script>
 <script th:if="${logado}" th:src="@{/js/melhor-horario.js}" defer></script>
 <script th:if="${logado}" th:src="@{/js/dicas.js}"></script>
@@ -1677,6 +1699,34 @@
             </div>
         </div>
     </div>
+
+    <!--/* TRANCAMENTO: início */-->
+    <div class="modal fade" id="modalTrancar" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header"><h5 class="modal-title fw-bold">Trancar matrícula</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button></div>
+                <form th:action="@{/matriculas/trancar/0}" method="post" id="formTrancar">
+                    <div class="modal-body">
+                        <p class="small texto-apoio mb-3">Aluno: <strong id="trancarAluno">-</strong>. Enquanto estiver trancada, a catraca bloqueia o aluno e as mensalidades pendentes ficam congeladas (não viram atrasadas). Ao destrancar, o fim do plano e os vencimentos andam pelos dias trancados.</p>
+                        <div class="row g-2 mb-2">
+                            <div class="col-6">
+                                <label class="form-label" for="trancarInicio">Início</label>
+                                <input type="date" name="inicio" id="trancarInicio" class="form-control" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label" for="trancarRetorno">Retorno previsto <span class="texto-apoio">(opcional)</span></label>
+                                <input type="date" name="retorno" id="trancarRetorno" class="form-control">
+                            </div>
+                        </div>
+                        <label class="form-label" for="trancarMotivo">Motivo <span class="texto-apoio">(opcional)</span></label>
+                        <input type="text" name="motivo" id="trancarMotivo" class="form-control" maxlength="200" placeholder="Ex.: viagem, lesão, mudança de cidade">
+                    </div>
+                    <div class="modal-footer"><button type="submit" class="btn-brand">Trancar matrícula</button></div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!--/* TRANCAMENTO: fim */-->
 
     <div class="modal fade" id="modalRegistrosCatraca" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-scrollable">

@@ -19,6 +19,10 @@ public class SituacaoService {
         LocalDate hoje = LocalDate.now();
 
         List<Mensalidade> atrasadas = mensalidadeRepository.findBySituacaoAndVencimentoBefore("PENDENTE", hoje);
+        // Matrícula TRANCADA congela as pendentes: não viram atrasadas (o vencimento anda ao destrancar)
+        atrasadas = atrasadas.stream()
+                .filter(m -> m.getMatricula() == null || !"TRANCADA".equals(m.getMatricula().getSituacao()))
+                .toList();
         atrasadas.forEach(m -> m.setSituacao("ATRASADA"));
         mensalidadeRepository.saveAll(atrasadas);
 
