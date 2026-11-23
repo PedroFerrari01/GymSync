@@ -2059,3 +2059,32 @@ body.mt-aberto { overflow: hidden; }
     .tabela-mens td:nth-child(6) form { margin: 0; }
 }
 /* MENSALIDADES-CELULAR: fim */
+
+/* METAS: início */
+.metas-grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 0.75rem; }
+.meta-item { display: flex; gap: 1rem; align-items: center; padding: 0.9rem; border: 1px solid var(--border-color); border-radius: 12px; min-width: 0; }
+.meta-item.concluida { border-color: var(--accent); }
+.meta-anel { position: relative; flex: 0 0 auto; width: 92px; height: 92px; }
+.meta-anel svg { width: 100%; height: 100%; display: block; }
+.meta-anel .anel-fundo { stroke: rgba(128, 128, 128, 0.25); }
+.meta-anel .anel-valor { stroke: var(--accent); animation: meta-anel-entra 0.9s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.meta-pct { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.05rem; }
+.meta-texto { min-width: 0; flex: 1; }
+.meta-titulo { font-weight: 600; line-height: 1.25; }
+.meta-titulo i { color: var(--accent); }
+.meta-selo { font-size: 0.7rem; font-weight: 700; padding: 1px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
+.meta-atual { font-size: 0.85rem; margin-top: 0.2rem; }
+.meta-prazo.atrasada { color: #dc2626; font-weight: 600; }
+.meta-acoes { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; }
+.meta-acoes form { margin: 0; }
+.meta-form { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: flex-end; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color); }
+.meta-form-campo { flex: 1 1 150px; min-width: 0; }
+.meta-form-campo .form-control, .meta-form-campo .form-select { width: 100%; }
+@keyframes meta-anel-entra { from { stroke-dasharray: 0 100; } }
+@media (prefers-reduced-motion: reduce) { .meta-anel .anel-valor { animation: none; } }
+@media (max-width: 575.98px) {
+    .metas-grade { grid-template-columns: 1fr; }
+    .meta-anel { width: 80px; height: 80px; }
+    .meta-salvar { width: 100%; }
+}
+/* METAS: fim */

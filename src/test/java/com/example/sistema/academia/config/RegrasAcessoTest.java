@@ -233,4 +233,15 @@ class RegrasAcessoTest {
         assertFalse(RegrasAcesso.permitido("PROFESSOR", "/alunos/7/visao-360/../excluir"));
         assertTrue(RegrasAcesso.visitantePode("GET", "/alunos/7/visao-360"));
     }
+
+    @Test
+    void metasSoOAlunoMexeEVisitanteNaoGrava() {
+        assertTrue(RegrasAcesso.permitido("ALUNO", "/aluno/metas/salvar"));
+        assertTrue(RegrasAcesso.permitido("ALUNO", "/aluno/metas/3/remover"));
+        assertFalse(RegrasAcesso.permitido("ADMIN", "/aluno/metas/salvar"));
+        assertFalse(RegrasAcesso.permitido("PROFESSOR", "/aluno/metas/3/remover"));
+        assertFalse(RegrasAcesso.permitido(null, "/aluno/metas/salvar"));
+        assertFalse(RegrasAcesso.visitantePode("POST", "/aluno/metas/salvar"));
+        assertFalse(RegrasAcesso.visitantePode("POST", "/aluno/metas/3/remover"));
+    }
 }

@@ -88,6 +88,32 @@ public class VisitanteService {
     }
     // MURAL: fim
 
+    // METAS: início
+    @Autowired private com.example.sistema.academia.repository.MetaAlunoRepository metaAlunoRepository;
+
+    /** Três metas de exemplo para a Ana, só com o modo visitante ligado e a tabela de metas vazia. */
+    @Transactional
+    public void criarMetasDeExemplo() {
+        if (!habilitado || metaAlunoRepository.count() > 0) return;
+        Aluno ana = alunoExemplo().orElse(null);
+        if (ana == null) return;
+        LocalDate hoje = LocalDate.now();
+        metaAlunoRepository.save(metaExemplo(ana, com.example.sistema.academia.model.MetaAluno.TREINOS_SEMANA, 4, hoje.plusDays(30)));
+        metaAlunoRepository.save(metaExemplo(ana, com.example.sistema.academia.model.MetaAluno.PESO, 62, hoje.plusDays(60)));
+        metaAlunoRepository.save(metaExemplo(ana, com.example.sistema.academia.model.MetaAluno.GORDURA, 22, null));
+    }
+
+    private com.example.sistema.academia.model.MetaAluno metaExemplo(Aluno aluno, String tipo, double alvo, LocalDate prazo) {
+        com.example.sistema.academia.model.MetaAluno m = new com.example.sistema.academia.model.MetaAluno();
+        m.setAluno(aluno);
+        m.setTipo(tipo);
+        m.setAlvo(alvo);
+        m.setCriadaEm(LocalDate.now());
+        m.setPrazo(prazo);
+        return m;
+    }
+    // METAS: fim
+
     private static final String SUFIXO_EXEMPLO = "@exemplo.gymsync";
     /** A ficha da Ana é criada sempre "hoje - 20 dias": serve de marcador para saber quanto os dados envelheceram. */
     private static final int DIAS_FICHA_ANA = 20;
@@ -97,6 +123,7 @@ public class VisitanteService {
     public void aoSubir() {
         criarDadosDeExemplo();
         criarMuralDeExemplo(); // MURAL
+        criarMetasDeExemplo(); // METAS
         completarCamposNovos();
         renovarDatas();
     }
