@@ -4,7 +4,7 @@ Sistema web de gestão de academias feito em **Java com Spring Boot**: cadastros
 
 Desenvolvi este sistema para um trabalho acadêmico do curso de Análise e Desenvolvimento de Sistemas: modelagem, regras de negócio, back-end, telas e testes.
 
-**Experimente agora:** [gymsync-ucfj.onrender.com](https://gymsync-ucfj.onrender.com), com o botão "Testar como visitante" (dados de exemplo, só leitura). O site roda em plano gratuito e dorme sem uso, então a primeira visita pode levar cerca de um minuto para abrir.
+**Versão publicada:** [gymsync-ucfj.onrender.com](https://gymsync-ucfj.onrender.com), com o botão "Testar como visitante" (dados de exemplo, só leitura). Ela roda em plano gratuito (dorme sem uso e a primeira visita pode levar cerca de um minuto) e pode estar desatualizada em relação a este código: a versão de entrega é a que está nesta pasta.
 
 https://github.com/user-attachments/assets/6e4983c2-15bf-4e2f-ae1a-8074b9f34598
 
@@ -27,12 +27,12 @@ https://github.com/user-attachments/assets/6e4983c2-15bf-4e2f-ae1a-8074b9f34598
 - **Mapa do corpo na avaliação física.** Silhueta masculina ou feminina com as medidas por região (ombro, peito, abdômen, cintura, quadril, braço, antebraço, coxa e panturrilha) e a variação desde a primeira avaliação, com a legenda separada por grupo (melhorou, estável, sem cor).
 - **Reserva de aula em grade semanal**, com **lista de espera** nas aulas lotadas (o aluno é avisado no sininho quando abre vaga) e **presença** marcada pelo professor, com relatório de faltas.
 - **Modo treino** no celular: um exercício por vez, séries marcadas e cronômetro de descanso (no visitante não grava), mais os **recordes de carga** do aluno com gráfico.
-- **Acompanhamento do aluno:** conquistas, metas com anel de progresso e, para admin e professor, a **visão 360°** do aluno com linha do tempo (o professor só abre os próprios alunos).
+- **Acompanhamento do aluno:** conquistas, metas com anel de progresso e, para admin e professor, a **visão 360°** do aluno com linha do tempo (o professor abre os alunos com quem tem ficha ou conversa).
 - **Mural de avisos da academia**, publicado pelo administrador e mostrado no sininho e na tela inicial.
 - **Identidade da academia:** o administrador escolhe a cor de destaque e a logo, e o sistema inteiro muda na hora.
 - **Pagamento simulado com Pix em QR** e copia-e-cola, e **recibo** das mensalidades pagas.
 - **Mais ferramentas do dia a dia:** sininho de notificações por perfil, busca rápida com Ctrl+K, tour de dicas na primeira entrada, "Melhor horário para treinar" para o aluno, simulador de faturamento para o administrador e relatório com botão "Baixar PDF".
-- **Professor só vê os próprios alunos.**
+- **O professor vê os alunos com quem tem ficha ou conversa** (fichas, avaliações, entradas, mapa do corpo e visão 360°).
 
 ## Telas
 
@@ -119,16 +119,24 @@ cd GymSync
 
 1. Em `src/main/resources`, copie `application.properties.example` para `application.properties` e coloque a senha do seu MySQL em `spring.datasource.password`.
 2. Rode:
-   - Windows: `.\mvnw.cmd spring-boot:run`
-   - Linux/macOS: `./mvnw spring-boot:run`
+   - Windows (PowerShell): `.\mvnw.cmd spring-boot:run`
+   - Linux/macOS: `sh mvnw spring-boot:run`
 3. Abra `http://localhost:8080` quando aparecer `Started SistemaAcademiaApplication`.
 
 **Acesso de teste:** administrador `admin` / `123`. Professores e alunos entram com o CPF ou e-mail cadastrado pelo administrador e a senha inicial `123`. Para cadastrar, use CPFs válidos (o sistema confere os dígitos).
 
 **Testes** (não precisam do banco):
 
+Windows (PowerShell):
+
+```powershell
+.\mvnw.cmd test "-Dtest=!SistemaAcademiaApplicationTests"
+```
+
+Linux/macOS (bash; as aspas evitam que o `!` seja interpretado):
+
 ```bash
-./mvnw test -Dtest=!SistemaAcademiaApplicationTests
+sh mvnw test "-Dtest=!SistemaAcademiaApplicationTests"
 ```
 
 São 326 testes; não precisam do banco. `SistemaAcademiaApplicationTests` precisa do MySQL ligado e fica de fora.
