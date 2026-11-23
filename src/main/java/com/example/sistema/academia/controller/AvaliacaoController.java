@@ -19,6 +19,7 @@ public class AvaliacaoController {
 
     @Autowired private AlunoRepository alunoRepository;
     @Autowired private AvaliacaoFisicaRepository avaliacaoFisicaRepository;
+    @Autowired private com.example.sistema.academia.service.AlunosDoProfessorService alunosDoProfessor;
 
     private boolean medidaInvalida(Double valor, double maximo) {
         return valor != null && (valor <= 0 || valor > maximo);
@@ -49,7 +50,12 @@ public class AvaliacaoController {
             redirect.addFlashAttribute("erro", "Selecione o aluno.");
             return "redirect:/";
         }
-        if (dataAvaliacao.isAfter(LocalDate.now()) || peso <= 0 || peso > 500
+        if ("PROFESSOR".equals(session.getAttribute("perfil"))
+                && !alunosDoProfessor.ids((Long) session.getAttribute("usuarioId")).contains(aluno.getId())) {
+            redirect.addFlashAttribute("erro", "Você só pode lançar avaliação de alunos com quem tem ficha ou conversa.");
+            return "redirect:/";
+        }
+        if (dataAvaliacao.isAfter(LocalDate.now()) || dataAvaliacao.getYear() < 2000 || peso <= 0 || peso > 500
                 || medidaInvalida(altura, 3) || medidaInvalida(percentualGordura, 80)
                 || medidaInvalida(cintura, 300) || medidaInvalida(abdomen, 300) || medidaInvalida(quadril, 300) || medidaInvalida(peito, 300)
                 || medidaInvalida(braco, 150) || medidaInvalida(coxa, 200)

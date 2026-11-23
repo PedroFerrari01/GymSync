@@ -32,7 +32,7 @@ public class SenhaService {
     }
 
     public int tamanhoMinimo() {
-        return fortes ? 8 : 4;
+        return fortes ? 8 : 3;
     }
 
     /** Mensagem de erro se a senha nova não serve, ou null se está boa. */

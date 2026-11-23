@@ -17,9 +17,10 @@ class SenhaServiceTest {
     @Test
     void desenvolvimentoContinuaComoAntes() {
         assertEquals("123", desenvolvimento.provisoria());
-        assertEquals(4, desenvolvimento.tamanhoMinimo());
+        assertEquals(3, desenvolvimento.tamanhoMinimo());
         assertNull(desenvolvimento.validarNova("1234"));
-        assertNotNull(desenvolvimento.validarNova("123"));
+        assertNull(desenvolvimento.validarNova("123"));
+        assertNotNull(desenvolvimento.validarNova("12"));
         assertTrue(desenvolvimento.aceitaSenhaVaziaComo123());
     }
 

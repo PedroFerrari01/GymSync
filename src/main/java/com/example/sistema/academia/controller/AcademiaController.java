@@ -270,8 +270,9 @@ public class AcademiaController {
                     .filter(ex -> ex.getTreino() != null && idsMeusTreinos.contains(ex.getTreino().getId())).toList());
             model.addAttribute("entradas", entradasMeus);
             model.addAttribute("entradasRecentes", entradasMeus.stream().limit(30).toList());
-            model.addAttribute("avaliacoes", avaliacaoFisicaRepository.findAllByOrderByDataAvaliacaoDescIdDesc().stream()
-                    .filter(av -> av.getAluno() != null && meus.contains(av.getAluno().getId())).toList());
+            List<AvaliacaoFisica> avaliacoesMeus = com.example.sistema.academia.service.AlunosDoProfessorService.apenasDeles(todasAvaliacoes, meus);
+            model.addAttribute("avaliacoes", avaliacoesMeus);
+            model.addAttribute("mapasCorpo", evolucaoService.mapasCorpo(avaliacoesMeus));
             model.addAttribute("ultimosRegistros", ultimosRegistros(todosRegistros.stream()
                     .filter(r -> r.getAluno() != null && meus.contains(r.getAluno().getId())).toList()));
             model.addAttribute("linksWhatsapp", meusLinks);

@@ -25,6 +25,13 @@ public class AlunosDoProfessorService {
         this.mensagemRepository = mensagemRepository;
     }
 
+    /** Só as avaliações dos alunos do professor (usado para o mapa do corpo, dado de saúde). */
+    public static java.util.List<com.example.sistema.academia.model.AvaliacaoFisica> apenasDeles(
+            java.util.List<com.example.sistema.academia.model.AvaliacaoFisica> todas, Set<Long> alunoIds) {
+        return todas.stream()
+                .filter(av -> av.getAluno() != null && alunoIds.contains(av.getAluno().getId())).toList();
+    }
+
     public Set<Long> ids(Long professorId) {
         Set<Long> ids = new HashSet<>();
         if (professorId == null) return ids;

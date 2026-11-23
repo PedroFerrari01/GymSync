@@ -44,6 +44,21 @@ class AlunosDoProfessorServiceTest {
     }
 
     @Test
+    void mapaDoCorpoSoComAvaliacoesDosAlunosDoProfessor() {
+        com.example.sistema.academia.model.AvaliacaoFisica meu = new com.example.sistema.academia.model.AvaliacaoFisica();
+        meu.setAluno(aluno(1));
+        com.example.sistema.academia.model.AvaliacaoFisica alheio = new com.example.sistema.academia.model.AvaliacaoFisica();
+        alheio.setAluno(aluno(9));
+        com.example.sistema.academia.model.AvaliacaoFisica semAluno = new com.example.sistema.academia.model.AvaliacaoFisica();
+
+        List<com.example.sistema.academia.model.AvaliacaoFisica> r =
+                AlunosDoProfessorService.apenasDeles(List.of(meu, alheio, semAluno), Set.of(1L));
+
+        assertEquals(List.of(meu), r);
+        assertTrue(AlunosDoProfessorService.apenasDeles(List.of(alheio), Set.of()).isEmpty());
+    }
+
+    @Test
     void professorSemFichaNemConversaNaoVeNinguem() {
         TreinoRepository treinos = mock(TreinoRepository.class);
         MensagemRepository mensagens = mock(MensagemRepository.class);

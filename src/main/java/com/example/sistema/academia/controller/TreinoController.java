@@ -141,6 +141,10 @@ public class TreinoController {
         if (t == null) {
             return "redirect:/";
         }
+        if (!podeEditar(session, t.getProfessor())) {
+            redirect.addFlashAttribute("erro", "Você só pode enviar fichas feitas por você.");
+            return "redirect:/";
+        }
         String destino = t.getAluno().getEmail();
         if (!emailService.configurado()) {
             redirect.addFlashAttribute("erro", "O envio de e-mail ainda não foi configurado no application.properties.");
@@ -171,6 +175,10 @@ public class TreinoController {
         Treino t = treinoRepository.findById(treinoId).orElse(null);
         if (t == null || !podeEditar(session, t.getProfessor())) {
             redirect.addFlashAttribute("erro", "Você não tem permissão para alterar esta ficha.");
+            return "redirect:/";
+        }
+        if (exercicio.isBlank() || exercicio.trim().length() > 120 || series < 1 || repeticoes < 1) {
+            redirect.addFlashAttribute("erro", "Preencha o exercício (até 120 caracteres) com séries e repetições válidas.");
             return "redirect:/";
         }
         ExercicioTreino ex = new ExercicioTreino();
