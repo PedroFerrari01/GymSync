@@ -15,6 +15,23 @@ import org.junit.jupiter.api.Test;
 class RegrasAcessoTest {
 
     @Test
+    void identidadeDaAcademiaLogoPublicaEAlteracaoSoDoAdmin() {
+        // A tela de login precisa da logo e do CSS da cor, sem sessão
+        assertTrue(RegrasAcesso.permitido(null, "/marca/logo"));
+        assertTrue(RegrasAcesso.permitido(null, "/marca/tema.css"));
+        // Quem altera é só o admin
+        assertTrue(RegrasAcesso.permitido("ADMIN", "/marca/salvar"));
+        assertTrue(RegrasAcesso.permitido("ADMIN", "/marca/restaurar"));
+        for (String perfil : new String[]{"PROFESSOR", "ALUNO", null}) {
+            assertFalse(RegrasAcesso.permitido(perfil, "/marca/salvar"), String.valueOf(perfil));
+            assertFalse(RegrasAcesso.permitido(perfil, "/marca/restaurar"), String.valueOf(perfil));
+        }
+        // Visitante só olha: não envia o formulário
+        assertFalse(RegrasAcesso.visitantePode("POST", "/marca/salvar"));
+        assertFalse(RegrasAcesso.visitantePode("POST", "/marca/restaurar"));
+    }
+
+    @Test
     void semLoginSoAcessaRotasPublicas() {
         assertTrue(RegrasAcesso.permitido(null, "/"));
         assertTrue(RegrasAcesso.permitido(null, "/login"));

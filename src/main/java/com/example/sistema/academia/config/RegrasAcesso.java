@@ -21,6 +21,8 @@ public final class RegrasAcesso {
                 || caminho.equals("/robots.txt")
                 || caminho.equals("/sitemap.xml")
                 || caminho.equals("/privacidade")
+                || caminho.equals("/marca/logo")      // logo e CSS da identidade da academia: a tela de login usa
+                || caminho.equals("/marca/tema.css")
                 || caminho.startsWith("/css/")
                 || caminho.startsWith("/js/")
                 || caminho.startsWith("/img/")

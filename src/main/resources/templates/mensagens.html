@@ -9,14 +9,15 @@
     <link rel="stylesheet" th:href="@{/vendor/phosphor/regular/style.css}">
     <link rel="stylesheet" th:href="@{/css/gymsync.css}">
     <link rel="stylesheet" th:href="@{/css/gymsync-tema.css}">
+    <!--/* MARCA: início */--><link th:if="${@marca.temCor()}" rel="stylesheet" th:href="@{/marca/tema.css(v=${@marca.versao()})}"><!--/* MARCA: fim */-->
     <link rel="icon" type="image/png" th:href="@{/img/favicon.png}">
 </head>
 <body>
 
 <header class="topbar">
     <a href="/" class="brand-box border-0 m-0 p-0">
-        <span class="brand-logo"><img th:src="@{/img/logo-simbolo-fundo-escuro.png}" class="logo-fundo-escuro" alt="GymSync" height="48"><img th:src="@{/img/logo-simbolo-fundo-claro.png}" class="logo-fundo-claro" alt="GymSync" height="48"></span>
-        <div><span class="brand-title">GymSync</span><span class="brand-sub">Mensagens</span></div>
+        <span class="brand-logo"><img th:if="${@marca.temLogo()}" th:src="@{/marca/logo(v=${@marca.versao()})}" th:classappend="${@marca.logoClara()} ? 'sobre-escuro'" class="logo-marca" alt="Logo da academia"><img th:unless="${@marca.temLogo()}" th:src="@{/img/logo-simbolo-fundo-escuro.png}" class="logo-fundo-escuro" alt="GymSync" height="48"><img th:unless="${@marca.temLogo()}" th:src="@{/img/logo-simbolo-fundo-claro.png}" class="logo-fundo-claro" alt="GymSync" height="48"></span>
+        <div><span class="brand-title" th:text="${@marca.temNome()} ? ${@marca.nomePersonalizado()} : 'GymSync'">GymSync</span><span class="brand-sub">Mensagens</span></div>
     </a>
     <div class="d-flex align-items-center gap-2">
         <a href="/" class="btn-theme"><i class="bi bi-arrow-left"></i> Voltar</a>

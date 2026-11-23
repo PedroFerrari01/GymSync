@@ -2163,3 +2163,41 @@ body.mt-aberto { overflow: hidden; }
 .aula-card.est-fila .aula-fila { color: var(--text-primary); }
 .aula-fila-total { display: flex; align-items: center; gap: 4px; color: var(--text-secondary); font-size: .72rem; }
 /* ESPERA: fim */
+
+/* ===== MARCA (identidade da academia): início ===== */
+/* Logo enviada pelo admin: sempre sobre um quadro claro e neutro, para servir a logos claras e escuras. */
+.brand-logo img.logo-marca,
+.login-logo img.logo-marca {
+    background: #f4f4f5;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 10px;
+    object-fit: contain;
+    padding: 4px;
+}
+.brand-logo img.logo-marca.sobre-escuro,
+.login-logo img.logo-marca.sobre-escuro { background: #18181f; border-color: rgba(255, 255, 255, 0.22); }
+.id-logo-quadro.sobre-escuro { background: #18181f; }
+.brand-logo img.logo-marca { height: 48px; width: auto; max-width: 120px; }
+.login-logo img.logo-marca { height: 120px; width: auto; max-width: min(100%, 320px); padding: 10px; animation: none; }
+@media (max-width: 576px) { .login-logo img.logo-marca { height: 96px; } }
+
+/* Card "Identidade da academia" (aba Planos & Financeiro) */
+.identidade-cores { display: flex; flex-wrap: wrap; gap: 10px; }
+.id-cor { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; margin: 0; }
+.id-cor input { position: absolute; opacity: 0; inset: 0; width: 100%; height: 100%; cursor: pointer; margin: 0; }
+.id-cor > span { width: 40px; height: 40px; border-radius: 50%; background: var(--c); border: 2px solid var(--border-color); transition: transform 0.15s, box-shadow 0.15s; }
+.id-cor small { font-size: 0.7rem; color: var(--text-secondary); }
+.id-cor:hover > span { transform: scale(1.08); }
+.id-cor input:checked + span { box-shadow: 0 0 0 3px var(--bg-card), 0 0 0 5px var(--c); }
+.id-cor input:focus-visible + span { outline: 2px solid var(--text-primary); outline-offset: 3px; }
+.id-cor-seletor { width: 52px; min-width: 52px; padding: 4px; height: 40px; }
+.id-cor-texto { max-width: 140px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; text-transform: lowercase; }
+.identidade-previa { --previa: #f97316; display: flex; flex-wrap: wrap; align-items: center; gap: 14px; padding: 12px 14px; border: 1px dashed var(--border-color); border-radius: 10px; }
+.id-previa-botao { background: var(--previa); color: #fff; font-weight: 700; padding: 6px 16px; border-radius: 8px; text-shadow: 0 0 1px rgba(0,0,0,.35); }
+.id-previa-link { color: var(--previa); font-weight: 600; filter: brightness(1.15); }
+.id-previa-barra { width: 90px; height: 8px; border-radius: 999px; background: var(--border-color); overflow: hidden; }
+.id-previa-barra i { display: block; width: 65%; height: 100%; background: var(--previa); }
+.id-logo-quadro { flex: 0 0 auto; width: 96px; height: 72px; display: flex; align-items: center; justify-content: center; background: #f4f4f5; border: 1px solid var(--border-color); border-radius: 10px; padding: 6px; }
+.id-logo-previa { max-width: 100%; max-height: 100%; object-fit: contain; }
+@media (max-width: 576px) { .id-cor > span { width: 36px; height: 36px; } }
+/* ===== MARCA: fim ===== */

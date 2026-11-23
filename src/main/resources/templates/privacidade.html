@@ -8,6 +8,7 @@
     <link rel="stylesheet" th:href="@{/vendor/bootstrap-icons/bootstrap-icons.min.css}">
     <link rel="stylesheet" th:href="@{/css/gymsync.css}">
     <link rel="stylesheet" th:href="@{/css/gymsync-tema.css}">
+    <!--/* MARCA: início */--><link th:if="${@marca.temCor()}" rel="stylesheet" th:href="@{/marca/tema.css(v=${@marca.versao()})}"><!--/* MARCA: fim */-->
     <link rel="icon" type="image/png" th:href="@{/img/favicon.png}">
 </head>
 <body>

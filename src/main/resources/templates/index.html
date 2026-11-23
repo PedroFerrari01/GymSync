@@ -23,6 +23,7 @@
     <link rel="stylesheet" th:href="@{/vendor/phosphor/regular/style.css}">
     <link rel="stylesheet" th:href="@{/css/gymsync.css}">
     <link rel="stylesheet" th:href="@{/css/gymsync-tema.css}">
+    <!--/* MARCA: início */--><link th:if="${@marca.temCor()}" rel="stylesheet" th:href="@{/marca/tema.css(v=${@marca.versao()})}"><!--/* MARCA: fim */-->
     <link rel="icon" type="image/png" th:href="@{/img/favicon.png}">
     <link rel="manifest" th:href="@{/manifest.json}">
     <link rel="apple-touch-icon" th:href="@{/img/app/icone-180.png}">
@@ -51,7 +52,7 @@
     </div>
 
     <div class="login-card">
-        <div class="login-logo"><img th:src="@{/img/logo-completo-fundo-escuro.png}" class="logo-fundo-escuro" alt="GymSync - Sistema de Gestão" height="150"><img th:src="@{/img/logo-completo-fundo-claro.png}" class="logo-fundo-claro" alt="GymSync - Sistema de Gestão" height="150"></div>
+        <div class="login-logo"><img th:if="${@marca.temLogo()}" th:src="@{/marca/logo(v=${@marca.versao()})}" th:classappend="${@marca.logoClara()} ? 'sobre-escuro'" class="logo-marca" alt="Logo da academia"><img th:unless="${@marca.temLogo()}" th:src="@{/img/logo-completo-fundo-escuro.png}" class="logo-fundo-escuro" alt="GymSync - Sistema de Gestão" height="150"><img th:unless="${@marca.temLogo()}" th:src="@{/img/logo-completo-fundo-claro.png}" class="logo-fundo-claro" alt="GymSync - Sistema de Gestão" height="150"></div>
 
         <div th:if="${erroLogin}" class="alert alert-danger py-2 small rounded-3 border-0 mb-3">
             <i class="bi bi-exclamation-circle-fill me-1"></i><span th:text="${erroLogin}"></span>
@@ -387,8 +388,8 @@
     <aside class="sidebar" role="navigation" id="menuLateral">
         <button type="button" class="menu-fechar d-lg-none" id="btnFecharMenu" aria-label="Fechar menu"><i class="bi bi-x-lg"></i></button>
         <a href="/" class="brand-box">
-            <span class="brand-logo"><img th:src="@{/img/logo-simbolo-fundo-escuro.png}" class="logo-fundo-escuro" alt="GymSync" height="48"><img th:src="@{/img/logo-simbolo-fundo-claro.png}" class="logo-fundo-claro" alt="GymSync" height="48"></span>
-            <div><span class="brand-title">GymSync</span><span class="brand-sub">Gestão Fitness</span></div>
+            <span class="brand-logo"><img th:if="${@marca.temLogo()}" th:src="@{/marca/logo(v=${@marca.versao()})}" th:classappend="${@marca.logoClara()} ? 'sobre-escuro'" class="logo-marca" alt="Logo da academia"><img th:unless="${@marca.temLogo()}" th:src="@{/img/logo-simbolo-fundo-escuro.png}" class="logo-fundo-escuro" alt="GymSync" height="48"><img th:unless="${@marca.temLogo()}" th:src="@{/img/logo-simbolo-fundo-claro.png}" class="logo-fundo-claro" alt="GymSync" height="48"></span>
+            <div><span class="brand-title" th:text="${@marca.temNome()} ? ${@marca.nomePersonalizado()} : 'GymSync'">GymSync</span><span class="brand-sub">Gestão Fitness</span></div>
         </a>
 
         <div class="nav nav-menu" id="menuAbas" role="tablist">
@@ -1122,6 +1123,7 @@
                                 <div th:if="${#lists.isEmpty(planos)}" class="vazio">Nenhum plano cadastrado ainda.</div>
                             </div>
                         </div>
+                        <!--/* MARCA identidade: início */--><div class="col-12" th:replace="~{fragments/identidade :: card}"></div><!--/* MARCA identidade: fim */-->
                     </div>
                 </div>
 
@@ -1622,6 +1624,7 @@
 <script th:if="${logado}" type="module" th:src="@{/js/mapa-corpo.js}"></script>
     <!--/* Formulários do painel: abrem em modal (o painel fica só para olhar) */-->
 <script th:src="@{/js/simulador.js}" th:if="${perfil == 'ADMIN'}"></script>
+<script th:src="@{/js/marca.js}" th:if="${perfil == 'ADMIN'}"></script>
 <script th:src="@{/js/visao360.js}" th:if="${perfil == 'ADMIN' or perfil == 'PROFESSOR'}"></script>
     <div class="modal fade" id="modalCatraca" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
