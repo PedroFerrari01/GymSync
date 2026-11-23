@@ -88,6 +88,77 @@ public class VisitanteService {
     }
     // MURAL: fim
 
+    // ESPERA: início
+    @Autowired private EsperaAulaRepository esperaAulaRepository;
+
+    /**
+     * Duas aulas lotadas nos próximos dias para o visitante ver a lista de espera: na "Boxe" o Bruno está na fila e a Ana
+     * pode entrar; no "Pilates" a Ana já está na posição 2. Só recria quando não há fila de exemplo vigente
+     * (as datas envelhecem) e nunca mexe em fila de aluno que não seja de exemplo.
+     */
+    @Transactional
+    public void criarEsperaDeExemplo() {
+        if (!habilitado) return;
+        LocalDate hoje = LocalDate.now();
+        Aluno ana = alunoPorEmail(EMAIL_ALUNO), bruno = alunoPorEmail(EMAIL_BRUNO);
+        Aluno diego = alunoPorEmail("diego.alves@exemplo.gymsync"), felipe = alunoPorEmail("felipe.costa@exemplo.gymsync");
+        Professor carla = professorRepository.findFirstByCpfOrEmailIgnoreCase("carla.nunes@exemplo.gymsync", "carla.nunes@exemplo.gymsync").orElse(null);
+        if (ana == null || bruno == null || diego == null || felipe == null || carla == null) return;
+        List<EsperaAula> existentes = esperaAulaRepository.findAll();
+        if (existentes.stream().anyMatch(e -> !e.getDataAula().isBefore(hoje))) return; // já há fila vigente
+        if (existentes.stream().anyMatch(e -> !e.getAluno().getEmail().toLowerCase().endsWith(SUFIXO_EXEMPLO))) return;
+        esperaAulaRepository.deleteAll(existentes);
+
+        AulaColetiva boxe = aulaDeEspera("Boxe", carla, hoje.plusDays(1), LocalTime.of(19, 0));
+        AulaColetiva pilates = aulaDeEspera("Pilates", carla, hoje.plusDays(2), LocalTime.of(20, 0));
+        for (AulaColetiva a : List.of(boxe, pilates)) { // reservas velhas dos alunos de exemplo nestas duas aulas
+            for (ReservaAula r : reservaAulaRepository.findByAulaId(a.getId())) {
+                if (r.getAluno().getEmail() != null && r.getAluno().getEmail().toLowerCase().endsWith(SUFIXO_EXEMPLO)) reservaAulaRepository.delete(r);
+            }
+        }
+        lotar(boxe, hoje.plusDays(1), diego, felipe);
+        lotar(pilates, hoje.plusDays(2), diego, felipe);
+        entrarNaFila(boxe, hoje.plusDays(1), bruno);
+        entrarNaFila(pilates, hoje.plusDays(2), bruno);
+        entrarNaFila(pilates, hoje.plusDays(2), ana);
+    }
+
+    private Aluno alunoPorEmail(String email) {
+        return alunoRepository.findFirstByCpfOrEmailIgnoreCase(email, email).orElse(null);
+    }
+
+    private AulaColetiva aulaDeEspera(String nome, Professor professor, LocalDate data, LocalTime horario) {
+        AulaColetiva a = aulaColetivaRepository.findAll().stream().filter(x -> nome.equals(x.getNome())).findFirst().orElseGet(AulaColetiva::new);
+        a.setNome(nome);
+        a.setProfessor(a.getProfessor() != null ? a.getProfessor() : professor);
+        a.setDiaSemana(data.getDayOfWeek());
+        a.setHorario(horario);
+        a.setVagas(2);
+        return aulaColetivaRepository.save(a);
+    }
+
+    /** Deixa a aula lotada naquela data (reservas dos alunos de exemplo; não apaga nem repete reserva). */
+    private void lotar(AulaColetiva aula, LocalDate data, Aluno... alunos) {
+        for (Aluno al : alunos) {
+            if (reservaAulaRepository.findFirstByAulaIdAndAlunoIdAndDataAula(aula.getId(), al.getId(), data).isPresent()) continue;
+            ReservaAula r = new ReservaAula();
+            r.setAula(aula);
+            r.setAluno(al);
+            r.setDataAula(data);
+            reservaAulaRepository.save(r);
+        }
+    }
+
+    private void entrarNaFila(AulaColetiva aula, LocalDate data, Aluno aluno) {
+        EsperaAula e = new EsperaAula();
+        e.setAula(aula);
+        e.setAluno(aluno);
+        e.setDataAula(data);
+        e.setCriadaEm(java.time.LocalDateTime.now());
+        esperaAulaRepository.save(e);
+    }
+    // ESPERA: fim
+
     private static final String SUFIXO_EXEMPLO = "@exemplo.gymsync";
     /** A ficha da Ana é criada sempre "hoje - 20 dias": serve de marcador para saber quanto os dados envelheceram. */
     private static final int DIAS_FICHA_ANA = 20;
@@ -99,6 +170,7 @@ public class VisitanteService {
         criarMuralDeExemplo(); // MURAL
         completarCamposNovos();
         renovarDatas();
+        criarEsperaDeExemplo(); // ESPERA (depois de renovar: tem datas próprias)
     }
 
     // Valores de exemplo dos campos que vieram depois (na ordem das avaliações, da mais antiga para a mais nova):

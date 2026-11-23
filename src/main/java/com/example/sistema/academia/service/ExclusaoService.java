@@ -27,6 +27,7 @@ public class ExclusaoService {
     @Autowired private EquipamentoRepository equipamentoRepository;
     @Autowired private EquipamentoImagemRepository equipamentoImagemRepository;
     @Autowired private ManutencaoRepository manutencaoRepository;
+    @Autowired private EsperaAulaRepository esperaAulaRepository; // ESPERA
 
     @Transactional
     public void excluirExercicio(Long id) {
@@ -43,12 +44,14 @@ public class ExclusaoService {
 
     @Transactional
     public void excluirAula(Long id) {
+        esperaAulaRepository.deleteAll(esperaAulaRepository.findByAulaId(id)); // ESPERA
         reservaAulaRepository.deleteAll(reservaAulaRepository.findByAulaId(id));
         aulaColetivaRepository.deleteById(id);
     }
 
     @Transactional
     public void excluirAluno(Long id) {
+        esperaAulaRepository.deleteAll(esperaAulaRepository.findByAlunoId(id)); // ESPERA
         entradaRepository.deleteAll(entradaRepository.findByAlunoId(id));
         registroExercicioRepository.deleteAll(registroExercicioRepository.findByAlunoId(id));
         exercicioTreinoRepository.deleteAll(exercicioTreinoRepository.findByTreinoAlunoId(id));
@@ -65,6 +68,7 @@ public class ExclusaoService {
     public void excluirProfessor(Long id) {
         mensagemRepository.deleteAll(mensagemRepository.findByProfessorId(id));
         for (AulaColetiva aula : aulaColetivaRepository.findByProfessorId(id)) {
+            esperaAulaRepository.deleteAll(esperaAulaRepository.findByAulaId(aula.getId())); // ESPERA
             reservaAulaRepository.deleteAll(reservaAulaRepository.findByAulaId(aula.getId()));
             aulaColetivaRepository.delete(aula);
         }

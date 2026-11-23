@@ -28,6 +28,7 @@ public class AulaController {
     @Autowired private MatriculaRepository matriculaRepository;
     @Autowired private AulaService aulaService;
     @Autowired private ExclusaoService exclusaoService;
+    @Autowired private com.example.sistema.academia.service.EsperaService esperaService; // ESPERA
 
     @PostMapping("/aulas/salvar")
     public String salvar(@RequestParam String nome,
@@ -107,6 +108,7 @@ public class AulaController {
         reserva.setAluno(aluno);
         reserva.setDataAula(data);
         reservaAulaRepository.save(reserva);
+        esperaService.aoReservar(id, alunoId, data); // ESPERA: quem reservou sai da fila
         redirect.addFlashAttribute("sucesso", "Vaga reservada em " + aula.getNome() + "!");
         return volta;
     }
@@ -125,7 +127,9 @@ public class AulaController {
             redirect.addFlashAttribute("erro", "Aula que já passou não pode ser cancelada.");
             return voltaGrade(pedida);
         }
+        boolean tinha = reservaAulaRepository.findFirstByAulaIdAndAlunoIdAndDataAula(id, alunoId, data).isPresent();
         reservaAulaRepository.findFirstByAulaIdAndAlunoIdAndDataAula(id, alunoId, data).ifPresent(reservaAulaRepository::delete);
+        if (tinha) esperaService.aoCancelarReserva(aula, data); // ESPERA: abriu vaga, avisa o primeiro da fila
         redirect.addFlashAttribute("sucesso", "Reserva cancelada.");
         return voltaGrade(pedida);
     }
