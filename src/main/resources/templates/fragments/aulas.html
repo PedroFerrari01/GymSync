@@ -164,7 +164,17 @@
         <input type="hidden" name="data" th:value="${c.data}">
         <button type="submit" class="aula-card est-aberta" title="Reservar vaga"><th:block th:replace="~{fragments/aulas :: cartaoConteudo(${c})}"></th:block></button>
     </form>
-    <div th:if="${perfil != 'ALUNO' or (c.estado != 'RESERVADA' and c.estado != 'ABERTA')}" class="aula-card"
+    <!--/* ESPERA: início */-->
+    <form th:if="${perfil == 'ALUNO' and c.estado == 'LOTADA' and esperaPos[''+c.aula.id+'|'+c.data.toString()] != null}" th:action="@{/aulas/espera/sair/{id}(id=${c.aula.id})}" method="post" class="grade-form" data-confirm="Sair da lista de espera?">
+        <input type="hidden" name="data" th:value="${c.data}">
+        <button type="submit" class="aula-card est-lotada est-fila" title="Sair da lista de espera"><th:block th:replace="~{fragments/aulas :: cartaoConteudo(${c})}"></th:block></button>
+    </form>
+    <form th:if="${perfil == 'ALUNO' and c.estado == 'LOTADA' and esperaPos[''+c.aula.id+'|'+c.data.toString()] == null}" th:action="@{/aulas/espera/entrar/{id}(id=${c.aula.id})}" method="post" class="grade-form">
+        <input type="hidden" name="data" th:value="${c.data}">
+        <button type="submit" class="aula-card est-lotada est-entrar" title="Entrar na lista de espera"><th:block th:replace="~{fragments/aulas :: cartaoConteudo(${c})}"></th:block></button>
+    </form>
+    <!--/* ESPERA: fim */-->
+    <div th:if="${perfil != 'ALUNO' or (c.estado != 'RESERVADA' and c.estado != 'ABERTA' and c.estado != 'LOTADA')}" class="aula-card"
          th:classappend="${c.estado == 'LOTADA' ? 'est-lotada' : (c.estado == 'PASSOU' ? 'est-passou' : (c.estado == 'RESERVADA' ? 'est-reservada' : 'est-aberta'))}">
         <th:block th:replace="~{fragments/aulas :: cartaoConteudo(${c})}"></th:block>
     </div>
@@ -181,5 +191,13 @@
         <span class="aula-estado" th:if="${c.estado == 'ABERTA' or c.estado == 'LONGE'}" th:text="${c.livres == 1 ? '1 vaga' : c.livres + ' vagas'}"></span>
     </span>
     <span class="aula-meta" th:if="${perfil != 'ALUNO'}"><span th:text="|${c.inscritos} de ${c.aula.vagas} inscritos|"></span></span>
+    <!--/* ESPERA conteúdo: início */-->
+    <span class="aula-fila" th:if="${perfil == 'ALUNO' and c.estado == 'LOTADA'}">
+        <i class="ph ph-hourglass-medium"></i>
+        <span th:if="${esperaPos[''+c.aula.id+'|'+c.data.toString()] != null}" th:text="|Na fila: posição ${esperaPos[''+c.aula.id+'|'+c.data.toString()]}|"></span>
+        <span th:if="${esperaPos[''+c.aula.id+'|'+c.data.toString()] == null}">Entrar na lista de espera</span>
+    </span>
+    <span class="aula-meta aula-fila-total" th:if="${perfil != 'ALUNO' and esperaTotal[''+c.aula.id+'|'+c.data.toString()] != null}"><i class="ph ph-hourglass-medium"></i><span th:text="|${esperaTotal[''+c.aula.id+'|'+c.data.toString()]} na fila|"></span></span>
+    <!--/* ESPERA conteúdo: fim */-->
 </th:block>
 <!--/* GRADE-AULAS cartão: fim */-->

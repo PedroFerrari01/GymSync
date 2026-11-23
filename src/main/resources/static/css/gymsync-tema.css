@@ -2156,3 +2156,10 @@ body.mt-aberto { overflow: hidden; }
     .presenca-btn { flex: 1; }
 }
 /* PRESENCA: fim */
+
+/* ESPERA: início (lista de espera nas aulas lotadas) */
+.aula-fila { display: flex; align-items: center; gap: 5px; margin-top: 4px; font-size: .74rem; font-weight: 600; color: var(--accent); }
+.aula-card.est-entrar:hover, .aula-card.est-fila:hover { border-color: var(--accent); }
+.aula-card.est-fila .aula-fila { color: var(--text-primary); }
+.aula-fila-total { display: flex; align-items: center; gap: 4px; color: var(--text-secondary); font-size: .72rem; }
+/* ESPERA: fim */

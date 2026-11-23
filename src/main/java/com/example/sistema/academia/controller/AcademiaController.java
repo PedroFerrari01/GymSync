@@ -56,6 +56,7 @@ public class AcademiaController {
     @Autowired private AcompanhamentoService acompanhamentoService;
     @Autowired private com.example.sistema.academia.service.RecordesService recordesService; // recordes de carga do aluno
     @Autowired private SininhoService sininhoService;
+    @Autowired private com.example.sistema.academia.service.EsperaService esperaService; // ESPERA
     @Autowired private com.example.sistema.academia.service.VisaoEquipeService visaoEquipeService;
     @Autowired private com.example.sistema.academia.service.AlunosDoProfessorService alunosDoProfessor;
     @Autowired private PasswordEncoder encoder;
@@ -207,9 +208,12 @@ public class AcademiaController {
             model.addAttribute("naoLidas", mensagemRepository.countByAlunoIdAndRemetenteAndLidaFalse(usuarioId, "PROFESSOR"));
             aulaService.preencher(model, usuarioId);
             aulaService.grade(model, usuarioId, semana);
+            esperaService.preencherGrade(model, usuarioId); // ESPERA
             model.addAttribute("melhorHorario", movimentoService.planoAluno(java.time.LocalDateTime.now()));
-            model.addAttribute("sininho", com.example.sistema.academia.service.MuralService.naFrente(sininhoService.paraAluno(avisoService.paraAluno(usuarioId),
-                    mensagemRepository.countByAlunoIdAndRemetenteAndLidaFalse(usuarioId, "PROFESSOR"), aulasReservadasTexto(model)), mural, perfil));
+            List<com.example.sistema.academia.dto.Notificacao> sininhoAluno = new ArrayList<>(esperaService.sininho(usuarioId, java.time.LocalDateTime.now())); // ESPERA: vaga aberta primeiro
+            sininhoAluno.addAll(sininhoService.paraAluno(avisoService.paraAluno(usuarioId),
+                    mensagemRepository.countByAlunoIdAndRemetenteAndLidaFalse(usuarioId, "PROFESSOR"), aulasReservadasTexto(model)));
+            model.addAttribute("sininho", com.example.sistema.academia.service.MuralService.naFrente(sininhoAluno, mural, perfil));
             return "index";
         }
 
@@ -245,6 +249,7 @@ public class AcademiaController {
         model.addAttribute("painel", visaoEquipeService.montar(professor ? usuarioId : null, LocalDate.now()));
         aulaService.preencher(model, null);
         aulaService.grade(model, null, semana);
+        esperaService.preencherGrade(model, null); // ESPERA
         model.addAttribute("mapaCalor", movimentoService.mapa(java.time.LocalDateTime.now()));
 
         if (professor) {

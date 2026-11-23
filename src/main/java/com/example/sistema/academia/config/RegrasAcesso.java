@@ -52,7 +52,8 @@ public final class RegrasAcesso {
 
         if (caminho.startsWith("/aluno/")
                 || caminho.startsWith("/aulas/reservar")
-                || caminho.startsWith("/aulas/cancelar-reserva")) {
+                || caminho.startsWith("/aulas/cancelar-reserva")
+                || caminho.startsWith("/aulas/espera")) {
             return aluno;
         }
         // Recibo: admin e aluno entram; o controller confere se a mensalidade é do próprio aluno.
