@@ -2207,3 +2207,28 @@ body.mt-aberto { overflow: hidden; }
 .trancadas-resumo i { color: var(--accent); }
 .trancada-info { max-width: 22rem; white-space: normal; }
 /* ===== TRANCAMENTO: fim ===== */
+
+/* AJUSTES-ALUNOS: início */
+/* Lista de alunos: a coluna de ações fica sempre visível (fixa à direita) e a tabela rola por baixo */
+.tabela-lista-alunos th, .tabela-lista-alunos td { white-space: nowrap; }
+@media (min-width: 576px) {
+    .tabela-lista-alunos th:last-child, .tabela-lista-alunos td:last-child {
+        position: sticky; right: 0; background: var(--bg-card); z-index: 2;
+        box-shadow: -8px 0 8px -8px rgba(0, 0, 0, .35);
+    }
+}
+@media (max-width: 575.98px) {
+    .tabela-lista-alunos td:last-child { white-space: normal !important; min-width: 8.5rem; }
+    .tabela-lista-alunos td:last-child .action-btn { margin-bottom: 4px; }
+    /* celular: só nome, status e ações (CPF, e-mail, nascimento e telefone aparecem ao editar) */
+    .tabela-lista-alunos th:nth-child(n+2):nth-child(-n+5), .tabela-lista-alunos td:nth-child(n+2):nth-child(-n+5) { display: none; }
+}
+/* Trancar / Destrancar: botão secundário legível (não parece desabilitado) */
+.btn-trancar, form[action*="/matriculas/destrancar/"] .btn-outline-secondary {
+    color: var(--text-primary); border-color: var(--text-secondary); background: transparent; opacity: 1;
+}
+.btn-trancar:hover, form[action*="/matriculas/destrancar/"] .btn-outline-secondary:hover {
+    color: var(--text-primary); border-color: var(--accent); background: var(--accent-soft);
+}
+.btn-trancar i, form[action*="/matriculas/destrancar/"] .btn-outline-secondary i { color: var(--accent); }
+/* AJUSTES-ALUNOS: fim */
