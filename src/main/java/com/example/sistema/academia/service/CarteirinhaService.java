@@ -127,6 +127,13 @@ public class CarteirinhaService {
         return null;
     }
 
+    /** Igual à regra acima, mas com o trancamento: aluno com matrícula trancada é barrado com o motivo (e a data de retorno). */
+    public static String motivoBloqueio(Aluno a, boolean matriculaAtiva, boolean mensalidadeAtrasada, String motivoTrancada) {
+        if ("INATIVO".equals(a.getSituacao())) return "está com cadastro INATIVO";
+        if (motivoTrancada != null) return motivoTrancada;
+        return motivoBloqueio(a, matriculaAtiva, mensalidadeAtrasada);
+    }
+
     /** QR em SVG (gerado no servidor, sem script). */
     public String qrSvg(String conteudo) {
         return qrSvg(conteudo, "QR code da carteirinha");

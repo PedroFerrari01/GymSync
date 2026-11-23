@@ -27,7 +27,7 @@
         <div th:if="${#lists.isEmpty(visao.linhaDoTempo)}" class="vazio">Este aluno ainda não tem histórico.</div>
         <ol class="v360-tempo" th:unless="${#lists.isEmpty(visao.linhaDoTempo)}">
             <li th:each="ev : ${visao.linhaDoTempo}" th:class="${'v360-item v360-' + #strings.toLowerCase(ev.tipo)}">
-                <span class="v360-ponto"><i th:class="${ev.tipo == 'MATRICULA' ? 'bi bi-card-checklist' : ev.tipo == 'PAGAMENTO' ? 'bi bi-check-lg' : ev.tipo == 'ATRASO' ? 'bi bi-exclamation-lg' : ev.tipo == 'ANALISE' ? 'bi bi-hourglass-split' : ev.tipo == 'AVALIACAO' ? 'bi bi-rulers' : ev.tipo == 'ENTRADAS' ? 'bi bi-door-open' : 'bi bi-chat-dots'}"></i></span>
+                <span class="v360-ponto"><i th:class="${ev.tipo == 'MATRICULA' ? 'bi bi-card-checklist' : ev.tipo == 'PAGAMENTO' ? 'bi bi-check-lg' : ev.tipo == 'ATRASO' ? 'bi bi-exclamation-lg' : ev.tipo == 'ANALISE' ? 'bi bi-hourglass-split' : ev.tipo == 'AVALIACAO' ? 'bi bi-rulers' : ev.tipo == 'ENTRADAS' ? 'bi bi-door-open' : ev.tipo == 'TRANCAMENTO' ? 'bi bi-pause-circle' : 'bi bi-chat-dots'}"></i></span>
                 <div class="v360-corpo">
                     <div class="v360-titulo" th:text="${ev.titulo}"></div>
                     <div class="small texto-apoio" th:if="${ev.detalhe != null and !ev.detalhe.isEmpty()}" th:text="${ev.detalhe}"></div>

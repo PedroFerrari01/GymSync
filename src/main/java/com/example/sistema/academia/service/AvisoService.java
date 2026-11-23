@@ -36,6 +36,7 @@ public class AvisoService {
                         "está atrasada (venceu em " + m.getVencimento().format(DATA) + ")")));
 
         mensalidadeRepository.findBySituacao("PENDENTE").stream()
+                .filter(m -> !congelada(m)) // TRANCAMENTO: matrícula trancada não gera aviso de vencimento
                 .filter(m -> m.getVencimento() != null && !m.getVencimento().isBefore(hoje) && !m.getVencimento().isAfter(hoje.plusDays(3)))
                 .sorted(Comparator.comparing(Mensalidade::getVencimento))
                 .forEach(m -> avisos.add(avisoDaMensalidade("warning", m,
@@ -49,6 +50,13 @@ public class AvisoService {
             Aluno aluno = m.getAluno();
             avisos.add(new Aviso("warning", aluno.getNome() + ": matrícula termina em " + m.getDataFim().format(DATA) + ".",
                     aluno.getId(), null));
+        }
+
+        // TRANCAMENTO: retornos previstos nos próximos 7 dias (ou já vencidos e ainda trancada)
+        for (Matricula tr : matriculaRepository.findBySituacao(TrancamentoService.TRANCADA)) {
+            if (TrancamentoService.retornoProximo(tr, hoje) && tr.getAluno() != null) {
+                avisos.add(new Aviso("info", TrancamentoService.textoRetorno(tr, hoje), tr.getAluno().getId(), null));
+            }
         }
 
         for (Equipamento eq : equipamentoRepository.findAll()) {
@@ -81,12 +89,20 @@ public class AvisoService {
 
         List<Matricula> matriculas = matriculaRepository.findByAlunoId(alunoId);
         Optional<Matricula> ativa = matriculas.stream().filter(m -> "ATIVA".equals(m.getSituacao())).findFirst();
-        if (ativa.isEmpty()) {
+        Optional<Matricula> trancada = matriculas.stream().filter(m -> TrancamentoService.TRANCADA.equals(m.getSituacao())).findFirst();
+        if (ativa.isEmpty() && trancada.isPresent()) { // TRANCAMENTO: aviso discreto, sem o alerta de "sem matrícula"
+            avisos.add(new Aviso("info", TrancamentoService.avisoAluno(trancada.get())));
+        } else if (ativa.isEmpty()) {
             avisos.add(new Aviso("danger", "Você não tem matrícula ativa. Fale com a recepção para renovar."));
         } else if (ativa.get().getDataFim() != null && !ativa.get().getDataFim().isAfter(hoje.plusDays(15))) {
             avisos.add(new Aviso("warning", "Seu plano termina em " + ativa.get().getDataFim().format(DATA) + "."));
         }
         return avisos;
+    }
+
+    /** Mensalidade de matrícula TRANCADA fica congelada (sem aviso de vencimento até destrancar). */
+    private static boolean congelada(Mensalidade m) {
+        return m.getMatricula() != null && TrancamentoService.TRANCADA.equals(m.getMatricula().getSituacao());
     }
 
     /** Linha do painel do admin ligada à mensalidade e ao aluno dela. */
@@ -99,7 +115,7 @@ public class AvisoService {
     /** Mensalidade pendente que vence nos próximos 3 dias (a mais próxima), com o botão de pagar no aviso. */
     public Optional<Aviso> avisoVencimento(List<Mensalidade> mensalidades, LocalDate hoje) {
         return mensalidades.stream()
-                .filter(m -> "PENDENTE".equals(m.getSituacao()) && m.getVencimento() != null
+                .filter(m -> "PENDENTE".equals(m.getSituacao()) && !congelada(m) && m.getVencimento() != null
                         && !m.getVencimento().isBefore(hoje) && !m.getVencimento().isAfter(hoje.plusDays(3)))
                 .min(Comparator.comparing(Mensalidade::getVencimento))
                 .map(m -> {

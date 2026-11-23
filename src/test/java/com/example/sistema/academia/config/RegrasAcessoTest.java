@@ -268,4 +268,17 @@ class RegrasAcessoTest {
         assertFalse(RegrasAcesso.visitantePode("POST", "/aluno/metas/salvar"));
         assertFalse(RegrasAcesso.visitantePode("POST", "/aluno/metas/3/remover"));
     }
+
+    // TRANCAMENTO: início
+    @Test
+    void trancarEDestrancarMatriculaSoOAdminEVisitanteNao() {
+        for (String caminho : new String[]{"/matriculas/trancar/5", "/matriculas/destrancar/5"}) {
+            assertTrue(RegrasAcesso.permitido("ADMIN", caminho), caminho);
+            for (String perfil : new String[]{"PROFESSOR", "ALUNO", null}) {
+                assertFalse(RegrasAcesso.permitido(perfil, caminho), perfil + " " + caminho);
+            }
+            assertFalse(RegrasAcesso.visitantePode("POST", caminho), caminho);
+        }
+    }
+    // TRANCAMENTO: fim
 }

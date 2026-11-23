@@ -33,6 +33,7 @@ public class AlunoAreaController {
     @Autowired private com.example.sistema.academia.repository.MatriculaRepository matriculaRepository;
     @Autowired private com.example.sistema.academia.service.CarteirinhaService carteirinhaService;
     @Autowired private com.example.sistema.academia.service.PixService pixService;
+    @Autowired private com.example.sistema.academia.service.TrancamentoService trancamentoService; // TRANCAMENTO
 
     /**
      * Código novo da carteirinha do próprio aluno (a tela chama antes do atual vencer).
@@ -48,7 +49,8 @@ public class AlunoAreaController {
         String codigo = carteirinhaService.token(alunoId);
         String motivo = com.example.sistema.academia.service.CarteirinhaService.motivoBloqueio(aluno,
                 matriculaRepository.existsByAlunoIdAndSituacao(alunoId, "ATIVA"),
-                mensalidadeRepository.existsByMatriculaAlunoIdAndSituacao(alunoId, "ATRASADA"));
+                mensalidadeRepository.existsByMatriculaAlunoIdAndSituacao(alunoId, "ATRASADA"),
+                trancamentoService.motivoCatracaDoAluno(alunoId));
         java.util.Map<String, Object> corpo = new java.util.LinkedHashMap<>();
         corpo.put("codigo", codigo);
         corpo.put("qr", carteirinhaService.qrSvg(codigo));

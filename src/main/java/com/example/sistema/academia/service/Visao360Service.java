@@ -100,6 +100,16 @@ public class Visao360Service {
                 eventos.add(ev(m.getDataInicio(), "MATRICULA", "Matrícula no plano " + plano,
                         "Situação: " + texto(m.getSituacao())));
             }
+            // TRANCAMENTO: trancou (e, se já voltou, destrancou)
+            if (m.getTrancadaDesde() != null) {
+                boolean trancadaAgora = "TRANCADA".equals(m.getSituacao());
+                String det = (m.getMotivoTrancamento() != null ? "Motivo: " + m.getMotivoTrancamento() : "Sem motivo informado")
+                        + (trancadaAgora && m.getTrancadaAte() != null ? " · retorno previsto " + m.getTrancadaAte().format(DIA_MES) : "");
+                eventos.add(ev(m.getTrancadaDesde(), "TRANCAMENTO", "Matrícula trancada", det));
+                if (!trancadaAgora && m.getTrancadaAte() != null && "ATIVA".equals(m.getSituacao())) {
+                    eventos.add(ev(m.getTrancadaAte(), "TRANCAMENTO", "Matrícula destrancada", "Voltou a treinar"));
+                }
+            }
         }
 
         int atraso = 0;

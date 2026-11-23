@@ -49,4 +49,23 @@ public class Matricula {
 
     public String getSituacao() { return situacao; }
     public void setSituacao(String situacao) { this.situacao = situacao; }
+
+    // TRANCAMENTO: início (campos opcionais; situacao = "TRANCADA" enquanto trancada).
+    // Depois de destrancar ficam como registro do último trancamento (trancadaAte = dia em que voltou).
+    private LocalDate trancadaDesde;
+
+    private LocalDate trancadaAte;
+
+    @jakarta.persistence.Column(length = 200)
+    private String motivoTrancamento;
+
+    public LocalDate getTrancadaDesde() { return trancadaDesde; }
+    public void setTrancadaDesde(LocalDate trancadaDesde) { this.trancadaDesde = trancadaDesde; }
+
+    public LocalDate getTrancadaAte() { return trancadaAte; }
+    public void setTrancadaAte(LocalDate trancadaAte) { this.trancadaAte = trancadaAte; }
+
+    public String getMotivoTrancamento() { return motivoTrancamento; }
+    public void setMotivoTrancamento(String motivoTrancamento) { this.motivoTrancamento = motivoTrancamento; }
+    // TRANCAMENTO: fim
 }

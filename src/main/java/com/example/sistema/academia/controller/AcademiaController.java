@@ -63,6 +63,7 @@ public class AcademiaController {
     @Autowired private SenhaService senhaService;
     @Autowired private VisitanteService visitanteService;
     @Autowired private CarteirinhaService carteirinhaService;
+    @Autowired private com.example.sistema.academia.service.TrancamentoService trancamentoService; // TRANCAMENTO
     @Autowired private com.example.sistema.academia.service.MuralService muralService; // MURAL
 
     @Value("${gymsync.validar-cpf:true}") private boolean validarCpf;
@@ -170,7 +171,8 @@ public class AcademiaController {
             String codigoCarteirinha = carteirinhaService.token(usuarioId);
             String motivoCarteirinha = CarteirinhaService.motivoBloqueio(aluno,
                     matriculaRepository.existsByAlunoIdAndSituacao(usuarioId, "ATIVA"),
-                    mensalidadeRepository.existsByMatriculaAlunoIdAndSituacao(usuarioId, "ATRASADA"));
+                    mensalidadeRepository.existsByMatriculaAlunoIdAndSituacao(usuarioId, "ATRASADA"),
+                    trancamentoService.motivoCatracaDoAluno(usuarioId));
             model.addAttribute("carteirinhaCodigo", codigoCarteirinha);
             model.addAttribute("carteirinhaQr", carteirinhaService.qrSvg(codigoCarteirinha));
             model.addAttribute("carteirinhaMotivo", motivoCarteirinha);
@@ -292,7 +294,10 @@ public class AcademiaController {
             }
             model.addAttribute("equipe", equipe);
         }
-        model.addAttribute("matriculas", matriculaRepository.findAll());
+        List<Matricula> todasMatriculas = matriculaRepository.findAll();
+        model.addAttribute("matriculas", todasMatriculas);
+        model.addAttribute("trancadasQtd", todasMatriculas.stream() // TRANCAMENTO
+                .filter(mt -> "TRANCADA".equals(mt.getSituacao())).count());
         model.addAttribute("mensalidades", mensalidadeRepository.findAll());
         List<Aviso> avisosAdmin = avisoService.paraAdmin();
         model.addAttribute("avisos", avisosAdmin);
@@ -560,6 +565,10 @@ public class AcademiaController {
             redirect.addFlashAttribute("erro", "O aluno " + a.getNome() + " já possui uma matrícula ativa.");
             return "redirect:/";
         }
+        if (matriculaRepository.existsByAlunoIdAndSituacao(alunoId, "TRANCADA")) { // TRANCAMENTO
+            redirect.addFlashAttribute("erro", "O aluno " + a.getNome() + " tem uma matrícula trancada. Destranque ou cancele antes de matricular de novo.");
+            return "redirect:/";
+        }
 
         long meses = p.getDuracaoMeses();
         if (meses < 1) meses = 1;
@@ -679,7 +688,8 @@ public class AcademiaController {
         }
         String motivo = CarteirinhaService.motivoBloqueio(a,
                 matriculaRepository.existsByAlunoIdAndSituacao(alunoId, "ATIVA"),
-                mensalidadeRepository.existsByMatriculaAlunoIdAndSituacao(alunoId, "ATRASADA"));
+                mensalidadeRepository.existsByMatriculaAlunoIdAndSituacao(alunoId, "ATRASADA"),
+                trancamentoService.motivoCatracaDoAluno(alunoId));
         if (motivo != null) {
             redirect.addFlashAttribute("erro", "Catraca Bloqueada: o aluno " + a.getNome() + " " + motivo + "!");
             return "redirect:/";
