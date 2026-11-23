@@ -66,6 +66,8 @@ public class VisitanteService {
 
     @Autowired private ReservaAulaRepository reservaAulaRepository;
 
+    @Autowired private PresencaExemplo presencaExemplo; // PRESENCA
+
     // MURAL: início
     @Autowired private MuralAvisoRepository muralAvisoRepository;
 
@@ -99,6 +101,7 @@ public class VisitanteService {
         criarMuralDeExemplo(); // MURAL
         completarCamposNovos();
         renovarDatas();
+        presencaExemplo.criar(); // PRESENCA
     }
 
     // Valores de exemplo dos campos que vieram depois (na ordem das avaliações, da mais antiga para a mais nova):

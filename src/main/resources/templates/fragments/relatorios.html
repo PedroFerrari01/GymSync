@@ -291,4 +291,8 @@
             </table>
         </div>
     </div>
+
+    <!--/* PRESENCA: início */-->
+    <th:block th:if="${presencaRelatorio != null}"><th:block th:replace="~{fragments/presenca :: relatorio}"></th:block></th:block>
+    <!--/* PRESENCA: fim */-->
 </div>
