@@ -51,6 +51,8 @@ public class AcademiaController {
     @Autowired private FrequenciaService frequenciaService;
     @Autowired private EvolucaoService evolucaoService;
     @Autowired private com.example.sistema.academia.service.ConquistasService conquistasService; // conquistas do aluno
+    @Autowired private com.example.sistema.academia.service.MetasService metasService; // METAS
+    @Autowired private com.example.sistema.academia.repository.MetaAlunoRepository metaAlunoRepository; // METAS
     @Autowired private AcompanhamentoService acompanhamentoService;
     @Autowired private SininhoService sininhoService;
     @Autowired private com.example.sistema.academia.service.VisaoEquipeService visaoEquipeService;
@@ -179,6 +181,9 @@ public class AcademiaController {
             model.addAttribute("conquistas", conquistasService.calcular(entradas, avaliacoes.size(),
                     mensalidadeRepository.findByMatriculaAlunoId(usuarioId),
                     registroExercicioRepository.findByAlunoId(usuarioId).size(), hoje));
+            model.addAttribute("metas", metasService.calcular(metaAlunoRepository.findByAlunoIdOrderByIdAsc(usuarioId), // METAS
+                    com.example.sistema.academia.service.MetasService.treinosDaSemana(entradas, hoje), avaliacoes, hoje));
+            model.addAttribute("podeNovaMeta", metaAlunoRepository.findByAlunoId(usuarioId).size() < com.example.sistema.academia.service.MetasService.MAX_METAS);
             model.addAttribute("pedirAceite", aluno.getAceitePrivacidade() == null
                     && !Boolean.TRUE.equals(session.getAttribute("visitante"))
                     && !Boolean.TRUE.equals(session.getAttribute("trocarSenha")));

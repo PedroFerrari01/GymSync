@@ -22,6 +22,7 @@ public class ExclusaoService {
     @Autowired private AvaliacaoFisicaRepository avaliacaoFisicaRepository;
     @Autowired private AulaColetivaRepository aulaColetivaRepository;
     @Autowired private ReservaAulaRepository reservaAulaRepository;
+    @Autowired private com.example.sistema.academia.repository.MetaAlunoRepository metaAlunoRepository; // METAS
     @Autowired private MensagemRepository mensagemRepository;
     @Autowired private RegistroExercicioRepository registroExercicioRepository;
     @Autowired private EquipamentoRepository equipamentoRepository;
@@ -56,6 +57,7 @@ public class ExclusaoService {
         mensalidadeRepository.deleteAll(mensalidadeRepository.findByMatriculaAlunoId(id));
         matriculaRepository.deleteAll(matriculaRepository.findByAlunoId(id));
         avaliacaoFisicaRepository.deleteAll(avaliacaoFisicaRepository.findByAlunoId(id));
+        metaAlunoRepository.deleteAll(metaAlunoRepository.findByAlunoId(id)); // METAS
         reservaAulaRepository.deleteAll(reservaAulaRepository.findByAlunoId(id));
         mensagemRepository.deleteAll(mensagemRepository.findByAlunoId(id));
         alunoRepository.deleteById(id);

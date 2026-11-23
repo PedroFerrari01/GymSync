@@ -170,6 +170,62 @@
         </div>
     </div>
 
+<!--/* METAS: início */-->
+    <div class="panel-card mt-4 metas ocultar-impressao" id="metas" th:if="${metas != null}">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <h5 class="panel-title mb-0">Minhas metas</h5>
+            <span class="small texto-apoio" th:text="${#lists.size(metas)} + ' de 3 metas'"></span>
+        </div>
+        <div class="metas-grade" th:if="${!#lists.isEmpty(metas)}">
+            <div th:each="mt : ${metas}" class="meta-item" th:classappend="${mt.concluida ? 'concluida' : ''}">
+                <div class="meta-anel" role="img" th:aria-label="${mt.titulo + ': ' + mt.percentual + '%'}">
+                    <svg viewBox="0 0 100 100" aria-hidden="true">
+                        <circle class="anel-fundo" cx="50" cy="50" r="42" fill="none" stroke-width="9"></circle>
+                        <circle class="anel-valor" cx="50" cy="50" r="42" fill="none" stroke-width="9" stroke-linecap="round"
+                                pathLength="100" th:stroke-dasharray="${mt.percentual + ' 100'}" transform="rotate(-90 50 50)"></circle>
+                    </svg>
+                    <span class="meta-pct" th:text="${mt.percentual + '%'}"></span>
+                </div>
+                <div class="meta-texto">
+                    <div class="meta-titulo"><i th:class="${'ph ' + mt.icone}"></i> <span th:text="${mt.titulo}"></span>
+                        <span th:if="${mt.concluida}" class="meta-selo">Meta batida!</span></div>
+                    <div class="meta-atual" th:text="${mt.atualTexto}"></div>
+                    <div class="meta-alvo small texto-apoio" th:text="${mt.alvoTexto}"></div>
+                    <div class="meta-prazo small" th:if="${mt.prazoTexto != null}" th:classappend="${mt.atrasada ? 'atrasada' : 'texto-apoio'}"
+                         th:text="${mt.atrasada ? mt.prazoTexto + ' (prazo vencido)' : mt.prazoTexto}"></div>
+                    <div class="meta-acoes">
+                        <button type="button" class="btn-theme btn-sm btn-editar-meta" th:data-tipo="${mt.tipo}" th:data-alvo="${mt.alvoCampo}" th:data-prazo="${mt.prazoCampo}"><i class="bi bi-pencil"></i> Editar</button>
+                        <form th:action="@{/aluno/metas/{id}/remover(id=${mt.id})}" method="post" class="d-inline" data-confirm="Remover esta meta?">
+                            <button type="submit" class="btn-theme btn-sm"><i class="bi bi-x-lg"></i> Remover meta</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div th:if="${#lists.isEmpty(metas)}" class="vazio">Você ainda não definiu metas. Escolha uma abaixo.</div>
+        <form th:action="@{/aluno/metas/salvar}" method="post" class="meta-form" id="formMeta">
+            <div class="meta-form-campo">
+                <label for="metaTipo" class="small texto-apoio">Tipo</label>
+                <select id="metaTipo" name="tipo" class="form-select form-select-sm">
+                    <option value="TREINOS_SEMANA">Treinos por semana</option>
+                    <option value="PESO">Peso alvo (kg)</option>
+                    <option value="GORDURA">Gordura alvo (%)</option>
+                </select>
+            </div>
+            <div class="meta-form-campo">
+                <label for="metaAlvo" class="small texto-apoio">Alvo</label>
+                <input id="metaAlvo" name="alvo" type="number" step="0.1" min="1" max="300" required class="form-control form-control-sm" placeholder="Ex.: 4">
+            </div>
+            <div class="meta-form-campo">
+                <label for="metaPrazo" class="small texto-apoio">Prazo (opcional)</label>
+                <input id="metaPrazo" name="prazo" type="date" class="form-control form-control-sm">
+            </div>
+            <button type="submit" class="btn-theme btn-sm meta-salvar"><i class="bi bi-check2"></i> Salvar meta</button>
+        </form>
+        <div class="small texto-apoio mt-2" th:if="${!podeNovaMeta}">Limite de 3 metas: salvar um tipo que já existe edita a meta.</div>
+    </div>
+<!--/* METAS: fim */-->
+
 <!--/* CONQUISTAS: início */-->
     <div class="panel-card mt-4 conquistas ocultar-impressao" id="conquistas" th:if="${conquistas != null and !#lists.isEmpty(conquistas)}">
         <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">

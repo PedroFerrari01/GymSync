@@ -150,4 +150,54 @@ public class AlunoAreaController {
         }
         return "redirect:/";
     }
+
+    // METAS: início
+    @Autowired private com.example.sistema.academia.repository.MetaAlunoRepository metaAlunoRepository;
+
+    /** Cria ou edita a meta do tipo informado (uma por tipo, no máximo 3). Só do aluno logado. */
+    @PostMapping("/aluno/metas/salvar")
+    public String salvarMeta(@RequestParam String tipo, @RequestParam(required = false) Double alvo,
+                             @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate prazo,
+                             HttpSession session, RedirectAttributes redirect) {
+        Long alunoId = (Long) session.getAttribute("usuarioId");
+        Aluno aluno = alunoId != null ? alunoRepository.findById(alunoId).orElse(null) : null;
+        if (aluno == null) return "redirect:/";
+        String erro = com.example.sistema.academia.service.MetasService.validar(tipo, alvo, prazo, java.time.LocalDate.now());
+        if (erro != null) {
+            redirect.addFlashAttribute("erro", erro);
+            return "redirect:/#metas";
+        }
+        java.util.List<com.example.sistema.academia.model.MetaAluno> minhas = metaAlunoRepository.findByAlunoIdOrderByIdAsc(alunoId);
+        com.example.sistema.academia.model.MetaAluno meta = minhas.stream().filter(m -> tipo.equals(m.getTipo())).findFirst().orElse(null);
+        if (meta == null) {
+            if (minhas.size() >= com.example.sistema.academia.service.MetasService.MAX_METAS) {
+                redirect.addFlashAttribute("erro", "Você já tem 3 metas.");
+                return "redirect:/#metas";
+            }
+            meta = new com.example.sistema.academia.model.MetaAluno();
+            meta.setAluno(aluno);
+            meta.setTipo(tipo);
+            meta.setCriadaEm(java.time.LocalDate.now());
+        }
+        meta.setAlvo(alvo);
+        meta.setPrazo(prazo);
+        metaAlunoRepository.save(meta);
+        redirect.addFlashAttribute("sucesso", "Meta salva!");
+        return "redirect:/#metas";
+    }
+
+    /** Remove só a meta (nunca outro dado) e só se for do aluno logado. */
+    @PostMapping("/aluno/metas/{id}/remover")
+    public String removerMeta(@org.springframework.web.bind.annotation.PathVariable Long id, HttpSession session, RedirectAttributes redirect) {
+        Long alunoId = (Long) session.getAttribute("usuarioId");
+        com.example.sistema.academia.model.MetaAluno meta = alunoId != null ? metaAlunoRepository.findById(id).orElse(null) : null;
+        if (meta == null || !meta.getAluno().getId().equals(alunoId)) {
+            redirect.addFlashAttribute("erro", "Meta não encontrada.");
+            return "redirect:/#metas";
+        }
+        metaAlunoRepository.delete(meta);
+        redirect.addFlashAttribute("sucesso", "Meta removida.");
+        return "redirect:/#metas";
+    }
+    // METAS: fim
 }
