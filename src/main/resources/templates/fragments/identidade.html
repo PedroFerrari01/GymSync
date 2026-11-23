@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<!--/* Identidade da academia (cor de destaque, nome e logo). Só entra para o admin, na aba Planos & Financeiro. Estilos: bloco MARCA no fim do gymsync-tema.css; lógica: js/marca.js */-->
+<div th:fragment="card" class="col-12">
+    <div class="panel-card identidade" id="identidade-academia">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+            <h5 class="panel-title mb-0"><i class="ph ph-palette me-2"></i>Identidade da academia</h5>
+            <span class="tag-pill" th:text="${@marca.temCor() or @marca.temLogo() or @marca.temNome()} ? 'Personalizada' : 'Padrão GymSync'">Padrão GymSync</span>
+        </div>
+        <p class="small texto-apoio mb-3">Escolha a cor de destaque e a logo: o sistema inteiro muda na hora, para todos os perfis e na tela de login.</p>
+
+        <form th:action="@{/marca/salvar}" method="post" enctype="multipart/form-data" class="identidade-form">
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <label class="form-label fw-semibold">Cor de destaque</label>
+                    <div class="identidade-cores" role="radiogroup" aria-label="Cores predefinidas">
+                        <label class="id-cor" title="Laranja (padrão)"><input type="radio" name="cor" value="#f97316" th:checked="${!@marca.temCor()}"><span style="--c:#f97316"></span><small>Laranja</small></label>
+                        <label class="id-cor" title="Azul"><input type="radio" name="cor" value="#2563eb" th:checked="${@marca.cor() == '#2563eb'}"><span style="--c:#2563eb"></span><small>Azul</small></label>
+                        <label class="id-cor" title="Verde"><input type="radio" name="cor" value="#16a34a" th:checked="${@marca.cor() == '#16a34a'}"><span style="--c:#16a34a"></span><small>Verde</small></label>
+                        <label class="id-cor" title="Roxo"><input type="radio" name="cor" value="#7c3aed" th:checked="${@marca.cor() == '#7c3aed'}"><span style="--c:#7c3aed"></span><small>Roxo</small></label>
+                        <label class="id-cor" title="Vermelho"><input type="radio" name="cor" value="#dc2626" th:checked="${@marca.cor() == '#dc2626'}"><span style="--c:#dc2626"></span><small>Vermelho</small></label>
+                        <label class="id-cor" title="Grafite"><input type="radio" name="cor" value="#52525b" th:checked="${@marca.cor() == '#52525b'}"><span style="--c:#52525b"></span><small>Grafite</small></label>
+                    </div>
+                    <div class="identidade-custom mt-3">
+                        <label class="form-label small mb-1" for="id-cor-texto">Ou uma cor própria (#RRGGBB)</label>
+                        <div class="d-flex gap-2 align-items-center">
+                            <input type="color" class="form-control form-control-color id-cor-seletor" th:value="${@marca.cor()}" aria-label="Escolher cor" value="#f97316">
+                            <input type="text" id="id-cor-texto" name="corPersonalizada" class="form-control id-cor-texto" maxlength="7" placeholder="#2563eb" autocomplete="off" spellcheck="false" th:value="${@marca.corPropria()}">
+                        </div>
+                        <div class="small texto-apoio mt-1">Cores muito claras são recusadas, porque o texto dos botões ficaria ilegível.</div>
+                    </div>
+                    <div class="identidade-previa mt-3" aria-hidden="true">
+                        <span class="id-previa-botao">Botão</span>
+                        <span class="id-previa-link">Link e ícones</span>
+                        <span class="id-previa-barra"><i></i></span>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <label class="form-label fw-semibold" for="id-nome">Nome da academia <span class="texto-apoio fw-normal">(opcional)</span></label>
+                    <input type="text" id="id-nome" name="nome" class="form-control mb-3" maxlength="60" placeholder="GymSync" th:value="${@marca.nomePersonalizado()}">
+
+                    <label class="form-label fw-semibold" for="id-logo">Logo</label>
+                    <div class="d-flex gap-3 align-items-center mb-2">
+                        <div class="id-logo-quadro" th:classappend="${@marca.temLogo() and @marca.logoClara()} ? 'sobre-escuro'">
+                            <img class="id-logo-previa" th:if="${@marca.temLogo()}" th:src="@{/marca/logo(v=${@marca.versao()})}" alt="Logo atual">
+                            <img class="id-logo-previa" th:unless="${@marca.temLogo()}" th:src="@{/img/logo-simbolo-fundo-claro.png}" alt="Logo padrão do GymSync" data-padrao="true">
+                        </div>
+                        <input type="file" id="id-logo" name="logo" class="form-control" accept="image/png,image/jpeg">
+                    </div>
+                    <div class="small texto-apoio">JPG ou PNG, até 2 MB. A logo aparece dentro de um quadro neutro no menu e no login: o sistema usa um quadro escuro para logos claras (letras brancas) e um quadro claro para as demais. Sem enviar um arquivo, a logo atual é mantida.</div>
+                </div>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2 mt-4">
+                <button type="submit" class="btn-brand"><i class="ph ph-floppy-disk me-1"></i>Salvar identidade</button>
+            </div>
+        </form>
+        <form th:action="@{/marca/restaurar}" method="post" class="mt-2" data-confirm="Restaurar o padrão? A cor volta ao laranja, o nome volta a GymSync e a logo enviada é removida. Nenhum outro dado é apagado.">
+            <button type="submit" class="btn-theme"><i class="ph ph-arrow-counter-clockwise me-1"></i>Restaurar padrão</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>
