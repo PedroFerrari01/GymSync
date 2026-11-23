@@ -208,8 +208,8 @@ const ALTURA_PADRAO_CM = 170;
 
 // Desenho-base de cada silhueta: largura relativa dos ombros, peito, cintura, quadril e coxas
 const BASES_SILHUETA = {
-    MASCULINA: { ombro: 1.05, peito: 1.03, cintura: 0.98, quadril: 0.95, coxa: 0.97 },
-    FEMININA: { ombro: 0.92, peito: 0.95, cintura: 0.90, quadril: 1.07, coxa: 1.04 },
+    MASCULINA: { ombro: 1.16, peito: 1.10, cintura: 1.00, quadril: 0.90, coxa: 0.94 },
+    FEMININA: { ombro: 0.84, peito: 0.90, cintura: 0.80, quadril: 1.14, coxa: 1.10 },
     NAO_INFORMADA: { ombro: 1, peito: 1, cintura: 1, quadril: 1, coxa: 1 }
 };
 // Perímetro de referência dividido pela altura (o "normal" de cada silhueta, que não mexe no desenho)
@@ -249,7 +249,7 @@ function perfilDe(aluno, momento) {
     };
     const cintura = razao('cintura', ref.cintura);
     const quadril = razao('quadril', ref.quadril);
-    const faixa = (v, min = 0.78, max = 1.3) => limitar(v, min, max);
+    const faixa = (v, min = 0.68, max = 1.35) => limitar(v, min, max);
     return {
         cabeca: 1,
         ombro: faixa(base.ombro * Math.sqrt(geral)),
