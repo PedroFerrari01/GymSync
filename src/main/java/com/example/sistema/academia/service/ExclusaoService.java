@@ -23,6 +23,7 @@ public class ExclusaoService {
     @Autowired private AulaColetivaRepository aulaColetivaRepository;
     @Autowired private ReservaAulaRepository reservaAulaRepository;
     @Autowired private com.example.sistema.academia.repository.MetaAlunoRepository metaAlunoRepository; // METAS
+    @Autowired private com.example.sistema.academia.repository.PresencaAulaRepository presencaAulaRepository; // PRESENCA
     @Autowired private MensagemRepository mensagemRepository;
     @Autowired private RegistroExercicioRepository registroExercicioRepository;
     @Autowired private EquipamentoRepository equipamentoRepository;
@@ -44,6 +45,7 @@ public class ExclusaoService {
 
     @Transactional
     public void excluirAula(Long id) {
+        presencaAulaRepository.deleteAll(presencaAulaRepository.findByAulaId(id)); // PRESENCA
         reservaAulaRepository.deleteAll(reservaAulaRepository.findByAulaId(id));
         aulaColetivaRepository.deleteById(id);
     }
@@ -58,6 +60,7 @@ public class ExclusaoService {
         matriculaRepository.deleteAll(matriculaRepository.findByAlunoId(id));
         avaliacaoFisicaRepository.deleteAll(avaliacaoFisicaRepository.findByAlunoId(id));
         metaAlunoRepository.deleteAll(metaAlunoRepository.findByAlunoId(id)); // METAS
+        presencaAulaRepository.deleteAll(presencaAulaRepository.findByAlunoId(id)); // PRESENCA
         reservaAulaRepository.deleteAll(reservaAulaRepository.findByAlunoId(id));
         mensagemRepository.deleteAll(mensagemRepository.findByAlunoId(id));
         alunoRepository.deleteById(id);
@@ -67,6 +70,7 @@ public class ExclusaoService {
     public void excluirProfessor(Long id) {
         mensagemRepository.deleteAll(mensagemRepository.findByProfessorId(id));
         for (AulaColetiva aula : aulaColetivaRepository.findByProfessorId(id)) {
+            presencaAulaRepository.deleteAll(presencaAulaRepository.findByAulaId(aula.getId())); // PRESENCA
             reservaAulaRepository.deleteAll(reservaAulaRepository.findByAulaId(aula.getId()));
             aulaColetivaRepository.delete(aula);
         }

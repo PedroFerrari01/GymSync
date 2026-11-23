@@ -2127,3 +2127,32 @@ body.mt-aberto { overflow: hidden; }
     .mt-confete { display: none; }
 }
 /* RECORDES-CARGA: fim */
+
+/* PRESENCA: início */
+.presenca-chamada, .presenca-relatorio { height: auto; }
+.presenca-sessao { border: 1px solid var(--border-color); border-radius: var(--raio); margin-bottom: 8px; background: var(--bg-input); }
+.presenca-sessao summary { list-style: none; cursor: pointer; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 4px 12px; padding: 10px 14px; }
+.presenca-sessao summary::-webkit-details-marker { display: none; }
+.presenca-titulo { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
+.presenca-contagem { font-size: .8rem; color: var(--text-secondary); white-space: nowrap; }
+.presenca-contagem.completa { color: #22c55e; }
+:root[data-theme="light"] .presenca-contagem.completa { color: #047857; }
+.presenca-lista { list-style: none; margin: 0; padding: 0 14px 10px; }
+.presenca-aluno { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 6px 12px; padding: 8px 0; border-top: 1px solid var(--border-color); }
+.presenca-botoes { display: flex; gap: 6px; margin: 0; }
+.presenca-btn { border: 1px solid var(--border-color); background: transparent; color: var(--text-secondary); border-radius: 8px; padding: 6px 12px; font-size: .85rem; font-weight: 600; cursor: pointer; min-height: 36px; transition: background-color .2s, color .2s, border-color .2s; }
+.presenca-btn:hover { border-color: var(--accent); color: inherit; }
+.presenca-btn.presente.ativo { background: #15803d; border-color: #15803d; color: #fff; }
+.presenca-btn.faltou.ativo { background: #b91c1c; border-color: #b91c1c; color: #fff; }
+.presenca-barra-linha { display: flex; align-items: center; gap: 10px; min-width: 160px; }
+.presenca-barra-linha .adesao-trilho { flex: 1; min-width: 70px; }
+.presenca-barra.boa { background: #22c55e; }
+.presenca-barra.media { background: #f97316; }
+.presenca-barra.baixa { background: #ef4444; }
+.presenca-aluno-resumo { display: flex; align-items: center; gap: 8px; font-size: .85rem; color: var(--text-secondary); margin: -4px 0 16px; }
+.presenca-aluno-resumo strong { color: inherit; }
+@media (max-width: 575.98px) {
+    .presenca-botoes { width: 100%; }
+    .presenca-btn { flex: 1; }
+}
+/* PRESENCA: fim */

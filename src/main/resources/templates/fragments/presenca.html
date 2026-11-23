@@ -1,0 +1,71 @@
+<!--/* PRESENCA: início */-->
+
+<!--/* Lista de chamada (professor da aula e admin) */-->
+<div th:fragment="chamada" class="panel-card presenca-chamada" id="presenca-chamada">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-1">
+        <h5 class="panel-title mb-0">Presença nas aulas</h5>
+        <span class="tag-pill">Últimos 14 dias</span>
+    </div>
+    <p class="small mb-3 texto-apoio">Abra a aula e marque Presente ou Faltou para cada aluno que reservou. Dá para trocar a marcação.</p>
+    <div th:if="${#lists.isEmpty(presencaSessoes)}" class="vazio">Nenhuma aula com reservas nos últimos 14 dias.</div>
+    <div th:each="s : ${presencaSessoes}" class="presenca-sessao">
+        <details th:open="${presencaAberta != null ? presencaAberta == s.chave : s.marcados < #lists.size(s.alunos)}">
+            <summary>
+                <span class="presenca-titulo"><strong th:text="${s.aula}"></strong>
+                    <span class="texto-apoio" th:text="|${s.dia} ${#temporals.format(s.data, 'dd/MM')}|"></span></span>
+                <span class="presenca-contagem" th:classappend="${s.marcados == #lists.size(s.alunos) ? 'completa' : ''}"
+                      th:text="|${s.marcados} de ${#lists.size(s.alunos)} marcados|"></span>
+            </summary>
+            <ul class="presenca-lista">
+                <li th:each="c : ${s.alunos}" class="presenca-aluno">
+                    <span class="presenca-nome" th:text="${c.aluno}"></span>
+                    <form th:action="@{/aulas/presenca}" method="post" class="presenca-botoes">
+                        <input type="hidden" name="reservaId" th:value="${c.reservaId}">
+                        <button type="submit" name="presente" value="true" class="presenca-btn presente"
+                                th:classappend="${c.presente != null and c.presente ? 'ativo' : ''}"
+                                th:aria-pressed="${c.presente != null and c.presente}"><i class="bi bi-check-lg"></i> Presente</button>
+                        <button type="submit" name="presente" value="false" class="presenca-btn faltou"
+                                th:classappend="${c.presente != null and !c.presente ? 'ativo' : ''}"
+                                th:aria-pressed="${c.presente != null and !c.presente}"><i class="bi bi-x-lg"></i> Faltou</button>
+                    </form>
+                </li>
+            </ul>
+        </details>
+    </div>
+</div>
+
+<!--/* Relatório de faltas dos últimos 30 dias (admin em Relatórios; professor nas aulas dele) */-->
+<div th:fragment="relatorio" class="panel-card presenca-relatorio mt-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-1">
+        <h5 class="panel-title mb-0">Faltas nas aulas coletivas</h5>
+        <span class="tag-pill">Últimos 30 dias</span>
+    </div>
+    <p class="small mb-3 texto-apoio">Quem mais faltou aparece primeiro. A barra mostra a presença do aluno.</p>
+    <div th:if="${presencaRelatorio == null or #lists.isEmpty(presencaRelatorio)}" class="vazio">Nenhuma presença marcada nos últimos 30 dias.</div>
+    <div th:if="${presencaRelatorio != null and !#lists.isEmpty(presencaRelatorio)}" class="table-responsive">
+        <table class="table table-custom mb-0">
+            <thead><tr><th>Aluno</th><th>Presença</th><th class="text-end">Faltas</th></tr></thead>
+            <tbody>
+                <tr th:each="l, st : ${presencaRelatorio}" th:if="${st.index < 10}">
+                    <td class="fw-semibold" th:text="${l.nome}"></td>
+                    <td>
+                        <div class="presenca-barra-linha">
+                            <div class="adesao-trilho"><div class="adesao-barra presenca-barra" th:classappend="${l.percentual >= 80 ? 'boa' : (l.percentual >= 50 ? 'media' : 'baixa')}" th:style="|width:${l.percentual}%|"></div></div>
+                            <span class="small text-nowrap" th:text="|${l.percentual}% (${l.presentes} de ${l.total})|"></span>
+                        </div>
+                    </td>
+                    <td class="text-end"><span th:class="${l.faltas > 0 ? 'status-err fw-semibold' : 'texto-apoio'}" th:text="${l.faltas}"></span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!--/* Resumo discreto na Minha Área do aluno */-->
+<div th:fragment="aluno" th:if="${presencaAluno != null and presencaAluno.total > 0}" class="presenca-aluno-resumo ocultar-impressao">
+    <i class="bi bi-calendar-check"></i>
+    <span><strong>Presença nas aulas:</strong> <span th:text="|${presencaAluno.presentes} de ${presencaAluno.total}|"></span>
+        <span class="texto-apoio" th:text="|(${presencaAluno.percentual}%, últimos 30 dias)|"></span></span>
+</div>
+
+<!--/* PRESENCA: fim */-->

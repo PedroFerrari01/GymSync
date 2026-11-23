@@ -61,6 +61,13 @@
         </div>
         <!--/* GRADE-AULAS: fim */-->
 
+        <!--/* PRESENCA: início */-->
+        <div th:if="${perfil != 'ALUNO' and presencaSessoes != null}" class="col-12">
+            <th:block th:replace="~{fragments/presenca :: chamada}"></th:block>
+            <th:block th:if="${perfil == 'PROFESSOR'}"><th:block th:replace="~{fragments/presenca :: relatorio}"></th:block></th:block>
+        </div>
+        <!--/* PRESENCA: fim */-->
+
         <div th:if="${perfil == 'ADMIN' or perfil == 'PROFESSOR'}" class="col-lg-4">
             <div class="panel-card">
                 <div class="d-flex justify-content-between align-items-center mb-3"><span class="tag-pill">Agenda</span><i class="bi bi-calendar-week fs-5"></i></div>
