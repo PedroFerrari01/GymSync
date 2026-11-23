@@ -102,10 +102,10 @@ public class VisitanteService {
     }
 
     // Valores de exemplo dos campos que vieram depois (na ordem das avaliações, da mais antiga para a mais nova):
-    // ombro, antebraço, panturrilha, massa muscular e massa gorda. Os mesmos usados em criarDadosDeExemplo.
+    // ombro, antebraço, panturrilha, massa muscular, massa gorda, abdômen e peito. Os mesmos usados em criarDadosDeExemplo.
     private static final double[][] NOVOS_ANA = {
-            {104.0, 24.5, 35.0, 24.8, 18.7}, {105.0, 25.0, 35.5, 25.3, 17.1}, {106.0, 25.5, 36.0, 25.9, 15.8}};
-    private static final double[][] NOVOS_BRUNO = {{116.0, 29.5, 38.5, 33.0, 17.6}, {114.5, 29.0, 38.0, 32.4, 20.2}};
+            {104.0, 24.5, 35.0, 24.8, 18.7, 82.0, 90.0}, {105.0, 25.0, 35.5, 25.3, 17.1, 80.0, 90.5}, {106.0, 25.5, 36.0, 25.9, 15.8, 78.0, 91.0}};
+    private static final double[][] NOVOS_BRUNO = {{116.0, 29.5, 38.5, 33.0, 17.6, 94.0, 104.0}, {114.5, 29.0, 38.0, 32.4, 20.2, 97.0, 102.0}};
     private static final String EMAIL_BRUNO = "bruno.lima@exemplo.gymsync";
 
     /**
@@ -136,6 +136,8 @@ public class VisitanteService {
                 if (av.getPanturrilha() == null) { av.setPanturrilha(valores[i][2]); mudou = true; }
                 if (av.getMassaMuscularKg() == null) { av.setMassaMuscularKg(valores[i][3]); mudou = true; }
                 if (av.getMassaGordaKg() == null) { av.setMassaGordaKg(valores[i][4]); mudou = true; }
+                if (av.getAbdomen() == null) { av.setAbdomen(valores[i][5]); mudou = true; }
+                if (av.getPeito() == null) { av.setPeito(valores[i][6]); mudou = true; }
                 if (mudou) avaliacaoFisicaRepository.save(av);
             }
         }
@@ -307,12 +309,12 @@ public class VisitanteService {
 
         // Avaliações da Ana: o peso e o percentual de gordura caem aos poucos
         // Medidas: cintura, quadril, peito, braço, coxa, ombro, antebraço e panturrilha (aparecem no mapa do corpo)
-        bio(avaliacao(ana, marcos, hoje.minusDays(90), 1.65, 68.0, 27.5, 76.0, 100.0, 91.0, 27.5, 55.0, 104.0, 24.5, 35.0), 24.8, 18.7);
-        bio(avaliacao(ana, marcos, hoje.minusDays(45), 1.65, 66.4, 25.8, 73.5, 98.5, 90.0, 28.0, 55.5, 105.0, 25.0, 35.5), 25.3, 17.1);
-        bio(avaliacao(ana, marcos, hoje.minusDays(5), 1.65, 65.1, 24.2, 71.0, 97.0, 89.5, 28.5, 56.0, 106.0, 25.5, 36.0), 25.9, 15.8);
+        bio(abdomen(avaliacao(ana, marcos, hoje.minusDays(90), 1.65, 68.0, 27.5, 76.0, 100.0, 90.0, 27.5, 55.0, 104.0, 24.5, 35.0), 82.0), 24.8, 18.7);
+        bio(abdomen(avaliacao(ana, marcos, hoje.minusDays(45), 1.65, 66.4, 25.8, 73.5, 98.5, 90.5, 28.0, 55.5, 105.0, 25.0, 35.5), 80.0), 25.3, 17.1);
+        bio(abdomen(avaliacao(ana, marcos, hoje.minusDays(5), 1.65, 65.1, 24.2, 71.0, 97.0, 91.0, 28.5, 56.0, 106.0, 25.5, 36.0), 78.0), 25.9, 15.8);
         // Bruno parou de treinar: a cintura e a gordura subiram, ombro, antebraço e panturrilha perderam um pouco
-        bio(avaliacao(bruno, marcos, hoje.minusDays(75), 1.78, 84.0, 21.0, 88.0, 101.0, 102.0, 35.0, 58.0, 116.0, 29.5, 38.5), 33.0, 17.6);
-        bio(avaliacao(bruno, marcos, hoje.minusDays(14), 1.78, 86.5, 23.4, 91.5, 102.0, 101.0, 34.5, 57.5, 114.5, 29.0, 38.0), 32.4, 20.2);
+        bio(abdomen(avaliacao(bruno, marcos, hoje.minusDays(75), 1.78, 84.0, 21.0, 88.0, 101.0, 104.0, 35.0, 58.0, 116.0, 29.5, 38.5), 94.0), 33.0, 17.6);
+        bio(abdomen(avaliacao(bruno, marcos, hoje.minusDays(14), 1.78, 86.5, 23.4, 91.5, 102.0, 102.0, 34.5, 57.5, 114.5, 29.0, 38.0), 97.0), 32.4, 20.2);
 
         aula("Spinning", carla, DayOfWeek.MONDAY, LocalTime.of(18, 0), 12);
         aula("Funcional", carla, DayOfWeek.WEDNESDAY, LocalTime.of(7, 0), 10);
@@ -408,6 +410,12 @@ public class VisitanteService {
         r.setDataRegistro(data);
         r.setCarga(carga);
         registroExercicioRepository.save(r);
+    }
+
+    /** Abdômen de exemplo (cm). */
+    private AvaliacaoFisica abdomen(AvaliacaoFisica a, double cm) {
+        a.setAbdomen(cm);
+        return a;
     }
 
     /** Bioimpedância de exemplo (massa muscular e massa gorda, em kg). */

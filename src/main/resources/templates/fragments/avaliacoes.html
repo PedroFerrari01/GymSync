@@ -21,6 +21,7 @@
                     <input type="number" step="0.1" min="1" max="80" name="percentualGordura" class="form-control mb-2">
                     <div class="row g-2 mb-2">
                         <div class="col"><label class="form-label">Cintura (cm)</label><input type="number" step="0.1" min="1" max="300" name="cintura" class="form-control"></div>
+                        <div class="col"><label class="form-label">Abdômen (cm)</label><input type="number" step="0.1" min="1" max="300" name="abdomen" class="form-control"></div>
                         <div class="col"><label class="form-label">Quadril (cm)</label><input type="number" step="0.1" min="1" max="300" name="quadril" class="form-control"></div>
                     </div>
                     <div class="row g-2 mb-2">
@@ -49,7 +50,7 @@
                 <h5 class="panel-title mb-3">Avaliações registradas</h5>
                 <div class="table-responsive tabela-scroll">
                     <table class="table table-custom tabela-filtravel">
-                        <thead><tr><th>Aluno</th><th>Data</th><th>Peso</th><th>IMC</th><th>% Gord.</th><th>Cint.</th><th>Quad.</th><th>Registrou</th><th class="text-end"></th></tr></thead>
+                        <thead><tr><th>Aluno</th><th>Data</th><th>Peso</th><th>IMC</th><th>% Gord.</th><th>Cint.</th><th>Abd.</th><th>Quad.</th><th>Registrou</th><th class="text-end"></th></tr></thead>
                         <tbody>
                             <tr th:each="av : ${avaliacoes}">
                                 <td class="fw-semibold" th:text="${av.aluno.nome}"></td>
@@ -58,6 +59,7 @@
                                 <td th:text="${@fmt.numero(av.imc, 1)}"></td>
                                 <td th:text="${av.percentualGordura != null ? @fmt.numero(av.percentualGordura, 1) + '%' : '-'}"></td>
                                 <td th:text="${@fmt.numero(av.cintura, 1)}"></td>
+                                <td th:text="${@fmt.numero(av.abdomen, 1)}"></td>
                                 <td th:text="${@fmt.numero(av.quadril, 1)}"></td>
                                 <td class="small" th:text="${av.registradoPor}"></td>
                                 <td class="text-end">
@@ -148,7 +150,7 @@
                 <h5 class="panel-title mb-3">Minhas avaliações</h5>
                 <div class="table-responsive">
                     <table class="table table-custom tabela-avaliacoes">
-                        <thead><tr><th>Data</th><th>Peso</th><th>IMC</th><th>% Gord.</th><th>Cintura</th><th>Quadril</th><th>Peito</th><th>Braço</th><th>Coxa</th><th>Ombro</th><th>Antebraço</th><th>Panturrilha</th></tr></thead>
+                        <thead><tr><th>Data</th><th>Peso</th><th>IMC</th><th>% Gord.</th><th>Cintura</th><th>Abdômen</th><th>Quadril</th><th>Peito</th><th>Braço</th><th>Coxa</th><th>Ombro</th><th>Antebraço</th><th>Panturrilha</th></tr></thead>
                         <tbody>
                             <tr th:each="av : ${avaliacoes}">
                                 <td th:text="${av.dataAvaliacao != null ? #temporals.format(av.dataAvaliacao, 'dd/MM/yyyy') : '-'}"></td>
@@ -156,6 +158,7 @@
                                 <td th:text="${@fmt.numero(av.imc, 1)}"></td>
                                 <td th:text="${av.percentualGordura != null ? @fmt.numero(av.percentualGordura, 1) + '%' : '-'}"></td>
                                 <td th:text="${@fmt.numero(av.cintura, 1)}"></td>
+                                <td th:text="${@fmt.numero(av.abdomen, 1)}"></td>
                                 <td th:text="${@fmt.numero(av.quadril, 1)}"></td>
                                 <td th:text="${@fmt.numero(av.peito, 1)}"></td>
                                 <td th:text="${@fmt.numero(av.braco, 1)}"></td>

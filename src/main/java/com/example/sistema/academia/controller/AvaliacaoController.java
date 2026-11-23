@@ -31,6 +31,7 @@ public class AvaliacaoController {
                          @RequestParam(required = false) Double altura,
                          @RequestParam(required = false) Double percentualGordura,
                          @RequestParam(required = false) Double cintura,
+                         @RequestParam(required = false) Double abdomen,
                          @RequestParam(required = false) Double quadril,
                          @RequestParam(required = false) Double peito,
                          @RequestParam(required = false) Double braco,
@@ -50,7 +51,7 @@ public class AvaliacaoController {
         }
         if (dataAvaliacao.isAfter(LocalDate.now()) || peso <= 0 || peso > 500
                 || medidaInvalida(altura, 3) || medidaInvalida(percentualGordura, 80)
-                || medidaInvalida(cintura, 300) || medidaInvalida(quadril, 300) || medidaInvalida(peito, 300)
+                || medidaInvalida(cintura, 300) || medidaInvalida(abdomen, 300) || medidaInvalida(quadril, 300) || medidaInvalida(peito, 300)
                 || medidaInvalida(braco, 150) || medidaInvalida(coxa, 200)
                 || medidaInvalida(ombro, 200) || medidaInvalida(antebraco, 100) || medidaInvalida(panturrilha, 100)
                 || medidaInvalida(massaMuscularKg, peso) || medidaInvalida(massaGordaKg, peso)) {
@@ -65,6 +66,7 @@ public class AvaliacaoController {
         a.setAltura(altura);
         a.setPercentualGordura(percentualGordura);
         a.setCintura(cintura);
+        a.setAbdomen(abdomen);
         a.setQuadril(quadril);
         a.setPeito(peito);
         a.setBraco(braco);

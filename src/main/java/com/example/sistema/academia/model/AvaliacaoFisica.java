@@ -21,6 +21,8 @@ public class AvaliacaoFisica {
     private Double altura;
     private Double percentualGordura;
     private Double cintura;
+    /** Perímetro do abdômen (barriga, na altura do umbigo), em cm. Opcional: avaliações antigas ficam sem. */
+    private Double abdomen;
     private Double quadril;
     private Double peito;
     private Double braco;
@@ -58,6 +60,8 @@ public class AvaliacaoFisica {
     public void setPercentualGordura(Double percentualGordura) { this.percentualGordura = percentualGordura; }
     public Double getCintura() { return cintura; }
     public void setCintura(Double cintura) { this.cintura = cintura; }
+    public Double getAbdomen() { return abdomen; }
+    public void setAbdomen(Double abdomen) { this.abdomen = abdomen; }
     public Double getQuadril() { return quadril; }
     public void setQuadril(Double quadril) { this.quadril = quadril; }
     public Double getPeito() { return peito; }

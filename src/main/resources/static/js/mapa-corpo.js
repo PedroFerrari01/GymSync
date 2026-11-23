@@ -88,6 +88,7 @@ const CHAVES_RESUMO = ['peso', 'gordura', 'imc', 'massaMuscular', 'massaGorda'];
 // lado: de que lado fica o rótulo; em: altura aproximada (m) para alinhar o rótulo quando não há músculo para medir
 const SO_2D = {
     ombro: { lado: -1, em: 1.40 },
+    abdomen: { lado: 1, em: 1.12 }, // barriga: os retos do abdômen, no meio do tronco (só de frente)
     antebraco: { lado: 1, em: 0.98 },
     panturrilha: { lado: 1, em: 0.38 }
 };
@@ -326,7 +327,7 @@ function extremidades(vista, forma) {
 // Medida → músculos de cada lado do corpo (só as medidas que a avaliação física tem)
 const MUSCULOS = {
     frente: {
-        peito: ['chest'], braco: ['biceps', 'triceps'], cintura: ['abs', 'obliques'], quadril: ['abductors'], coxa: ['quadriceps'],
+        peito: ['chest'], braco: ['biceps', 'triceps'], cintura: ['obliques'], abdomen: ['abs'], quadril: ['abductors'], coxa: ['quadriceps'],
         ombro: ['front-deltoids'], antebraco: ['forearm'], panturrilha: ['calves'] // na frente, "calves" é a perna abaixo do joelho (tibial)
     },
     costas: {
@@ -437,7 +438,8 @@ function criarSilhueta(svg) {
                 if (lado * (cx - meio) < -folga) continue; // músculo do outro lado do corpo
                 let y0 = Infinity, y1 = -Infinity;
                 for (const p of pts) { y0 = Math.min(y0, p.y); y1 = Math.max(y1, p.y); }
-                const y = (y0 + y1) / 2;
+                // O abdômen sai pela parte de baixo dos retos, onde não há oblíquo ao lado: a linha não passa sobre a cintura
+                const y = y0 + (y1 - y0) * (chave === 'abdomen' ? 0.7 : 0.5);
                 // Borda do polígono na altura y, a mais para o lado do rótulo
                 for (let i = 0; i < pts.length; i++) {
                     const a = pts[i], b = pts[(i + 1) % pts.length];

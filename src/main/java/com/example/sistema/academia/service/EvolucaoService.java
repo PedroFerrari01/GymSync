@@ -48,6 +48,7 @@ public class EvolucaoService {
             new Medida("massaMuscular", "Massa muscular", " kg", AvaliacaoFisica::getMassaMuscularKg, Direcao.MAIOR_EH_MELHOR),
             new Medida("massaGorda", "Massa gorda", " kg", AvaliacaoFisica::getMassaGordaKg, Direcao.MENOR_EH_MELHOR),
             new Medida("cintura", "Cintura", " cm", AvaliacaoFisica::getCintura, Direcao.MENOR_EH_MELHOR),
+            new Medida("abdomen", "Abdômen", " cm", AvaliacaoFisica::getAbdomen, Direcao.MENOR_EH_MELHOR),
             new Medida("quadril", "Quadril", " cm", AvaliacaoFisica::getQuadril, Direcao.MENOR_EH_MELHOR),
             new Medida("peito", "Peito", " cm", AvaliacaoFisica::getPeito, Direcao.MAIOR_EH_MELHOR),
             new Medida("braco", "Braço", " cm", AvaliacaoFisica::getBraco, Direcao.MAIOR_EH_MELHOR),
