@@ -35,7 +35,7 @@
             <span>Menos movimento</span>
             <span class="calor-celula calor-n0" aria-hidden="true"></span><span class="calor-celula calor-n1" aria-hidden="true"></span><span class="calor-celula calor-n2" aria-hidden="true"></span><span class="calor-celula calor-n3" aria-hidden="true"></span><span class="calor-celula calor-n4" aria-hidden="true"></span><span class="calor-celula calor-n5" aria-hidden="true"></span>
             <span>Mais movimento</span>
-            <span class="ms-auto" th:text="|${mapaCalor.total} entradas no período|"></span>
+            <span class="ms-auto" th:text="|${mapaCalor.total} ${mapaCalor.total == 1 ? 'entrada' : 'entradas'} no período|"></span>
         </div>
     </div>
 </div>

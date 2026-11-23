@@ -56,6 +56,10 @@ public class TreinoController {
             redirect.addFlashAttribute("erro", "Selecione o aluno, o professor e informe o nome do treino.");
             return "redirect:/";
         }
+        if (descricao.trim().length() > 120) {
+            redirect.addFlashAttribute("erro", "O nome do treino pode ter no máximo 120 caracteres.");
+            return "redirect:/";
+        }
         Treino t = new Treino();
         t.setAluno(a);
         t.setProfessor(prof);
@@ -73,8 +77,8 @@ public class TreinoController {
             redirect.addFlashAttribute("erro", "Você não tem permissão para alterar esta ficha.");
             return "redirect:/";
         }
-        if (descricao.isBlank()) {
-            redirect.addFlashAttribute("erro", "O nome do treino não pode ficar vazio.");
+        if (descricao.isBlank() || descricao.trim().length() > 120) {
+            redirect.addFlashAttribute("erro", "O nome do treino não pode ficar vazio nem passar de 120 caracteres.");
             return "redirect:/";
         }
         t.setDescricao(descricao.trim());

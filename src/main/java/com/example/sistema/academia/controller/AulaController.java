@@ -42,8 +42,8 @@ public class AulaController {
             professorId = (Long) session.getAttribute("usuarioId");
         }
         Professor professor = professorId != null ? professorRepository.findById(professorId).orElse(null) : null;
-        if (professor == null || nome.isBlank() || vagas < 1 || vagas > 200) {
-            redirect.addFlashAttribute("erro", "Informe o nome, o professor e um número de vagas entre 1 e 200.");
+        if (professor == null || nome.isBlank() || nome.trim().length() > 100 || vagas < 1 || vagas > 200) {
+            redirect.addFlashAttribute("erro", "Informe o nome (até 100 caracteres), o professor e um número de vagas entre 1 e 200.");
             return "redirect:/";
         }
         AulaColetiva aula = new AulaColetiva();

@@ -62,7 +62,7 @@ public class PrivacidadeController {
         if (aluno != null) {
             aluno.setAceitePrivacidade(null);
             alunoRepository.save(aluno);
-            redirect.addFlashAttribute("sucesso", "Consentimento revogado. Sua área fica bloqueada até você aceitar a política de novo.");
+            redirect.addFlashAttribute("sucesso", "Consentimento revogado. A janela de aceite volta a aparecer, e a administração fica sabendo que você não concorda mais.");
         }
         return "redirect:/";
     }

@@ -259,7 +259,7 @@
                 <div class="d-flex flex-wrap gap-2 meus-dados-botoes">
                     <a th:href="@{/aluno/meus-dados}" class="btn-theme btn-sm"><i class="bi bi-download"></i> Baixar meus dados</a>
                     <a th:href="@{/privacidade}" class="btn-theme btn-sm"><i class="bi bi-file-text"></i> Privacidade</a>
-                    <form th:action="@{/aluno/privacidade/revogar}" method="post" class="d-inline" data-confirm="Revogar o consentimento? A sua área fica bloqueada até você aceitar a política de novo.">
+                    <form th:action="@{/aluno/privacidade/revogar}" method="post" class="d-inline" data-confirm="Revogar o consentimento? A janela de aceite da política volta a aparecer.">
                         <button type="submit" class="btn-theme btn-sm"><i class="bi bi-hand-thumbs-down"></i> Revogar consentimento</button>
                     </form>
                     <form th:action="@{/aluno/privacidade/pedir-exclusao}" method="post" class="d-inline" data-confirm="Pedir a exclusão dos seus dados? A administração será avisada e o seu cadastro será apagado.">
