@@ -1,3 +1,6 @@
+
+
+
 <img src="docs/img/banner.png" alt="GymSync: sistema web de gestão de academia com três perfis. Java 25, Spring Boot 4, MySQL e Thymeleaf" width="100%">
 
 Sistema web de gestão de academias feito em **Java com Spring Boot**: cadastros, planos, matrículas, mensalidades com Pix simulado, catraca, fichas de treino, avaliações físicas, aulas coletivas, equipamentos, mensagens e relatórios. Cada pessoa entra com o próprio perfil (administrador, professor ou aluno) e só vê o que é dela.
@@ -6,9 +9,10 @@ Desenvolvi este sistema para um trabalho acadêmico do curso de Análise e Desen
 
 **Versão publicada:** [gymsync-ucfj.onrender.com](https://gymsync-ucfj.onrender.com), com o botão "Testar como visitante" (dados de exemplo, só leitura). Ela roda em plano gratuito (dorme sem uso e a primeira visita pode levar cerca de um minuto) e pode estar desatualizada em relação a este código: a versão de entrega é a que está nesta pasta.
 
-https://github.com/user-attachments/assets/6e4983c2-15bf-4e2f-ae1a-8074b9f34598
+https://github.com/user-attachments/assets/a7a3b9c5-23ae-4a60-9854-d21fe6bc4eed
 
-**Vídeo de apresentação (40 s, com trilha e sem narração):** um resumo rápido das telas do sistema. Toca direto nesta página.
+
+**Vídeo de apresentação (59 s, com trilha e sem narração):** um resumo rápido das telas do sistema. Toca direto nesta página.
 
 **Outros vídeos:** o tour pelo sistema real toca no próprio site, no fim do "Quem somos". A versão narrada e a apresentação da faculdade estão na [release `videos-gymsync`](https://github.com/PedroFerrari01/GymSync/releases/tag/videos-gymsync).
 
